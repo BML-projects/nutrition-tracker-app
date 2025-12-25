@@ -29,7 +29,7 @@ export const onboardingStyles = StyleSheet.create({
       backgroundColor: COLORS.primary,
       borderRadius: 30,
       position: "absolute",       // absolute positioning
-      bottom: 120,                 // distance from bottom of the screen
+      bottom: 50,                 // distance from bottom of the screen
       marginHorizontal: 80,       // gap from left and right edges
       alignSelf: "center",        // center horizontally within available space
     }
