@@ -1,52 +1,29 @@
-import { router } from "expo-router"; // <-- import router
-import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useRef } from "react";
-import { Animated, View } from "react-native";
-import { splashStyles as styles } from "../styles/splashStyles";
+import React, { useEffect } from "react";
+import { View, Text, Image } from "react-native";
+import { useRouter } from "expo-router";
+import { Images } from "./constants/images";
+import { styles } from "./styles/splash";
 
-export default function Splash() {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+export default function Index() {
+    const router = useRouter();
 
-  useEffect(() => {
-    SplashScreen.hideAsync();
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            router.replace("/src/onboarding");
+        }, 2000);
 
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 1500,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        friction: 4,
-        useNativeDriver: true,
-      }),
-    ]).start();
+        return () => clearTimeout(timer);
+    }, []);
 
-    // Navigate to onboarding after 2.5 seconds
-    const timer = setTimeout(() => {
-      router.replace("/onboarding"); // <-- go to onboarding
-    }, 2500);
+    return (
+        <View style={styles.container}>
+            {/* IMAGE FROM constants/images.ts */}
+            <Image source={Images.logo} style={[
+                styles.logo,
+                { width: 500, height: 500, resizeMode: 'contain' }
+            ]} />
 
-    return () => clearTimeout(timer);
-  }, []);
-
-  return (
-    <View style={styles.container}>
-      <Animated.Image
-        source={require("../assets/images/logo.png")}
-        style={[
-          styles.logo,
-          { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
-        ]}
-      />
-      <Animated.Text style={[styles.title, { opacity: fadeAnim }]}>
-        NutriScan
-      </Animated.Text>
-      <Animated.Text style={[styles.subtitle, { opacity: fadeAnim }]}>
-        Eat Smart. Live Strong.
-      </Animated.Text>
-    </View>
-  );
+            <Text style={styles.tagline}>Data Behind Every Bite</Text>
+        </View>
+    );
 }

@@ -2,14 +2,16 @@
   "name": "nutrition-tracker-app",
   "version": "1.0.0",
   "private": true,
- "scripts": {
-  "start:frontend": "cross-env-shell \"cd NutriScan && npx expo start -c\"",
-  "start:backend": "cross-env-shell \"cd backend && nodemon src/server.js\"",
-  "start": "concurrently -n FRONTEND,BACKEND -c cyan,green \"npm run start:frontend\" \"npm run start:backend\""
-},
-
+  "scripts": {
+    "start:frontend": "cross-env-shell \"cd NutriScan && npx expo start -c\"",
+    "start:backend": "cross-env-shell \"cd backend && nodemon src/server.js\"",
+    "start": "concurrently -n FRONTEND,BACKEND -c cyan,green \"npm run start:frontend\" \"npm run start:backend\""
+  },
   "devDependencies": {
     "concurrently": "^8.0.0",
     "cross-env": "^10.1.0"
+  },
+  "dependencies": {
+    "expo": "^54.0.30"
   }
 }
