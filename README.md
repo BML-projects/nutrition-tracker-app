@@ -28,6 +28,7 @@
 ### Step 2: Setup on Your Computer
 ```bash
 # Open Command Prompt/Terminal on your computer
+npm run start
 
 # 1. Clone the repository
 git clone https://github.com/BML-projects/nutrition-tracker-app.git
