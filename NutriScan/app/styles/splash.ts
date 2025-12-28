@@ -1,4 +1,5 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
+const { width } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
     container: {
@@ -6,19 +7,22 @@ export const styles = StyleSheet.create({
         backgroundColor: "#ffffff",
         alignItems: "center",
         justifyContent: "center",
+        paddingHorizontal: 20,
     },
 
     logo: {
-        width: 220,
-        height: 220,
+
+        maxWidth: 400,
+        maxHeight: 400,
         resizeMode: "contain",
     },
 
     tagline: {
-        marginTop: 20,
-        fontSize: 16,
-        fontWeight: "600",
+        marginTop: 10,
+        fontSize: 18,
+        fontWeight: "bold",
         color: "#000",
         letterSpacing: 0.5,
+        textAlign: "center",
     },
 });
