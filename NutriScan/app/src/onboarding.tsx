@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { Images } from "../constants/images";
 import { styles } from "../styles/onboarding";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function OnboardingScreen() {
     const router = useRouter();
@@ -33,7 +34,12 @@ export default function OnboardingScreen() {
                     activeOpacity={0.8}
                 >
                     <Text style={styles.buttonText}>Next</Text>
-                    <Text style={styles.arrow}>→</Text>
+                    <Ionicons
+                        name="arrow-forward"
+                        size={25}
+                        color="#fff"
+                        style={styles.arrow}
+                    />
                 </TouchableOpacity>
             </View>
         </View>
