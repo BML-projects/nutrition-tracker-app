@@ -1,6 +1,6 @@
 import { StyleSheet, Dimensions } from "react-native";
 
-const { width, height } = Dimensions.get("window");
+const { height } = Dimensions.get("window");
 
 export const styles = StyleSheet.create({
     container: {
@@ -9,67 +9,58 @@ export const styles = StyleSheet.create({
     },
 
     image: {
-        height: height * 0.5,
+        height: height * 0.55,
         width: "100%",
     },
 
-    bottomContainer: {
+    card: {
         flex: 1,
+        backgroundColor: "#fff",
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+        paddingHorizontal: 28,
+        paddingTop: 36,
         alignItems: "center",
-        paddingHorizontal: 20,
-        paddingTop: 30,
     },
 
     title: {
-        color: "#fff",
-        fontSize: 24,
+        fontSize: 26,
         fontWeight: "700",
+        color: "#000",
         textAlign: "center",
-        marginBottom: 10,
+        marginBottom: 14,
     },
 
     subtitle: {
-        color: "#aaa",
-        fontSize: 14,
+        fontSize: 15,
+        color: "#666",
         textAlign: "center",
-    },
-
-    dotsContainer: {
-        flexDirection: "row",
-        marginVertical: 25,
-    },
-
-    dot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: "#555",
-        marginHorizontal: 5,
-    },
-
-    activeDot: {
-        backgroundColor: "#fff",
-        width: 10,
-        height: 10,
+        lineHeight: 22,
+        marginBottom: 40,
     },
 
     button: {
-        backgroundColor: "#4CAF50",
-        width: "100%",
-        paddingVertical: 14,
-        borderRadius: 25,
+        flexDirection: "row",
         alignItems: "center",
-        marginBottom: 15,
+        justifyContent: "center",
+        backgroundColor: "#000",
+        width: "70%",
+        paddingVertical: 16,
+        borderRadius: 30,
+        marginTop: 80,
     },
 
     buttonText: {
         color: "#fff",
-        fontWeight: "700",
         fontSize: 16,
+        fontWeight: "600",
+        marginRight: 10,
     },
 
-    loginText: {
-        color: "#888",
-        fontSize: 13,
+    arrow: {
+        color: "#fff",
+        fontSize: 18,
+        fontWeight: "600",
+        alignSelf: "center",
     },
 });

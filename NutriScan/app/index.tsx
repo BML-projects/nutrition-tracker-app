@@ -17,10 +17,7 @@ export default function Index() {
 
     return (
         <View style={styles.container}>
-            <Image source={Images.logo} style={[
-                styles.logo,
-                { width: 500, height: 500, resizeMode: 'contain' }
-            ]} />
+            <Image source={Images.logo} style={[styles.logo,]} />
 
             <Text style={styles.tagline}>Data Behind Every Bite</Text>
         </View>
