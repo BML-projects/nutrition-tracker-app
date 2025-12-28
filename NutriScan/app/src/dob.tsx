@@ -67,7 +67,7 @@ export default function DateOfBirth() {
             {/* FOOTER */}
             <View style={styles.footer}>
                 <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-                    <Text style={styles.nextButtonText}>NEXT</Text>
+                    <Text style={styles.nextButtonText}>Next</Text>
                     <Ionicons
                         name="arrow-forward"
                         size={25}
