@@ -56,7 +56,7 @@ export default function GenderScreen() {
                 ]}
                 onPress={() => {
                     if (!isButtonDisabled) {
-                        router.push("./nextScreen");
+                        router.push("./measurement");
                     }
                 }}
                 activeOpacity={0.8}
