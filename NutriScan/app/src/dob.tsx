@@ -1,55 +1,73 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, FlatList, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    FlatList,
+    NativeSyntheticEvent,
+    NativeScrollEvent
+} from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { styles, ITEM_HEIGHT } from "../styles/measurement";
+import { styles, ITEM_HEIGHT } from "../styles/dob";
 
-// Generate data arrays
-const HEIGHTS = Array.from({ length: 250 }, (_, i) => i + 1);
-const WEIGHTS = Array.from({ length: 150 }, (_, i) => i + 1);
+// Data Generation
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
+// Generates years from 1950 to 2025
+const YEARS = Array.from({ length: 76 }, (_, i) => 1950 + i);
 
-export default function Measurements() {
+export default function DateOfBirth() {
     const router = useRouter();
 
-    const [height, setHeight] = useState(165);
-    const [weight, setWeight] = useState(54);
+    const [month, setMonth] = useState("Jan");
+    const [day, setDay] = useState(1);
+    const [year, setYear] = useState(2000);
 
     const handleNext = () => {
-        console.log(`Selected Height: ${height} cm, Weight: ${weight} kg`);
-        router.replace("./dob");
+        console.log(`DOB: ${month} ${day}, ${year}`);
+        router.replace("./goal"); // Replace with your actual next route
     };
 
     return (
         <View style={styles.container}>
+
+            {/* HEADER */}
             <View style={styles.header}>
-                <Text style={styles.title}>Enter your body measurements</Text>
+                <Text style={styles.title}>Select your date of birth</Text>
                 <Text style={styles.subtitle}>we'll use this to create your personalized plan</Text>
             </View>
 
-            <View style={styles.metricBadge}>
-                <Text style={styles.metricText}>Metric</Text>
-            </View>
-
+            {/* 3-COLUMN PICKER SECTION */}
             <View style={styles.pickersContainer}>
+
+                {/* MONTH */}
                 <CustomPicker
-                    label="Height"
-                    data={HEIGHTS}
-                    unit="cm"
-                    initialValue={165}
-                    onValueChange={setHeight}
+                    data={MONTHS}
+                    initialValueIndex={0}
+                    onValueChange={(val) => setMonth(val as string)}
                 />
+
+                {/* DAY */}
                 <CustomPicker
-                    label="Weight"
-                    data={WEIGHTS}
-                    unit="kg"
-                    initialValue={54}
-                    onValueChange={setWeight}
+                    data={DAYS}
+                    initialValueIndex={0}
+                    onValueChange={(val) => setDay(val as number)}
+                />
+
+                {/* YEAR */}
+                <CustomPicker
+                    data={YEARS}
+                    // Index 50 represents year 2000
+                    initialValueIndex={50}
+                    onValueChange={(val) => setYear(val as number)}
                 />
             </View>
 
+            {/* FOOTER */}
             <View style={styles.footer}>
                 <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-                    <Text style={styles.nextButtonText}>Next</Text>
+                    <Text style={styles.nextButtonText}>NEXT</Text>
                     <Ionicons
                         name="arrow-forward"
                         size={25}
@@ -62,31 +80,35 @@ export default function Measurements() {
     );
 }
 
+// --- REUSABLE PICKER COMPONENT ---
 interface PickerProps {
-    label: string;
-    data: number[];
-    unit: string;
-    initialValue: number;
-    onValueChange: (val: number) => void;
+    data: (string | number)[];
+    initialValueIndex: number;
+    onValueChange: (val: string | number) => void;
 }
 
-const CustomPicker = ({ label, data, unit, initialValue, onValueChange }: PickerProps) => {
-    const [activeIndex, setActiveIndex] = useState(initialValue - 1);
+const CustomPicker = ({ data, initialValueIndex, onValueChange }: PickerProps) => {
+    const [activeIndex, setActiveIndex] = useState(initialValueIndex);
 
     const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const y = event.nativeEvent.contentOffset.y;
         const index = Math.round(y / ITEM_HEIGHT);
         setActiveIndex(index);
-        if (data[index]) {
+    };
+
+    const onMomentumScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        const y = event.nativeEvent.contentOffset.y;
+        const index = Math.round(y / ITEM_HEIGHT);
+        setActiveIndex(index);
+        if (data[index] !== undefined) {
             onValueChange(data[index]);
         }
     };
 
     return (
         <View style={styles.pickerColumn}>
-            <Text style={styles.pickerLabel}>{label}</Text>
-
             <View style={styles.pickerWrapper}>
+                {/* Selection Lines Overlay */}
                 <View style={styles.selectionLines} pointerEvents="none" />
 
                 <FlatList
@@ -94,32 +116,35 @@ const CustomPicker = ({ label, data, unit, initialValue, onValueChange }: Picker
                     keyExtractor={(item) => item.toString()}
                     showsVerticalScrollIndicator={false}
 
-                    // --- THE FIX IS HERE ---
+                    // --- SNAP LOGIC FIXED ---
                     snapToInterval={ITEM_HEIGHT}
-                    snapToAlignment="center" // <--- Forces it to stop EXACTLY in the middle
+                    // REMOVED snapToAlignment="center" to prevent offset issues
                     decelerationRate="fast"
                     scrollEventThrottle={16}
 
                     onScroll={onScroll}
+                    onMomentumScrollEnd={onMomentumScrollEnd}
+
                     getItemLayout={(_, index) => ({
                         length: ITEM_HEIGHT,
                         offset: ITEM_HEIGHT * index,
                         index,
                     })}
-                    initialScrollIndex={initialValue - 1}
+                    initialScrollIndex={initialValueIndex}
+
                     contentContainerStyle={{
                         paddingVertical: ITEM_HEIGHT,
                     }}
+
                     renderItem={({ item, index }) => {
                         const isActive = index === activeIndex;
                         return (
-                            // Using the style from file which has justifyContent: center
                             <View style={styles.itemContainer}>
                                 <Text style={[
                                     styles.itemText,
-                                    isActive ? styles.activeItemText : styles.inactiveItemText
+                                    isActive ? styles.activeItemText : styles.inactiveItemText,
                                 ]}>
-                                    {item} <Text style={{ fontSize: 14 }}>{unit}</Text>
+                                    {item}
                                 </Text>
                             </View>
                         );
