@@ -1,6 +1,5 @@
 import { StyleSheet } from "react-native";
 
-// 1. Export this so the .tsx file can use it for calculations
 export const ITEM_HEIGHT = 50;
 
 export const styles = StyleSheet.create({
@@ -11,61 +10,42 @@ export const styles = StyleSheet.create({
         paddingTop: 60,
     },
 
-    header: {
-        marginBottom: 20,
-    },
+    /* --- HEADER --- */
+    header: { marginBottom: 50 },
     title: {
         fontSize: 22,
         fontWeight: "bold",
         color: "#000",
-        textAlign: "center",
+        textAlign: "left",
         marginBottom: 8,
     },
     subtitle: {
         fontSize: 14,
-        color: "#777",
-        textAlign: "center",
+        color: "#666",
+        textAlign: "left",
         lineHeight: 20,
     },
 
-    metricBadge: {
-        backgroundColor: "#D37034",
-        alignSelf: "flex-start",
-        paddingVertical: 8,
-        paddingHorizontal: 20,
-        borderRadius: 20,
-        marginBottom: 40,
-        marginTop: 10,
-    },
-    metricText: {
-        color: "#fff",
-        fontWeight: "700",
-        fontSize: 14,
-    },
-
+    /* --- PICKER CONTAINER --- */
     pickersContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        paddingHorizontal: 20,
+        paddingHorizontal: 10,
         marginBottom: 20,
     },
     pickerColumn: {
         alignItems: "center",
-        width: "45%",
-    },
-    pickerLabel: {
-        fontSize: 18,
-        fontWeight: "600",
-        color: "#000",
-        marginBottom: 15,
+        width: "30%", // 3 Columns
     },
 
+    /* --- WHEEL MECHANISM --- */
     pickerWrapper: {
-        height: ITEM_HEIGHT * 3,
+        height: ITEM_HEIGHT * 3, // Shows exactly 3 items
         width: "100%",
         position: "relative",
     },
 
+    // Black Lines Overlay
     selectionLines: {
         position: "absolute",
         top: ITEM_HEIGHT,
@@ -77,30 +57,30 @@ export const styles = StyleSheet.create({
         zIndex: 10,
     },
 
-    // --- NEW: This centers the text container vertically ---
+    /* --- ITEM STYLING (Centering Logic) --- */
     itemContainer: {
         height: ITEM_HEIGHT,
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: "center", // Vertically centers the text container
+        alignItems: "center",     // Horizontally centers the text
     },
-
     itemText: {
         fontSize: 18,
-        // --- NEW: These two lines fix the Android alignment issue ---
-        textAlignVertical: "center",
+        // Crucial for vertical alignment consistency
+        textAlignVertical: 'center',
         includeFontPadding: false,
+        fontWeight: "600",
     },
-
     activeItemText: {
         color: "#000",
-        fontWeight: "700",
-        fontSize: 22,
+        fontWeight: "bold",
+        fontSize: 20,
     },
     inactiveItemText: {
-        color: "#aaa",
+        color: "#ccc",
         fontSize: 18,
     },
 
+    /* --- FOOTER --- */
     footer: {
         flex: 1,
         justifyContent: "flex-end",
@@ -110,7 +90,7 @@ export const styles = StyleSheet.create({
         flexDirection: "row",
         alignSelf: "center",
         justifyContent: "center",
-        alignItems: "center", // Ensures arrow and text are aligned
+        alignItems: "center",
         backgroundColor: "#000",
         width: "70%",
         paddingVertical: 16,
@@ -123,7 +103,6 @@ export const styles = StyleSheet.create({
         fontWeight: "600",
         marginRight: 10,
     },
-
     arrow: {
         marginLeft: 5,
     },
