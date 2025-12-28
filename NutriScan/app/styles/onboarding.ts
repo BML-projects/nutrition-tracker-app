@@ -52,15 +52,12 @@ export const styles = StyleSheet.create({
 
     buttonText: {
         color: "#fff",
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: "600",
         marginRight: 10,
     },
 
     arrow: {
-        color: "#fff",
-        fontSize: 18,
-        fontWeight: "600",
-        alignSelf: "center",
+        marginLeft: 5,
     },
 });

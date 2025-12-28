@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
     View,
@@ -6,7 +7,6 @@ import {
     TouchableOpacity,
     Image,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { styles } from "../styles/login";
 import { Images } from "../constants/images";
 import { Ionicons } from "@expo/vector-icons";
@@ -61,7 +61,11 @@ export default function Login() {
             </View>
 
             {/* LOGIN BUTTON */}
-            <TouchableOpacity style={styles.loginButton}>
+            <TouchableOpacity
+                style={styles.loginButton}
+                onPress={() => router.replace("./gender")}
+                activeOpacity={0.8}
+            >
                 <Text style={styles.loginButtonText}>Login</Text>
             </TouchableOpacity>
 
