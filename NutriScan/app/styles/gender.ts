@@ -63,6 +63,10 @@ export const styles = StyleSheet.create({
         marginBottom: 80,
     },
 
+    buttonDisabled: {
+        backgroundColor: "#ccc", // greyed out
+    },
+
     buttonContent: {
         flexDirection: "row",
         alignItems: "center",

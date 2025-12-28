@@ -12,16 +12,18 @@ export default function GenderScreen() {
     const [gender, setGender] = useState<"female" | "male" | null>(null);
     const router = useRouter();
 
+    const isButtonDisabled = gender === null;
+
     return (
         <View style={styles.container}>
-            {/* TOP CONTENT */}
+
             <View>
                 <Text style={styles.title}>Choose your Gender</Text>
                 <Text style={styles.subtitle}>
                     we'll use this to create your personalized plan
                 </Text>
 
-                {/* FEMALE */}
+
                 <TouchableOpacity
                     style={styles.option}
                     onPress={() => setGender("female")}
@@ -33,7 +35,7 @@ export default function GenderScreen() {
                     <Text style={styles.optionText}>Female</Text>
                 </TouchableOpacity>
 
-                {/* MALE */}
+
                 <TouchableOpacity
                     style={styles.option}
                     onPress={() => setGender("male")}
@@ -46,11 +48,19 @@ export default function GenderScreen() {
                 </TouchableOpacity>
             </View>
 
-            {/* BOTTOM BUTTON */}
+
             <TouchableOpacity
-                style={styles.button}
-                onPress={() => router.push("./nextScreen")}
+                style={[
+                    styles.button,
+                    isButtonDisabled && styles.buttonDisabled, // optional: change style when disabled
+                ]}
+                onPress={() => {
+                    if (!isButtonDisabled) {
+                        router.push("./measurement");
+                    }
+                }}
                 activeOpacity={0.8}
+                disabled={isButtonDisabled} // disable the button if no gender selected
             >
                 <View style={styles.buttonContent}>
                     <Text style={styles.buttonText}>Next</Text>
