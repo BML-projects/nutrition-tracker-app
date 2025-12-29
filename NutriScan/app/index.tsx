@@ -1,23 +1,32 @@
-import React, { useEffect } from "react";
-import { View, Text, Image } from "react-native";
 import { useRouter } from "expo-router";
-import { Images } from "./constants/images";
-import { styles } from "./styles/splash";
+import React, { useEffect } from "react";
+import { Image, Text, View } from "react-native";
+import { Images } from "../src/constants/images";
+import { styles } from "../src/styles/splash";
+
+
+
+const a = 'hello';
+console.log(a);
+
+
+
 
 export default function Index() {
     const router = useRouter();
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            router.replace("/src/onboarding");
+            router.replace("/onboarding"); // relative to app/
         }, 2000);
 
         return () => clearTimeout(timer);
-    }, []);
+    }, [router]);
 
     return (
         <View style={styles.container}>
-            <Image source={Images.logo} style={[styles.logo,]} />
+<Image source={Images.logo} style={styles.logo} />
+
 
             <Text style={styles.tagline}>Data Behind Every Bite</Text>
         </View>

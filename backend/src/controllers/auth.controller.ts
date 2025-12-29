@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.model";
 import { generateAccessToken, generateRefreshToken } from "../utils/token";
 import { z } from "zod";
+import { calculateBMI, calculateBMR, calculateDailyCalories } from "../utils/calculations";
 
 /* ================= Zod Signup Schema ================= */
 const signupSchema = z.object({
@@ -27,18 +28,45 @@ export const signup = async (req: Request, res: Response) => {
   try {
     const parsed = signupSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ errors: parsed.error.issues.map((e) => e.message) });
+      return res
+        .status(400)
+        .json({ errors: parsed.error.issues.map((e) => e.message) });
     }
 
-    const { email, password, gender, height, weight, birthday, goal } = parsed.data;
+    const { email, password, gender, height, weight, birthday, goal } =
+      parsed.data;
 
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: "User already exists" });
+    if (existingUser)
+      return res.status(400).json({ message: "User already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({ email, password: hashedPassword, gender, height, weight, birthday, goal });
+    // Create user WITHOUT bmi/bmr/dailyCalories first
+    const user = await User.create({
+      email,
+      password: hashedPassword,
+      gender,
+      height,
+      weight,
+      birthday,
+      goal,
+    });
 
+    // Calculate BMI, BMR, dailyCalories
+    const bmi = calculateBMI(height, weight);
+    const birthYear = birthday.getFullYear();
+    const age = new Date().getFullYear() - birthYear;
+    const bmr = calculateBMR(height, weight, age, gender);
+    const dailyCalories = calculateDailyCalories(bmr, goal);
+
+    // Update user document
+    user.bmi = bmi;
+    user.bmr = bmr;
+    user.dailyCalories = dailyCalories;
+    await user.save();
+
+    // Generate tokens
     const accessToken = generateAccessToken(user._id.toString());
     const refreshToken = generateRefreshToken(user._id.toString());
 
@@ -49,7 +77,12 @@ export const signup = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(201).json({ accessToken });
+    res.status(201).json({
+      accessToken,
+      bmi: user.bmi,
+      bmr: user.bmr,
+      dailyCalories: user.dailyCalories
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -59,10 +92,12 @@ export const signup = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ message: "Email and password required" });
+    if (!email || !password)
+      return res.status(400).json({ message: "Email and password required" });
 
     const user = await User.findOne({ email });
-    if (!user || !user.password) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user || !user.password)
+      return res.status(400).json({ message: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Incorrect Password" });
@@ -89,7 +124,11 @@ export const refresh = async (req: Request, res: Response) => {
   if (!token) return res.sendStatus(401);
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET as string) as any;
+    const payload = jwt.verify(
+      token,
+      process.env.JWT_REFRESH_SECRET as string
+    ) as any;
+
     const accessToken = generateAccessToken(payload.userId);
     res.json({ accessToken });
   } catch {

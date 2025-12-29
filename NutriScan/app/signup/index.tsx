@@ -1,44 +1,45 @@
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
   Text,
   TextInput,
   TouchableOpacity,
-  
+  View,
 } from "react-native";
-import { styles } from "../styles/login"; // your styles file
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
- 
-
-
+import { useSignup } from "../../src/context/SignupContext";
+import { styles } from "../../src/styles/login";
 
 export default function Signup() {
   const router = useRouter();
+  const { data, setData } = useSignup();
 
-  // Form state
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [secure, setSecure] = useState(true);
   const [secureConfirm, setSecureConfirm] = useState(true);
 
- // You can define handleSignup later when ready
+  const handleNext = () => {
+    if (!data.fullName || !data.email || !data.password || !data.confirmPassword) {
+      alert("Please fill all fields");
+      return;
+    }
 
+    if (data.password !== data.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
 
+    router.push("/signup/dob"); // go to next screen
+  };
 
   return (
     <View style={styles.container}>
-      {/* TITLE */}
       <Text style={styles.title}>Create Account</Text>
 
-      {/* SUBTITLE */}
       <Text style={styles.subtitle}>
         {"Already have an account? "}
         <Text
           style={[styles.linkText, { textDecorationLine: "underline" }]}
-          onPress={() => router.push("./login")}
+          onPress={() => router.push("/login")}
         >
           Login Here
         </Text>
@@ -49,8 +50,8 @@ export default function Signup() {
         style={styles.input}
         placeholder="Enter your full name"
         placeholderTextColor="#999"
-        value={fullName}
-        onChangeText={setFullName}
+        value={data.fullName || ""}
+        onChangeText={(text) => setData({ ...data, fullName: text })}
       />
 
       {/* EMAIL */}
@@ -58,8 +59,8 @@ export default function Signup() {
         style={styles.input}
         placeholder="Enter your email"
         placeholderTextColor="#999"
-        value={email}
-        onChangeText={setEmail}
+        value={data.email || ""}
+        onChangeText={(text) => setData({ ...data, email: text })}
         keyboardType="email-address"
         autoCapitalize="none"
       />
@@ -70,8 +71,8 @@ export default function Signup() {
           style={styles.passwordInput}
           placeholder="Enter your password"
           placeholderTextColor="#999"
-          value={password}
-          onChangeText={setPassword}
+          value={data.password || ""}
+          onChangeText={(text) => setData({ ...data, password: text })}
           secureTextEntry={secure}
         />
         <TouchableOpacity onPress={() => setSecure(!secure)}>
@@ -89,8 +90,8 @@ export default function Signup() {
           style={styles.passwordInput}
           placeholder="Confirm your password"
           placeholderTextColor="#999"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
+          value={data.confirmPassword || ""}
+          onChangeText={(text) => setData({ ...data, confirmPassword: text })}
           secureTextEntry={secureConfirm}
         />
         <TouchableOpacity onPress={() => setSecureConfirm(!secureConfirm)}>
@@ -102,10 +103,10 @@ export default function Signup() {
         </TouchableOpacity>
       </View>
 
-      {/* SIGNUP BUTTON */}
+      {/* NEXT BUTTON */}
       <TouchableOpacity
         style={styles.loginButton}
-         onPress={() => router.replace("./gender")} 
+        onPress={handleNext}
         activeOpacity={0.8}
       >
         <Text style={styles.loginButtonText}>Next</Text>
@@ -113,3 +114,6 @@ export default function Signup() {
     </View>
   );
 }
+
+
+

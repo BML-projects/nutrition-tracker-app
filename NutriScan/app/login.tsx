@@ -1,15 +1,15 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    View,
+    Image,
     Text,
     TextInput,
     TouchableOpacity,
-    Image,
+    View,
 } from "react-native";
-import { styles } from "../styles/login";
-import { Images } from "../constants/images";
-import { Ionicons } from "@expo/vector-icons";
+import { Images } from "../src/constants/images";
+import { styles } from "../src/styles/login";
 
 export default function Login() {
     const router = useRouter();
@@ -24,15 +24,15 @@ export default function Login() {
             {/* TITLE */}
             <Text style={styles.title}>Welcome</Text>
 
-<Text style={styles.subtitle}>
-  {"Don't have an account? "}
-  <Text
-    style={[styles.linkText, { textDecorationLine: 'underline' }]} // optional underline
-    onPress={() => router.push("./signup")}
-  >
-    Signup Here
-  </Text>
-</Text>
+            <Text style={styles.subtitle}>
+                {"Don't have an account? "}
+                <Text
+                    style={[styles.linkText, { textDecorationLine: 'underline' }]} // optional underline
+                    onPress={() => router.push("./signup")}
+                >
+                    Signup Here
+                </Text>
+            </Text>
 
 
 
