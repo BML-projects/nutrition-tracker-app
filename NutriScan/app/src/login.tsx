@@ -24,11 +24,19 @@ export default function Login() {
             {/* TITLE */}
             <Text style={styles.title}>Welcome</Text>
 
-            {/* SUBTITLE */}
-            <Text style={styles.subtitle}>
-                Already have an account?{" "}
-                <Text style={styles.linkText}>Login here</Text>
-            </Text>
+<Text style={styles.subtitle}>
+  {"Don't have an account? "}
+  <Text
+    style={[styles.linkText, { textDecorationLine: 'underline' }]} // optional underline
+    onPress={() => router.push("./signup")}
+  >
+    Signup Here
+  </Text>
+</Text>
+
+
+
+
 
             {/* EMAIL */}
             <TextInput
@@ -63,7 +71,7 @@ export default function Login() {
             {/* LOGIN BUTTON */}
             <TouchableOpacity
                 style={styles.loginButton}
-                onPress={() => router.replace("./gender")}
+                onPress={() => alert('logged in')}
                 activeOpacity={0.8}
             >
                 <Text style={styles.loginButtonText}>Login</Text>
