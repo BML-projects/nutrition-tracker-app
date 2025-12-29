@@ -1,70 +1,66 @@
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    View,
+    FlatList,
+    NativeScrollEvent,
+    NativeSyntheticEvent,
     Text,
     TouchableOpacity,
-    FlatList,
-    NativeSyntheticEvent,
-    NativeScrollEvent
+    View
 } from "react-native";
-import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { styles, ITEM_HEIGHT } from "../styles/dob";
+import { useSignup } from "../../src/context/SignupContext";
+import { ITEM_HEIGHT, styles } from "../../src/styles/dob";
 
 // Data Generation
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
-// Generates years from 1950 to 2025
-const YEARS = Array.from({ length: 76 }, (_, i) => 1950 + i);
+const YEARS = Array.from({ length: 76 }, (_, i) => 1950 + i); // 1950 - 2025
 
 export default function DateOfBirth() {
     const router = useRouter();
+    const { data, setData } = useSignup();
 
-    const [month, setMonth] = useState("Jan");
-    const [day, setDay] = useState(1);
-    const [year, setYear] = useState(2000);
+    // Initialize state from context
+    const initialMonthIndex = MONTHS.indexOf(data.dob ? new Date(data.dob).toLocaleString("default", { month: "short" }) : "Jan");
+    const initialDay = data.dob ? new Date(data.dob).getDate() : 1;
+    const initialYear = data.dob ? new Date(data.dob).getFullYear() : 2000;
+
+    const [month, setMonth] = useState(MONTHS[initialMonthIndex] || "Jan");
+    const [day, setDay] = useState(initialDay);
+    const [year, setYear] = useState(initialYear);
 
     const handleNext = () => {
-        console.log(`DOB: ${month} ${day}, ${year}`);
-        router.replace("./goal"); // Replace with your actual next route
+        const dobString = `${year}-${(MONTHS.indexOf(month) + 1).toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+        setData({ dob: dobString });
+        router.push("/signup/gender");
     };
 
     return (
         <View style={styles.container}>
-
-            {/* HEADER */}
             <View style={styles.header}>
                 <Text style={styles.title}>Select your date of birth</Text>
-                <Text style={styles.subtitle}>we'll use this to create your personalized plan</Text>
+                <Text style={styles.subtitle}>{`we'll use this to create your personalized plan`}</Text>
             </View>
 
-            {/* 3-COLUMN PICKER SECTION */}
             <View style={styles.pickersContainer}>
-
-                {/* MONTH */}
                 <CustomPicker
                     data={MONTHS}
-                    initialValueIndex={0}
+                    initialValueIndex={MONTHS.indexOf(month)}
                     onValueChange={(val) => setMonth(val as string)}
                 />
-
-                {/* DAY */}
                 <CustomPicker
                     data={DAYS}
-                    initialValueIndex={0}
+                    initialValueIndex={day - 1}
                     onValueChange={(val) => setDay(val as number)}
                 />
-
-                {/* YEAR */}
                 <CustomPicker
                     data={YEARS}
-                    // Index 50 represents year 2000
-                    initialValueIndex={50}
+                    initialValueIndex={YEARS.indexOf(year)}
                     onValueChange={(val) => setYear(val as number)}
                 />
             </View>
 
-            {/* FOOTER */}
             <View style={styles.footer}>
                 <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
                     <Text style={styles.nextButtonText}>Next</Text>
@@ -80,7 +76,6 @@ export default function DateOfBirth() {
     );
 }
 
-// --- REUSABLE PICKER COMPONENT ---
 interface PickerProps {
     data: (string | number)[];
     initialValueIndex: number;
@@ -108,42 +103,30 @@ const CustomPicker = ({ data, initialValueIndex, onValueChange }: PickerProps) =
     return (
         <View style={styles.pickerColumn}>
             <View style={styles.pickerWrapper}>
-                {/* Selection Lines Overlay */}
                 <View style={styles.selectionLines} pointerEvents="none" />
-
                 <FlatList
                     data={data}
                     keyExtractor={(item) => item.toString()}
                     showsVerticalScrollIndicator={false}
-
-                    // --- SNAP LOGIC FIXED ---
                     snapToInterval={ITEM_HEIGHT}
-                    // REMOVED snapToAlignment="center" to prevent offset issues
                     decelerationRate="fast"
                     scrollEventThrottle={16}
-
                     onScroll={onScroll}
                     onMomentumScrollEnd={onMomentumScrollEnd}
-
                     getItemLayout={(_, index) => ({
                         length: ITEM_HEIGHT,
                         offset: ITEM_HEIGHT * index,
                         index,
                     })}
                     initialScrollIndex={initialValueIndex}
-
                     contentContainerStyle={{
                         paddingVertical: ITEM_HEIGHT,
                     }}
-
                     renderItem={({ item, index }) => {
                         const isActive = index === activeIndex;
                         return (
                             <View style={styles.itemContainer}>
-                                <Text style={[
-                                    styles.itemText,
-                                    isActive ? styles.activeItemText : styles.inactiveItemText,
-                                ]}>
+                                <Text style={[styles.itemText, isActive ? styles.activeItemText : styles.inactiveItemText]}>
                                     {item}
                                 </Text>
                             </View>

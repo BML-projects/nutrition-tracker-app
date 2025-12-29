@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, FlatList, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
-import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { styles, ITEM_HEIGHT } from "../styles/measurement";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Text, TouchableOpacity, View } from "react-native";
+import { ITEM_HEIGHT, styles } from "../../src/styles/measurement";
 
 // Generate data arrays
 const HEIGHTS = Array.from({ length: 250 }, (_, i) => i + 1);
@@ -16,14 +16,14 @@ export default function Measurements() {
 
     const handleNext = () => {
         console.log(`Selected Height: ${height} cm, Weight: ${weight} kg`);
-        router.replace("./dob");
+        router.replace("/signup/goal");
     };
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>Enter your body measurements</Text>
-                <Text style={styles.subtitle}>we'll use this to create your personalized plan</Text>
+                <Text style={styles.subtitle}>{`we'll use this to create your personalized plan`}</Text>
             </View>
 
             <View style={styles.metricBadge}>

@@ -1,63 +1,72 @@
-import React, { useState } from "react";
-import {
-    View,
-    Text,
-    TouchableOpacity,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { styles } from "../styles/goal";
+import React, { useEffect, useState } from "react";
+import {
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { useSignup } from "../../src/context/SignupContext";
+import { styles } from "../../src/styles/gender";
 
-export default function GoalScreen() {
-    // State for the selected goal
-    const [goal, setGoal] = useState<"Lose Weight" | "Maintain" | "Gain Weight" | null>(null);
+export default function GenderScreen() {
     const router = useRouter();
+    const { data, setData } = useSignup();
 
-    const isButtonDisabled = goal === null;
+    // Initialize local state from context
+    const [gender, setGender] = useState<"female" | "male" | "other" | null>(data.gender ?? null);
+
+    const isButtonDisabled = gender === null;
+
+    // Update context whenever gender changes
+    useEffect(() => {
+        if (gender) {
+            setData({ gender });
+        }
+    }, [gender, setData]);
 
     return (
         <View style={styles.container}>
-
             <View>
-                <Text style={styles.title}>What is your goal?</Text>
+                <Text style={styles.title}>Choose your Gender</Text>
                 <Text style={styles.subtitle}>
-                    we'll use this to create your personalized plan
+                    {`we'll use this to create your personalized plan`}
                 </Text>
 
-                {/* Option 1: Lose Weight */}
+                {/* Female Option */}
                 <TouchableOpacity
                     style={styles.option}
-                    onPress={() => setGoal("Lose Weight")}
+                    onPress={() => setGender("female")}
                     activeOpacity={0.7}
                 >
                     <View style={styles.radioOuter}>
-                        {goal === "Lose Weight" && <View style={styles.radioInner} />}
+                        {gender === "female" && <View style={styles.radioInner} />}
                     </View>
-                    <Text style={styles.optionText}>Lose Weight</Text>
+                    <Text style={styles.optionText}>Female</Text>
                 </TouchableOpacity>
 
-                {/* Option 2: Maintain */}
+                {/* Male Option */}
                 <TouchableOpacity
                     style={styles.option}
-                    onPress={() => setGoal("Maintain")}
+                    onPress={() => setGender("male")}
                     activeOpacity={0.7}
                 >
                     <View style={styles.radioOuter}>
-                        {goal === "Maintain" && <View style={styles.radioInner} />}
+                        {gender === "male" && <View style={styles.radioInner} />}
                     </View>
-                    <Text style={styles.optionText}>Maintain</Text>
+                    <Text style={styles.optionText}>Male</Text>
                 </TouchableOpacity>
 
-                {/* Option 3: Gain Weight */}
+                {/* Other Option */}
                 <TouchableOpacity
                     style={styles.option}
-                    onPress={() => setGoal("Gain Weight")}
+                    onPress={() => setGender("other")}
                     activeOpacity={0.7}
                 >
                     <View style={styles.radioOuter}>
-                        {goal === "Gain Weight" && <View style={styles.radioInner} />}
+                        {gender === "other" && <View style={styles.radioInner} />}
                     </View>
-                    <Text style={styles.optionText}>Gain Weight</Text>
+                    <Text style={styles.optionText}>Other</Text>
                 </TouchableOpacity>
             </View>
 
@@ -69,8 +78,7 @@ export default function GoalScreen() {
                 ]}
                 onPress={() => {
                     if (!isButtonDisabled) {
-                        // Navigate to next page (e.g., activity level)
-                        router.push("./activitylevel");
+                        router.push("/signup/measurement"); // move to next screen
                     }
                 }}
                 activeOpacity={0.8}
