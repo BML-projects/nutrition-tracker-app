@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-const GREEN = "#32CD32";
+const GREEN = "#32CD32"; // Lime Green accent color
 
 export const styles = StyleSheet.create({
     container: {
@@ -10,10 +10,11 @@ export const styles = StyleSheet.create({
 
     scrollContent: {
         padding: 16,
-        paddingBottom: 120,
+        // Add padding at the bottom so the last item isn't hidden behind the nav bar
+        paddingBottom: 100,
     },
 
-    /* ---------- HEADER ---------- */
+    // Header section with the logo
     logoRow: {
         flexDirection: "row",
         alignItems: "center",
@@ -27,7 +28,7 @@ export const styles = StyleSheet.create({
         marginTop: 10,
     },
 
-    /* ---------- CALENDAR ---------- */
+    // The weekly calendar strip
     calendarRow: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -36,88 +37,96 @@ export const styles = StyleSheet.create({
 
     dayItem: {
         alignItems: "center",
-        width: "13%",
+        width: "13%", // Fits 7 days across the screen
     },
 
+    // The small green/black ring above the date
     progressRing: {
         width: 38,
         height: 38,
-        borderRadius: 18,
+        borderRadius: 19,
         borderWidth: 3,
         borderColor: GREEN,
         justifyContent: "center",
         alignItems: "center",
-        marginBottom: 4,
+        marginBottom: 6,
         backgroundColor: "#000",
     },
 
     progressText: {
-        fontSize: 10,
-        fontWeight: "600",
+        fontSize: 9,
+        fontWeight: "700",
         color: "#fff",
     },
 
     dateText: {
-        fontSize: 12,
+        fontSize: 13,
         color: "#000",
+        fontWeight: "600",
+        marginBottom: 2,
     },
 
     dayText: {
-        fontSize: 11,
+        fontSize: 10,
+        color: "#666",
+        textTransform: "uppercase",
+    },
+
+    // Style for the currently selected day
+    activeText: {
+        fontWeight: "900",
         color: "#000",
     },
 
-    activeText: {
-        fontWeight: "700",
-    },
-
-    /* ---------- MAIN CARD ---------- */
+    // The main black card showing calories
     card: {
         backgroundColor: "#000",
         borderRadius: 20,
-        padding: 16,
-        marginBottom: 20,
-        height: 200,
+        padding: 20,
+        marginBottom: 25,
+        minHeight: 180,
     },
 
     cardHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 20,
+        alignItems: "flex-start",
+        marginBottom: 10,
     },
 
     cardTitle: {
-        color: "#aaa",
-        fontSize: 14,
+        color: "#fff",
+        fontSize: 16,
         fontWeight: "600",
+        maxWidth: "80%",
     },
 
     cardContent: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginTop: 10,
+        marginTop: 15,
     },
 
     calorieNumber: {
-        fontSize: 32,
+        fontSize: 42,
         color: "#fff",
         fontWeight: "700",
-        marginLeft: 30,
+        marginBottom: 4,
     },
 
     calorieLabel: {
-        color: "#fff",
-        fontSize: 12,
-        marginLeft: 20,
+        color: "#aaa",
+        fontSize: 14,
+        fontWeight: "500",
     },
 
+    // Visual ring inside the card
     kcalRing: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        borderWidth: 4,
+        width: 65,
+        height: 65,
+        borderRadius: 32.5,
+        borderWidth: 3,
         borderColor: GREEN,
         justifyContent: "center",
         alignItems: "center",
@@ -129,56 +138,77 @@ export const styles = StyleSheet.create({
         fontSize: 12,
     },
 
-    /* ---------- RECENT ---------- */
+    // Recent Activities section
     sectionTitle: {
-        fontSize: 25,
-        fontWeight: "900",
-        marginBottom: 10,
+        fontSize: 20,
+        fontWeight: "800",
+        color: "#000",
+        marginBottom: 15,
         textAlign: "center",
     },
 
+    // Dashed box shown when no meals are recorded
     emptyBox: {
-        backgroundColor: "#f2f2f2",
+        backgroundColor: "#f5f5f5",
         borderRadius: 12,
-        borderWidth: 1,
+        borderWidth: 1.5,
         borderStyle: "dashed",
-        borderColor: "#999",
-        padding: 20,
+        borderColor: "#aaa",
+        paddingVertical: 30,
+        paddingHorizontal: 20,
         alignItems: "center",
         marginBottom: 20,
     },
 
     emptyTitle: {
         fontWeight: "700",
-        marginBottom: 4,
+        fontSize: 14,
+        marginBottom: 6,
         color: "#000",
     },
 
     emptySubtitle: {
-        color: "#555",
+        color: "#666",
+        fontSize: 14,
     },
 
-    /* ---------- ADD BUTTON ---------- */
+    // Styling for a single activity item (if data exists)
+    activityItem: {
+        backgroundColor: "#F9F9F9",
+        padding: 15,
+        borderRadius: 12,
+        marginBottom: 10,
+        borderLeftWidth: 4,
+        borderLeftColor: GREEN,
+    },
+
+    // Floating green add button
     addButton: {
-        width: 58,
-        height: 56,
+        width: 60,
+        height: 60,
         backgroundColor: GREEN,
-        borderRadius: 15,
+        borderRadius: 18,
         justifyContent: "center",
         alignItems: "center",
         alignSelf: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
     },
 
-    /* ---------- BOTTOM NAV ---------- */
+    // Fixed bottom navigation bar
     bottomNav: {
         position: "absolute",
         bottom: 0,
         left: 0,
         right: 0,
-        height: 80,
+        height: 85,
         backgroundColor: "#333",
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
+        paddingBottom: 10,
     },
 });
