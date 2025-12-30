@@ -90,7 +90,7 @@ export default function Login() {
                     source={Images.google}
                     style={styles.googleIcon}
                 />
-                <Text style={styles.googleText}>
+                <Text style={styles.googleText} onPress={() => router.push("../signup/home")}>
                     Sign Up with Google
                 </Text>
             </TouchableOpacity>
