@@ -210,7 +210,7 @@ export default function Home() {
                 {/* Floating Add Button */}
                 <TouchableOpacity
                     style={styles.addButton}
-                    onPress={() => router.push("/camera")}
+                    onPress={() => router.push("./camera")}
                 >
                     <Ionicons name="add" size={32} color="#000" />
                 </TouchableOpacity>
@@ -218,11 +218,11 @@ export default function Home() {
 
             {/* Bottom Navigation Bar */}
             <View style={styles.bottomNav}>
-                <TouchableOpacity onPress={() => router.replace("/home")}>
+                <TouchableOpacity onPress={() => router.replace("./home")}>
                     <Ionicons name="home" size={26} color="#fff" />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => router.push("/camera")}>
+                <TouchableOpacity onPress={() => router.push("./camera")}>
                     <Ionicons name="camera" size={26} color="#aaa" />
                 </TouchableOpacity>
 
@@ -230,7 +230,7 @@ export default function Home() {
                     <Ionicons name="bar-chart" size={26} color="#aaa" />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => router.push("/settings")}>
+                <TouchableOpacity onPress={() => router.push("./settings")}>
                     <Ionicons name="settings" size={26} color="#aaa" />
                 </TouchableOpacity>
             </View>
