@@ -83,3 +83,6 @@ git push origin feature/your-name/task-name
 #    - Select your branch
 #    - Add description
 #    - Click "Create pull request"
+
+#about env
+make your database connectin yourself
