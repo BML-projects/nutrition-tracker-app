@@ -10,6 +10,10 @@ app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
+app.get('/', (req, res) => {
+  res.send('Nutrition Tracker Backend is running!');
+});
+
 app.use("/api/auth", authRoutes);
 
 // 404 handler

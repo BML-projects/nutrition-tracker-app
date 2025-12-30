@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useSignup } from "../../src/context/SignupContext";
 import { styles } from "../../src/styles/login";
+import { signup as signupAPI } from '../../services/auth-api'
 
 export default function Signup() {
   const router = useRouter();
@@ -17,19 +18,43 @@ export default function Signup() {
   const [secure, setSecure] = useState(true);
   const [secureConfirm, setSecureConfirm] = useState(true);
 
-  const handleNext = () => {
-    if (!data.fullName || !data.email || !data.password || !data.confirmPassword) {
-      alert("Please fill all fields");
-      return;
-    }
+// import your axios API
 
-    if (data.password !== data.confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
+const handleNext = async () => {
+  // Validation
+  if (!data.fullName || !data.email || !data.password || !data.confirmPassword) {
+    alert("Please fill all fields");
+    return;
+  }
+  if (data.password !== data.confirmPassword) {
+    alert("Passwords do not match");
+    return;
+  }
 
-    router.push("/signup/dob"); // go to next screen
-  };
+  try {
+    // Call backend signup
+    const res = await signupAPI({
+      fullName: data.fullName,
+      email: data.email,
+      password: data.password,
+      gender: data.gender || "other",
+      height: data.height || 0,
+      weight: data.weight || 0,
+      birthday: data.dob || "",
+      goal: data.goal || "maintain",
+    });
+
+    // You can store the backend returned info in context if needed
+    setData({ fullName: res.fullName || data.fullName });
+
+    // Move to next screen
+    router.push("/signup/dob");
+  } catch (err: any) {
+    console.log(err);
+    alert(err?.response?.data?.message || "Signup failed");
+  }
+};
+
 
   return (
     <View style={styles.container}>

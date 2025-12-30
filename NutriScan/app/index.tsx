@@ -6,8 +6,14 @@ import { styles } from "../src/styles/splash";
 
 
 
+
 const a = 'hello';
 console.log(a);
+
+
+
+
+
 
 
 

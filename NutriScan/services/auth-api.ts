@@ -8,6 +8,7 @@ const API = axios.create({
 
 // ================== Types ==================
 export interface SignupData {
+  fullName: string;
   email: string;
   password: string;
   gender: string;
