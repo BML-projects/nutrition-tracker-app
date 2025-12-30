@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create axios instance
 const API = axios.create({
-  baseURL: "http://localhost:3000/api", // backend URL
+  baseURL: "http://192.168.1.72:3000/api", // backend URL
   withCredentials: true, // required for cookies (refreshToken)
 });
 
@@ -20,15 +20,43 @@ export interface SignupData {
 // ================== API Calls ==================
 
 // SIGNUP
-export const signup = async (data: SignupData) => {
-  const res = await API.post("/auth/signup", data);
-  return res.data; // { accessToken, bmi, bmr, dailyCalories }
+export const signup = async (payload: any) => {
+  const response = await fetch(`${API}/auth/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || data.errors?.[0] || "Signup failed"
+    );
+  }
+
+  return data;
 };
 
 // LOGIN
 export const login = async (email: string, password: string) => {
-  const res = await API.post("/auth/login", { email, password });
-  return res.data; // { accessToken }
+  const response = await fetch(`${API}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Login failed");
+  }
+
+  return data; // { accessToken }
 };
 
 // LOGOUT
