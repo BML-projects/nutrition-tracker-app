@@ -211,7 +211,7 @@ export default function AnalyticsScreen() {
                     <Ionicons name="home-outline" size={24} color="#aaa" />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => router.push("./camera")}>
+                <TouchableOpacity onPress={() => router.push("/signup/scan")}>
                     <Ionicons name="camera-outline" size={24} color="#aaa" />
                 </TouchableOpacity>
 
@@ -220,7 +220,7 @@ export default function AnalyticsScreen() {
                     <Ionicons name="bar-chart" size={24} color="#000" />
                 </View>
 
-                <TouchableOpacity onPress={() => router.push("./settings")}>
+                <TouchableOpacity onPress={() => router.push("/signup/setting")}>
                     <Ionicons name="settings-outline" size={24} color="#aaa" />
                 </TouchableOpacity>
             </View>
