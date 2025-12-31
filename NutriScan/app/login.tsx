@@ -108,9 +108,10 @@ export default function Login() {
         <View style={styles.line} />
       </View>
 
+      {/* routing to home only for testing */}
       <TouchableOpacity style={styles.googleButton}>
         <Image source={Images.google} style={styles.googleIcon} />
-        <Text style={styles.googleText}>Sign Up with Google</Text>
+        <Text style={styles.googleText} onPress={() => router.push("./signup/home")}>Sign Up with Google</Text>
       </TouchableOpacity>
     </View>
   );
