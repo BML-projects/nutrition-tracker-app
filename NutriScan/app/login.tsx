@@ -7,7 +7,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Alert,
+  Keyboard,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -15,7 +15,7 @@ import { Images } from "../src/constants/images";
 import { styles } from "../src/styles/login";
 import { login } from "../services/auth-api";
 
-
+import { KeyboardToastWrapper, showError, showSuccess } from "@/src/helper/keyboardToast";
 
 export default function Login() {
   const router = useRouter();
@@ -26,8 +26,11 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    // Dismiss keyboard immediately
+    Keyboard.dismiss();
+
     if (!email || !password) {
-      Alert.alert("Error", "Email and password are required");
+      showError("Email and password are required");
       return;
     }
 
@@ -35,84 +38,89 @@ export default function Login() {
       setLoading(true);
 
       const data = await login(email, password);
-
-      // ✅ Save token
       await AsyncStorage.setItem("accessToken", data.accessToken);
 
-      // ✅ Navigate after login
-      router.replace("./home"); // change to your screen
+      showSuccess("Logged in successfully");
+      router.replace("./home");
 
     } catch (error: any) {
-      Alert.alert("Login Failed", error.message);
+      if (error.response?.status === 401) {
+        showError("Invalid email or password");
+      } else {
+        showError("Server error. Please try again");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome</Text>
+    <KeyboardToastWrapper>
+      <View style={styles.container}>
+        <Text style={styles.title}>Welcome</Text>
 
-      <Text style={styles.subtitle}>
-        {"Don't have an account? "}
-        <Text
-          style={[styles.linkText, { textDecorationLine: "underline" }]}
-          onPress={() => router.push("./signup")}
-        >
-          Signup Here
+        <Text style={styles.subtitle}>
+          {"Don't have an account? "}
+          <Text
+            style={[styles.linkText, { textDecorationLine: "underline" }]}
+            onPress={() => router.push("./signup")}
+          >
+            Signup Here
+          </Text>
         </Text>
-      </Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your email"
-        placeholderTextColor="#999"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-
-      <View style={styles.passwordContainer}>
         <TextInput
-          style={styles.passwordInput}
-          placeholder="Enter your password"
+          style={styles.input}
+          placeholder="Enter your email"
           placeholderTextColor="#999"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={secure}
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
         />
-        <TouchableOpacity onPress={() => setSecure(!secure)}>
-          <Ionicons
-            name={secure ? "eye-off-outline" : "eye-outline"}
-            size={20}
-            color="#666"
+
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Enter your password"
+            placeholderTextColor="#999"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={secure}
           />
+          <TouchableOpacity onPress={() => setSecure(!secure)}>
+            <Ionicons
+              name={secure ? "eye-off-outline" : "eye-outline"}
+              size={20}
+              color="#666"
+            />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={handleLogin}
+          activeOpacity={0.8}
+          disabled={loading}
+        >
+          <Text style={styles.loginButtonText}>
+            {loading ? "Logging in..." : "Login"}
+          </Text>
+        </TouchableOpacity>
+
+        <View style={styles.dividerContainer}>
+          <View style={styles.line} />
+          <Text style={styles.orText}>or</Text>
+          <View style={styles.line} />
+        </View>
+
+        <TouchableOpacity style={styles.googleButton}>
+          <Image source={Images.google} style={styles.googleIcon} />
+          <Text style={styles.googleText} onPress={() => router.push("./signup/home")}>
+            Sign Up with Google
+          </Text>
         </TouchableOpacity>
       </View>
-
-      <TouchableOpacity
-        style={styles.loginButton}
-        onPress={handleLogin}
-        activeOpacity={0.8}
-        disabled={loading}
-      >
-        <Text style={styles.loginButtonText}>
-          {loading ? "Logging in..." : "Login"}
-        </Text>
-      </TouchableOpacity>
-
-      <View style={styles.dividerContainer}>
-        <View style={styles.line} />
-        <Text style={styles.orText}>or</Text>
-        <View style={styles.line} />
-      </View>
-
-      {/* routing to home only for testing */}
-      <TouchableOpacity style={styles.googleButton}>
-        <Image source={Images.google} style={styles.googleIcon} />
-        <Text style={styles.googleText} onPress={() => router.push("./signup/home")}>Sign Up with Google</Text>
-      </TouchableOpacity>
-    </View>
+    </KeyboardToastWrapper>
   );
 }

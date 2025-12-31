@@ -1,73 +1,40 @@
 import axios from "axios";
 
-// Create axios instance
+// Axios instance
 const API = axios.create({
-  baseURL: "http://192.168.1.72:3000/api", // backend URL
-  withCredentials: true, // required for cookies (refreshToken)
+  baseURL: "http://192.168.1.72:3000/api", // MUST match backend port
+  withCredentials: true,
 });
 
-// ================== Types ==================
-export interface SignupData {
-  email: string;
-  password: string;
-  gender: string;
-  height: number;
-  weight: number;
-  birthday: string; // must be string for TypeScript
-  goal: string;
-}
-
-// ================== API Calls ==================
-
-// SIGNUP
+// ================== SIGNUP ==================
 export const signup = async (payload: any) => {
-  const response = await fetch(`${API}/auth/signup`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || data.errors?.[0] || "Signup failed"
-    );
-  }
-
+  const { data } = await API.post("/auth/signup", payload);
   return data;
 };
 
-// LOGIN
+// ================== LOGIN ==================
 export const login = async (email: string, password: string) => {
-  const response = await fetch(`${API}/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
+  const { data } = await API.post("/auth/login", {
+    email,
+    password,
   });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Login failed");
-  }
-
-  return data; // { accessToken }
+  return data;
 };
 
-// LOGOUT
+// ================== CHECK EMAIL ==================
+export const checkEmailExists = async (email: string) => {
+  return API.post("/auth/check-email", { email });
+};
+
+// ================== LOGOUT ==================
 export const logout = async () => {
   await API.post("/auth/logout");
 };
 
-// REFRESH TOKEN
+// ================== REFRESH ==================
 export const refreshToken = async () => {
-  const res = await API.get("/auth/refresh");
-  return res.data; // { accessToken }
+  const { data } = await API.get("/auth/refresh");
+  return data;
 };
 
 export default API;

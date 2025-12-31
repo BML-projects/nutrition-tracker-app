@@ -9,6 +9,9 @@ import {
 } from "react-native";
 import { useSignup } from "../../src/context/SignupContext";
 import { styles } from "../../src/styles/login";
+import { checkEmailExists } from "@/services/auth-api";
+import {showError } from "@/src/helper/toast";
+import { KeyboardToastWrapper } from "@/src/helper/keyboardToast";
 
 export default function Signup() {
   const router = useRouter();
@@ -17,22 +20,42 @@ export default function Signup() {
   const [secure, setSecure] = useState(true);
   const [secureConfirm, setSecureConfirm] = useState(true);
 
-  const handleNext = () => {
-    if (!data.fullName || !data.email || !data.password || !data.confirmPassword) {
-      alert("Please fill all fields");
-      return;
-    }
+const handleNext = async () => {
+  if (!data.fullName || !data.email || !data.password || !data.confirmPassword) {
+    showError("Please fill all fields");
+    return;
+  }
 
-    if (data.password !== data.confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
+  if (data.password !== data.confirmPassword) {
+    showError("Password and confirm password do not match");
+    return;
+  }
 
-    router.push("/signup/dob"); // go to next screen
-  };
+  try {
+    await checkEmailExists(data.email);
+
+    // email is free → go next
+    router.push("/signup/dob");
+
+  } catch (error: any) {
+  if (error.response?.status === 401) {
+    showError("Invalid email or password");
+  } else if (error.response?.status === 400) {
+    showError(error.response.data?.message || "Invalid request");
+  } else {
+   showError("Server error. Please try again.");
+  }
+}
+
+};
+
 
   return (
-    <View style={styles.container}>
+
+
+  <KeyboardToastWrapper>    
+
+  <View style={styles.container}>
       <Text style={styles.title}>Create Account</Text>
 
       <Text style={styles.subtitle}>
@@ -112,8 +135,12 @@ export default function Signup() {
         <Text style={styles.loginButtonText}>Next</Text>
       </TouchableOpacity>
     </View>
-  );
-}
+
+  </KeyboardToastWrapper>
+
+  
+  )}
+  
 
 
 
