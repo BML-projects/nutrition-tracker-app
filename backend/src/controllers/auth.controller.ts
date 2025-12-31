@@ -94,15 +94,20 @@ export const signup = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password)
+
+    if (!email || !password) {
       return res.status(400).json({ message: "Email and password required" });
+    }
 
     const user = await User.findOne({ email });
-    if (!user || !user.password)
-      return res.status(400).json({ message: "Invalid credentials" });
+    if (!user || !user.password) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Incorrect Password" });
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
 
     const accessToken = generateAccessToken(user._id.toString());
     const refreshToken = generateRefreshToken(user._id.toString());
@@ -114,11 +119,13 @@ export const login = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ accessToken });
+    return res.status(200).json({ accessToken });
+
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 /* ================= REFRESH ================= */
 export const refresh = async (req: Request, res: Response) => {
@@ -143,3 +150,27 @@ export const logout = async (_req: Request, res: Response) => {
   res.clearCookie("refreshToken");
   res.sendStatus(204);
 };
+
+
+//check email exists
+export const checkEmailExists = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (user) {
+      return res.status(409).json({ message: "Email already exists" });
+    }
+
+    return res.status(200).json({ message: "Email available" });
+
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+

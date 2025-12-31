@@ -10,6 +10,14 @@ app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
+/* 🔥 ROOT ROUTE */
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Server is running 🚀",
+  });
+});
+
 app.use("/api/auth", authRoutes);
 
 // 404 handler
