@@ -80,20 +80,68 @@ export const login = async (email: string, password: string) => {
 };
 
 // ================== SIGNUP ==================
-export const signup = async (payload: any) => {
+// services/auth-api.ts
+export const signup = async (
+  email: string, 
+  password: string, 
+  name: string, 
+  gender: string, 
+  height: number, 
+  weight: number, 
+  dob: string, 
+  goal: string
+) => {
   try {
-    console.log("📝 Attempting signup for:", payload.email);
+    console.log('📝 Signup API call:', {
+      email,
+      gender,
+      height,
+      weight,
+      dob,
+      goal
+    });
+
+    const response = await fetch(`${BACKEND_URL}/api/auth/signup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      credentials: 'include', // Important for cookies
+      body: JSON.stringify({
+        email,
+        password,
+        gender,
+        height,
+        weight,
+        dob: new Date(dob).toISOString(), // Ensure proper date format
+        goal
+      }),
+    });
+
+    console.log('📝 Signup response status:', response.status);
     
-    const response = await API.post("/auth/signup", payload);
-    console.log("✅ Signup successful:", response.data);
-    return response.data;
+    const text = await response.text();
+    console.log('📝 Signup response text:', text);
     
-  } catch (error: any) {
-    console.error("❌ Signup failed:", error.response?.data);
-    throw error.response?.data || { 
-      success: false,
-      message: "Network error during signup" 
-    };
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error('📝 Failed to parse JSON:', e);
+      throw new Error('Invalid server response');
+    }
+    
+    if (!response.ok) {
+      console.error('📝 Signup error response:', data);
+      throw new Error(data.message || data.error || 'Signup failed');
+    }
+    
+    console.log('📝 Signup successful:', data);
+    return data;
+  } catch (error) {
+    console.error('📝 Signup API error:', error);
+    throw error;
   }
 };
 

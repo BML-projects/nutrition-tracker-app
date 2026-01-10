@@ -8,7 +8,7 @@ import { generateAccessToken, generateRefreshToken } from "../utils/token";
 
 /* ================= Zod Signup Schema ================= */
 const signupSchema = z.object({
-  fullname: z.string().min(2, "Full name must be at least 2 characters"),
+  fullName: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z
     .string()
@@ -27,8 +27,15 @@ const signupSchema = z.object({
 /* ================= SIGNUP ================= */
 export const signup = async (req: Request, res: Response) => {
   try {
+    console.log('=== SIGNUP REQUEST START ===');
+    console.log('Request body:', req.body);
+    console.log('Request headers:', req.headers);
+    console.log('Content-Type header:', req.headers['content-type']);
+    console.log('Content-Length:', req.headers['content-length']);
+    
     const parsed = signupSchema.safeParse(req.body);
     if (!parsed.success) {
+      console.log('Validation errors:', parsed.error.issues);
       return res
         .status(400)
         .json({ errors: parsed.error.issues.map((e) => e.message) });
@@ -37,10 +44,15 @@ export const signup = async (req: Request, res: Response) => {
     const { email, password, gender, height, weight, dob, goal } =
       parsed.data;
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser)
-      return res.status(400).json({ message: "User already exists" });
+    console.log('Parsed data:', { email, gender, height, weight, dob, goal });
 
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      console.log('User already exists:', email);
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    console.log('Creating new user...');
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user WITHOUT bmi/bmr/dailyCalories first
@@ -54,6 +66,7 @@ export const signup = async (req: Request, res: Response) => {
       goal,
     });
 
+    console.log('User created with ID:', user._id);
 
     // Calculate BMI, BMR, dailyCalories
     const bmi = calculateBMI(height, weight);
@@ -72,6 +85,8 @@ export const signup = async (req: Request, res: Response) => {
     const accessToken = generateAccessToken(user._id.toString());
     const refreshToken = generateRefreshToken(user._id.toString());
 
+    console.log('Tokens generated');
+
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -79,6 +94,7 @@ export const signup = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    console.log('=== SIGNUP REQUEST COMPLETE ===');
     res.status(201).json({
       accessToken,
       bmi: user.bmi,
@@ -86,6 +102,8 @@ export const signup = async (req: Request, res: Response) => {
       dailyCalories: user.dailyCalories
     });
   } catch (error: any) {
+    console.error('SIGNUP ERROR:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ error: error.message });
   }
 };

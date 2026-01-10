@@ -35,7 +35,7 @@ const handleNext = async () => {
     await checkEmailExists(data.email);
 
     // email is free → go next
-    router.push("/signup/dob");
+    router.push("./signup/dob");
 
   } catch (error: any) {
   if (error.response?.status === 401) {
