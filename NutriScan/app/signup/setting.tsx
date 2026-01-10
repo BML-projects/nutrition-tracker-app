@@ -3,12 +3,14 @@ import {
     View,
     Text,
     TouchableOpacity,
-    Image,
     ScrollView,
+    Alert
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { styles } from "../../src/styles/setting";
+import { logout } from "@/services/auth-api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /* ================= MOCK BACKEND DATA ================= */
 
@@ -33,6 +35,42 @@ export default function SettingsScreen() {
     const [goal, setGoal] = useState(mockUserData.goal);
     const [showThemeOptions, setShowThemeOptions] = useState(false);
     const [showGoalOptions, setShowGoalOptions] = useState(false);
+
+    const handleLogout = async () => {
+  Alert.alert(
+    "Logout",
+    "Are you sure you want to logout?",
+    [
+      {
+        text: "Cancel",
+        style: "cancel"
+      },
+      { 
+        text: "Logout", 
+        onPress: async () => {
+          try {
+            // Call your logout API
+            await logout();
+            
+            // Clear AsyncStorage
+            await AsyncStorage.multiRemove(['accessToken', 'userData']);
+            
+            // Navigate to login screen
+            router.replace('/login');
+            
+            // Optional: Show success message
+            // showSuccess('Logged out successfully');
+          } catch (error) {
+            console.error('Logout error:', error);
+            // Even if API fails, clear local storage and redirect
+            await AsyncStorage.multiRemove(['accessToken', 'userData']);
+            router.replace('/login');
+          }
+        }
+      }
+    ]
+  );
+};
 
     return (
         <View style={styles.screen}>
@@ -141,16 +179,19 @@ export default function SettingsScreen() {
                         <Text style={styles.menuText}>My Progress</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.menuItem}>
-                        <Ionicons name="log-out-outline" size={20} />
-                        <Text style={styles.menuText}>Logout</Text>
-                    </TouchableOpacity>
+                    <TouchableOpacity 
+  style={styles.menuItem}
+  onPress={handleLogout}
+>
+  <Ionicons name="log-out-outline" size={20} color="#FF3B30" />
+  <Text style={[styles.menuText, { color: '#FF3B30' }]}>Logout</Text>
+</TouchableOpacity>
                 </View>
             </ScrollView>
 
             {/* ================= BOTTOM NAV ================= */}
             <View style={styles.nav}>
-                <TouchableOpacity onPress={() => router.push("/signup/home")}>
+                <TouchableOpacity onPress={() => router.push("./signup/home")}>
                     <Ionicons name="home-outline" size={24} color="#aaa" />
                 </TouchableOpacity>
 
