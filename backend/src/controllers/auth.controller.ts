@@ -8,6 +8,7 @@ import { generateAccessToken, generateRefreshToken } from "../utils/token";
 
 /* ================= Zod Signup Schema ================= */
 const signupSchema = z.object({
+  fullname: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z
     .string()
@@ -90,38 +91,85 @@ export const signup = async (req: Request, res: Response) => {
 };
 
 /* ================= LOGIN ================= */
+/* ================= LOGIN ================= */
 export const login = async (req: Request, res: Response) => {
   try {
+    console.log("=== LOGIN REQUEST ===");
+    console.log("Request body:", req.body);
+    console.log("Request headers:", req.headers);
+    console.log("Cookies:", req.cookies);
+
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password required" });
+      console.log("Missing email or password");
+      return res.status(400).json({ 
+        success: false,
+        message: "Email and password required" 
+      });
     }
 
-    const user = await User.findOne({ email });
-    if (!user || !user.password) {
-      return res.status(401).json({ message: "Invalid email or password" });
+    console.log("Looking for user with email:", email);
+    const user = await User.findOne({ email }).select('+password');
+    
+    if (!user) {
+      console.log("User not found with email:", email);
+      return res.status(401).json({ 
+        success: false,
+        message: "Invalid email or password" 
+      });
     }
+
+    console.log("User found:", user._id);
+    console.log("Stored hashed password exists:", !!user.password);
 
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log("Password match:", isMatch);
+    
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({ 
+        success: false,
+        message: "Invalid email or password" 
+      });
     }
 
     const accessToken = generateAccessToken(user._id.toString());
     const refreshToken = generateRefreshToken(user._id.toString());
 
+    console.log("Tokens generated");
+    console.log("Setting cookie with refresh token");
+
+    // Set refresh token cookie
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
 
-    return res.status(200).json({ accessToken });
+    console.log("Login successful for user:", user._id);
+
+    return res.status(200).json({ 
+      success: true,
+      accessToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        fullName: user.fullname,
+        bmi: user.bmi,
+        bmr: user.bmr,
+        dailyCalories: user.dailyCalories
+      }
+    });
 
   } catch (error: any) {
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("Login error:", error);
+    return res.status(500).json({ 
+      success: false,
+      message: "Internal server error",
+      error: error.message 
+    });
   }
 };
 

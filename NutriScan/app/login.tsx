@@ -36,18 +36,40 @@ export default function Login() {
 
     try {
       setLoading(true);
+      console.log("🔄 Attempting login...");
 
-      const data = await login(email, password);
-      await AsyncStorage.setItem("accessToken", data.accessToken);
-
-      showSuccess("Logged in successfully");
-      router.replace("./home");
+      const data = await login(email.trim(), password.trim());
+      
+      if (data.success) {
+        // Store token
+        await AsyncStorage.setItem("accessToken", data.accessToken);
+        
+        // Store user data if available
+        if (data.user) {
+          await AsyncStorage.setItem("userData", JSON.stringify(data.user));
+        }
+        
+        console.log("✅ Login successful, token stored");
+        showSuccess("Logged in successfully");
+        
+        // Navigate to home
+        router.replace("./signup/home");
+      } else {
+        console.log("❌ Login failed:", data.message);
+        showError(data.message || "Login failed");
+      }
 
     } catch (error: any) {
-      if (error.response?.status === 401) {
+      console.error("❌ Login error:", error);
+      
+      // Check error structure
+      if (error.message === "Invalid email or password" || 
+          error.message?.includes("Invalid")) {
         showError("Invalid email or password");
+      } else if (error.isNetworkError) {
+        showError("Network error. Please check your connection");
       } else {
-        showError("Server error. Please try again");
+        showError(error.message || "Something went wrong. Please try again");
       }
     } finally {
       setLoading(false);
@@ -77,6 +99,8 @@ export default function Login() {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          autoCorrect={false}
+          editable={!loading}
         />
 
         <View style={styles.passwordContainer}>
@@ -87,8 +111,12 @@ export default function Login() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry={secure}
+            editable={!loading}
           />
-          <TouchableOpacity onPress={() => setSecure(!secure)}>
+          <TouchableOpacity 
+            onPress={() => setSecure(!secure)}
+            disabled={loading}
+          >
             <Ionicons
               name={secure ? "eye-off-outline" : "eye-outline"}
               size={20}
@@ -98,7 +126,7 @@ export default function Login() {
         </View>
 
         <TouchableOpacity
-          style={styles.loginButton}
+          style={[styles.loginButton, loading && { opacity: 0.7 }]}
           onPress={handleLogin}
           activeOpacity={0.8}
           disabled={loading}
@@ -114,10 +142,23 @@ export default function Login() {
           <View style={styles.line} />
         </View>
 
-        <TouchableOpacity style={styles.googleButton}>
+        <TouchableOpacity 
+          style={[styles.googleButton, loading && { opacity: 0.5 }]}
+          disabled={loading}
+        >
           <Image source={Images.google} style={styles.googleIcon} />
-          <Text style={styles.googleText} onPress={() => router.push("./signup/home")}>
-            Sign Up with Google
+          <Text style={styles.googleText}>
+            Sign In with Google
+          </Text>
+        </TouchableOpacity>
+
+        {/* Forgot password link */}
+        <TouchableOpacity 
+          style={{ marginTop: 20 }}
+          onPress={() => router.push("./forgot-password")}
+        >
+          <Text style={{ color: '#007AFF', fontSize: 14 }}>
+            Forgot Password?
           </Text>
         </TouchableOpacity>
       </View>
