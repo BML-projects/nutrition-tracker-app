@@ -9,6 +9,7 @@ export interface IUser extends Document {
   weight: number;           // in kg
   dob: Date;
   goal: "lose" | "maintain" | "gain";
+  activityLevel?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
 
   // Optional calculated fields
   bmi?: number;
@@ -28,6 +29,11 @@ const userSchema = new Schema<IUser>(
     weight: { type: Number, required: true },
     dob: { type: Date, required: true },
     goal: { type: String, enum: ["lose", "maintain", "gain"], required: true },
+  activityLevel: {
+  type: String,
+  enum: ['sedentary', 'light', 'moderate', 'active', 'very_active'],
+  default: 'moderate'
+},
 
     // Calculated fields
     bmi: { type: Number },
