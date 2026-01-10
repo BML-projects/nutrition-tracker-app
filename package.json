@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start:frontend": "cross-env-shell \"cd NutriScan && npx expo start -c\"",
-    "start:backend": "cross-env-shell \"cd backend && nodemon src/server.js\"",
+    "start:backend": "cross-env-shell \"cd backend && npm run dev\"",
     "start": "concurrently -n FRONTEND,BACKEND -c cyan,green \"npm run start:frontend\" \"npm run start:backend\""
   },
   "devDependencies": {

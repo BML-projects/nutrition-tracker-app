@@ -21,7 +21,7 @@ export default function Signup() {
   const [secureConfirm, setSecureConfirm] = useState(true);
 
 const handleNext = async () => {
-  if (!data.fullName || !data.email || !data.password || !data.confirmPassword) {
+  if (!data.fullName || !data.email || !data.password) {
     showError("Please fill all fields");
     return;
   }

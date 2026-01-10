@@ -9,37 +9,47 @@ import API from "@/services/auth-api"; // axios instance
 export default function GoalScreen() {
   const [goal, setGoal] = useState<"lose" | "maintain" | "gain" | null>(null);
   const router = useRouter();
-  const { data } = useSignup(); // get all previous signup data
+  const { data, setData } = useSignup(); // get all previous signup data
 
   const isButtonDisabled = goal === null;
 
   const handleSignup = async () => {
-    if (!goal) return;
+  if (!goal) return;
 
-    try {
-      // Send all collected signup data + goal
-      const payload = {
-        ...data,
-        goal, // convert to backend enum if needed: "lose", "maintain", "gain"
-      };
+  try {
+    // save goal to context
+    setData({ goal });
 
-      const res = await API.post("/auth/signup", payload);
+    const payload = {
+      ...data,
+      goal,
+      height: Number(data.height),
+      weight: Number(data.weight),
+    };
 
-      if (res.status === 201) {
-        // signup success, navigate to home
-        router.replace("./home");
-      }
-    } catch (error: any) {
-      // show error from backend
-      if (error.response?.data?.errors) {
-        Alert.alert("Signup Error", error.response.data.errors.join("\n"));
-      } else if (error.response?.data?.message) {
-        Alert.alert("Signup Error", error.response.data.message);
-      } else {
-        Alert.alert("Signup Error", "Something went wrong. Try again.");
-      }
+    console.log("FINAL PAYLOAD:", payload);
+    if (!data.email || !data.password || !data.gender || !data.dob || !data.height || !data.weight) {
+  Alert.alert("Error", "Incomplete signup data");
+  return;
+}
+
+
+    const res = await API.post("/auth/signup", payload);
+
+    if (res.status === 201) {
+      router.replace("./home");
     }
-  };
+  } catch (error: any) {
+    if (error.response?.data?.errors) {
+      Alert.alert("Signup Error", error.response.data.errors.join("\n"));
+    } else if (error.response?.data?.message) {
+      Alert.alert("Signup Error", error.response.data.message);
+    } else {
+      Alert.alert("Signup Error", "Something went wrong. Try again.");
+    }
+  }
+};
+
 
   return (
     <View style={styles.container}>

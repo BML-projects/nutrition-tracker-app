@@ -210,7 +210,7 @@ export default function Home() {
                 {/* Floating Add Button */}
                 <TouchableOpacity
                     style={styles.addButton}
-                    onPress={() => router.push("/signup/fooddetails")}
+                    onPress={() => router.push("./signup/fooddetails")}
                 >
                     <Ionicons name="add" size={32} color="#000" />
                 </TouchableOpacity>
