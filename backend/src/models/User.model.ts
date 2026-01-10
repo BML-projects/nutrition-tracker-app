@@ -1,12 +1,13 @@
 import { Schema, model, Document } from "mongoose";
 
 export interface IUser extends Document {
+  // fullname?: string;
   email: string;
   password: string;
   gender: "male" | "female" | "other";
   height: number;           // in cm
   weight: number;           // in kg
-  birthday: Date;
+  dob: Date;
   goal: "lose" | "maintain" | "gain";
 
   // Optional calculated fields
@@ -22,7 +23,7 @@ const userSchema = new Schema<IUser>(
     gender: { type: String, enum: ["male", "female", "other"], required: true },
     height: { type: Number, required: true },
     weight: { type: Number, required: true },
-    birthday: { type: Date, required: true },
+    dob: { type: Date, required: true },
     goal: { type: String, enum: ["lose", "maintain", "gain"], required: true },
 
     // Calculated fields

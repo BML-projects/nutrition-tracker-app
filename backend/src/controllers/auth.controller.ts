@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
+import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import User from "../models/User.model";
-import { generateAccessToken, generateRefreshToken } from "../utils/token";
 import { z } from "zod";
+import User from "../models/User.model";
 import { calculateBMI, calculateBMR, calculateDailyCalories } from "../utils/calculations";
+import { generateAccessToken, generateRefreshToken } from "../utils/token";
 
 /* ================= Zod Signup Schema ================= */
 const signupSchema = z.object({
@@ -19,14 +19,12 @@ const signupSchema = z.object({
   gender: z.enum(["male", "female", "other"]),
   height: z.number().positive(),
   weight: z.number().positive(),
-  birthday: z.coerce.date(),
+  dob: z.coerce.date(),
   goal: z.enum(["lose", "maintain", "gain"]),
 });
 
 /* ================= SIGNUP ================= */
 export const signup = async (req: Request, res: Response) => {
-  const a = 'hello'
-  console.log(a);
   try {
     const parsed = signupSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -35,7 +33,7 @@ export const signup = async (req: Request, res: Response) => {
         .json({ errors: parsed.error.issues.map((e) => e.message) });
     }
 
-    const { email, password, gender, height, weight, birthday, goal } =
+    const { email, password, gender, height, weight, dob, goal } =
       parsed.data;
 
     const existingUser = await User.findOne({ email });
@@ -51,13 +49,14 @@ export const signup = async (req: Request, res: Response) => {
       gender,
       height,
       weight,
-      birthday,
+      dob,
       goal,
     });
 
+
     // Calculate BMI, BMR, dailyCalories
     const bmi = calculateBMI(height, weight);
-    const birthYear = birthday.getFullYear();
+    const birthYear = dob.getFullYear();
     const age = new Date().getFullYear() - birthYear;
     const bmr = calculateBMR(height, weight, age, gender);
     const dailyCalories = calculateDailyCalories(bmr, goal);
