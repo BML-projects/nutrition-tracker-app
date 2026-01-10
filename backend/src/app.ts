@@ -3,6 +3,12 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes";
 import { errorHandler, notFound } from "./middleware/error.middleware";
+import dotenv from "dotenv";
+import { link } from "fs";
+import profileRoutes from "./routes/profile.routes";  
+
+
+dotenv.config();  link
 
 const app = express();
 
@@ -78,6 +84,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/profile", profileRoutes);  // Added profile routes
 
 // 404 handler
 app.use(notFound);
