@@ -32,21 +32,33 @@ const handleNext = async () => {
   }
 
   try {
-    await checkEmailExists(data.email);
-
-    // email is free → go next
-    router.push("./signup/dob");
+    console.log('🔍 Checking email availability...');
+    const response = await checkEmailExists(data.email);
+    
+    console.log('🔍 Email check response:', response);
+    
+    // If we get here, email is available
+    if (response.success && !response.exists) {
+      console.log('✅ Email is available, proceeding...');
+      router.push("./signup/dob");
+    } else if (response.exists) {
+      showError("This email is already registered");
+    }
 
   } catch (error: any) {
-  if (error.response?.status === 401) {
-    showError("Invalid email or password");
-  } else if (error.response?.status === 400) {
-    showError(error.response.data?.message || "Invalid request");
-  } else {
-   showError("Server error. Please try again.");
+    console.error('❌ Email check error:', error);
+    
+    // Handle different error scenarios
+    if (error.response?.status === 409) {
+      showError("This email is already registered");
+    } else if (error.response?.status === 400) {
+      showError(error.response.data?.message || "Invalid email");
+    } else if (error.message?.includes('timeout')) {
+      showError("Connection timeout. Please check your internet.");
+    } else {
+      showError(error.response?.data?.message || "Unable to verify email. Please try again.");
+    }
   }
-}
-
 };
 
 

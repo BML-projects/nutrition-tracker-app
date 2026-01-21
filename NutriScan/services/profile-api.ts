@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'http://192.168.1.72:3000';
+// const API_URL = 'http://192.168.1.72:3000';
+const API_URL = "http://192.168.1.77:4000";
 
 console.log('🌐 Profile API URL set to:', API_URL);
 
