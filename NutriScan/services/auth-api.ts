@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Get the correct backend URL
-const BACKEND_URL = "http://192.168.1.72:3000/api"; // Use your actual IP
+const BACKEND_URL = "http://192.168.1.77:4000/api";// Use your actual IP
 
 console.log("API Base URL:", BACKEND_URL);
 

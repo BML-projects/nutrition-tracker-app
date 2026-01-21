@@ -24,6 +24,50 @@ const signupSchema = z.object({
   goal: z.enum(["lose", "maintain", "gain"]),
 });
 
+//check email exists
+export const checkEmailExists = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    
+    console.log('📧 [Check Email] Checking email:', email);
+    
+    if (!email) {
+      return res.status(400).json({ 
+        success: false,
+        message: "Email is required" 
+      });
+    }
+
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
+    
+    if (existingUser) {
+      console.log('📧 [Check Email] Email already exists');
+      return res.status(409).json({ 
+        success: false,
+        exists: true,
+        message: "Email already registered" 
+      });
+    }
+    
+    console.log('📧 [Check Email] Email is available');
+    return res.status(200).json({ 
+      success: true,
+      exists: false,
+      message: "Email is available" 
+    });
+    
+  } catch (error: any) {
+    console.error('📧 [Check Email] Error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: "Error checking email",
+      error: error.message 
+    });
+  }
+};
+
+
+
 /* ================= SIGNUP ================= */
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -36,27 +80,32 @@ export const signup = async (req: Request, res: Response) => {
     const parsed = signupSchema.safeParse(req.body);
     if (!parsed.success) {
       console.log('Validation errors:', parsed.error.issues);
-      return res
-        .status(400)
-        .json({ errors: parsed.error.issues.map((e) => e.message) });
+      return res.status(400).json({ 
+        success: false,
+        errors: parsed.error.issues.map((e) => e.message) 
+      });
     }
 
-    const { email, password, gender, height, weight, dob, goal } =
-      parsed.data;
+    // ✅ Add fullName here
+    const { fullName, email, password, gender, height, weight, dob, goal } = parsed.data;
 
-    console.log('Parsed data:', { email, gender, height, weight, dob, goal });
+    console.log('Parsed data:', { fullName, email, gender, height, weight, dob, goal });
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       console.log('User already exists:', email);
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ 
+        success: false,
+        message: "User already exists" 
+      });
     }
 
     console.log('Creating new user...');
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user WITHOUT bmi/bmr/dailyCalories first
+    // ✅ Add fullname here
     const user = await User.create({
+      fullname: fullName,  // Map fullName to fullname (database field)
       email,
       password: hashedPassword,
       gender,
@@ -95,16 +144,27 @@ export const signup = async (req: Request, res: Response) => {
     });
 
     console.log('=== SIGNUP REQUEST COMPLETE ===');
+    
+    // ✅ Return proper response structure
     res.status(201).json({
+      success: true,
       accessToken,
-      bmi: user.bmi,
-      bmr: user.bmr,
-      dailyCalories: user.dailyCalories
+      user: {
+        id: user._id,
+        email: user.email,
+        fullName: user.fullname,
+        bmi: user.bmi,
+        bmr: user.bmr,
+        dailyCalories: user.dailyCalories
+      }
     });
   } catch (error: any) {
     console.error('SIGNUP ERROR:', error);
     console.error('Error stack:', error.stack);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
   }
 };
 
@@ -217,25 +277,5 @@ export const logout = async (_req: Request, res: Response) => {
 };
 
 
-//check email exists
-export const checkEmailExists = async (req: Request, res: Response) => {
-  try {
-    const { email } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ message: "Email is required" });
-    }
-
-    const user = await User.findOne({ email });
-
-    if (user) {
-      return res.status(409).json({ message: "Email already exists" });
-    }
-
-    return res.status(200).json({ message: "Email available" });
-
-  } catch (error: any) {
-    return res.status(500).json({ message: error.message });
-  }
-};
 
