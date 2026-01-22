@@ -1,46 +1,40 @@
-import { Schema, model, Document } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
-  fullname?: string;
+  fullname: string;
   email: string;
   password: string;
   gender: "male" | "female" | "other";
-  height: number;           // in cm
-  weight: number;           // in kg
+  height: number;
+  weight: number;
   dob: Date;
   goal: "lose" | "maintain" | "gain";
-  activityLevel?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
-
-  // Optional calculated fields
   bmi?: number;
   bmr?: number;
   dailyCalories?: number;
+  resetPasswordOTP?: string;
+  resetPasswordOTPExpiry?: Date;
 }
 
 const userSchema = new Schema<IUser>(
-  {  fullname: {
-      type: String,
-      default: "",
-    },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+  {
+    fullname: { type: String, required: true },
+    email: { type: String, required: true, unique: true, lowercase: true },
+    password: { type: String, required: true, select: false },
     gender: { type: String, enum: ["male", "female", "other"], required: true },
     height: { type: Number, required: true },
     weight: { type: Number, required: true },
     dob: { type: Date, required: true },
     goal: { type: String, enum: ["lose", "maintain", "gain"], required: true },
-  activityLevel: {
-  type: String,
-  enum: ['sedentary', 'light', 'moderate', 'active', 'very_active'],
-  default: 'moderate'
-},
-
-    // Calculated fields
     bmi: { type: Number },
     bmr: { type: Number },
     dailyCalories: { type: Number },
+    resetPasswordOTP: { type: String, select: false },
+    resetPasswordOTPExpiry: { type: Date, select: false },
   },
-  { timestamps: true } // Automatically add createdAt and updatedAt
+  {
+    timestamps: true,
+  }
 );
 
-export default model<IUser>("User", userSchema);
+export default mongoose.model<IUser>("User", userSchema);

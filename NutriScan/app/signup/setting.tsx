@@ -550,7 +550,7 @@ export default function SettingsScreen() {
 
       {/* ================= BOTTOM NAV ================= */}
       <View style={styles.nav}>
-        <TouchableOpacity onPress={() => router.push("./signup/home")}>
+        <TouchableOpacity onPress={() => router.push("./home")}>
           <Ionicons name="home-outline" size={24} color="#aaa" />
         </TouchableOpacity>
 

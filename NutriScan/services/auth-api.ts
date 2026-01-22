@@ -51,6 +51,55 @@ API.interceptors.response.use(
   }
 );
 
+
+// New forgot password functions
+export const forgotPassword = async (email: string) => {
+  try {
+    const response = await API.post("/auth/forgot-password", { email });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      throw error.response.data;
+    }
+    throw new Error(error.message || "Network error");
+  }
+};
+
+export const verifyOTP = async (email: string, otp: string) => {
+  try {
+    const response = await API.post("/auth/verify-otp", { email, otp });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      throw error.response.data;
+    }
+    throw new Error(error.message || "Network error");
+  }
+};
+
+export const resetPassword = async (
+  email: string,
+  otp: string,
+  newPassword: string
+) => {
+  try {
+    const response = await API.post("/auth/reset-password", {
+      email,
+      otp,
+      newPassword,
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      throw error.response.data;
+    }
+    throw new Error(error.message || "Network error");
+  }
+};
+
+
+
+
 // ================== LOGIN ==================
 export const login = async (email: string, password: string) => {
   try {
