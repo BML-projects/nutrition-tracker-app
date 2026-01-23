@@ -39,19 +39,19 @@ export default function Login() {
       console.log("🔄 Attempting login...");
 
       const data = await login(email.trim(), password.trim());
-      
+
       if (data.success) {
         // Store token
         await AsyncStorage.setItem("accessToken", data.accessToken);
-        
+
         // Store user data if available
         if (data.user) {
           await AsyncStorage.setItem("userData", JSON.stringify(data.user));
         }
-        
+
         console.log("✅ Login successful, token stored");
         showSuccess("Logged in successfully");
-        
+
         // Navigate to home
         router.replace("./signup/home");
       } else {
@@ -61,10 +61,10 @@ export default function Login() {
 
     } catch (error: any) {
       console.error("❌ Login error:", error);
-      
+
       // Check error structure
-      if (error.message === "Invalid email or password" || 
-          error.message?.includes("Invalid")) {
+      if (error.message === "Invalid email or password" ||
+        error.message?.includes("Invalid")) {
         showError("Invalid email or password");
       } else if (error.isNetworkError) {
         showError("Network error. Please check your connection");
@@ -113,7 +113,7 @@ export default function Login() {
             secureTextEntry={secure}
             editable={!loading}
           />
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => setSecure(!secure)}
             disabled={loading}
           >
@@ -142,7 +142,7 @@ export default function Login() {
           <View style={styles.line} />
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.googleButton, loading && { opacity: 0.5 }]}
           disabled={loading}
         >
@@ -153,7 +153,7 @@ export default function Login() {
         </TouchableOpacity>
 
         {/* Forgot password link */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={{ marginTop: 20 }}
           onPress={() => router.push("./forgot-password")}
         >

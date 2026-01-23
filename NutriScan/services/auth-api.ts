@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Get the correct backend URL
-const BACKEND_URL = "http://192.168.1.77:4000/api";// Use your actual IP
+const BACKEND_URL = "http://192.168.182.42:4000/api";// Use your actual IP
 
 console.log("API Base URL:", BACKEND_URL);
 
@@ -104,26 +104,26 @@ export const resetPassword = async (
 export const login = async (email: string, password: string) => {
   try {
     console.log("🔐 Attempting login for:", email);
-    
-    const response = await API.post("/auth/login", { 
-      email: email.trim(), 
+
+    const response = await API.post("/auth/login", {
+      email: email.trim(),
       password: password.trim()
     });
-    
+
     console.log("✅ Login successful:", response.data);
     return response.data;
-    
+
   } catch (error: any) {
     console.error("❌ Login failed:", {
       message: error.message,
       response: error.response?.data,
       status: error.response?.status,
     });
-    
+
     // Throw the error with proper structure
-    throw error.response?.data || { 
+    throw error.response?.data || {
       success: false,
-      message: "Network error. Please check your connection." 
+      message: "Network error. Please check your connection."
     };
   }
 };
@@ -131,13 +131,13 @@ export const login = async (email: string, password: string) => {
 // ================== SIGNUP ==================
 // services/auth-api.ts
 export const signup = async (
-  email: string, 
-  password: string, 
-  name: string, 
-  gender: string, 
-  height: number, 
-  weight: number, 
-  dob: string, 
+  email: string,
+  password: string,
+  name: string,
+  gender: string,
+  height: number,
+  weight: number,
+  dob: string,
   goal: string
 ) => {
   try {
@@ -169,10 +169,10 @@ export const signup = async (
     });
 
     console.log('📝 Signup response status:', response.status);
-    
+
     const text = await response.text();
     console.log('📝 Signup response text:', text);
-    
+
     let data;
     try {
       data = JSON.parse(text);
@@ -180,12 +180,12 @@ export const signup = async (
       console.error('📝 Failed to parse JSON:', e);
       throw new Error('Invalid server response');
     }
-    
+
     if (!response.ok) {
       console.error('📝 Signup error response:', data);
       throw new Error(data.message || data.error || 'Signup failed');
     }
-    
+
     console.log('📝 Signup successful:', data);
     return data;
   } catch (error) {
