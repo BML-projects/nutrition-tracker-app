@@ -60,6 +60,6 @@ export default function Login() {
         </View>
       </Animated.View>
       </View>
-    </KeyboardAvoidingView>
+    </KeyboardAvoidingView>  
   );
 }
