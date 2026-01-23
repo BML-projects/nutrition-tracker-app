@@ -6,7 +6,19 @@ import torch
 import torch.nn as nn
 from torchvision import models, transforms
 
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(title="Food101 Classification API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # allow all origins, or specify your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+
+
 
 # ---------------- CONFIG ----------------
 IMG_SIZE = 224
