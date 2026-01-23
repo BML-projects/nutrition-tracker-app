@@ -10,7 +10,7 @@
 - **👤 Personalized Goals**: Set and track custom nutrition targets
 - **🌙 Dark/Light Mode**: Beautiful UI with theme support
 
-## 👥 Team Members
+## 👥 Team Members 
 
 | Name | Role | Responsibilities |
 |------|------|------------------|
