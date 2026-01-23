@@ -32,6 +32,7 @@ export default function Splash() {
     return () => clearTimeout(timer);
   }, []);
 
+  console.log("Splash Screen Rendered");
   return (
     <View style={styles.container}>
       <Animated.Image
