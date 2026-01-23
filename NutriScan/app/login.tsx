@@ -55,7 +55,7 @@ export default function Login() {
             <Text style={{ color: "#38BDF8", fontWeight: "bold" }}>Forgot Password?</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push("/signup/step1")}>
-            <Text style={{ color: "#38BDF8", fontWeight: "bold" }}>Sign Up</Text>
+            <Text style={{ color:  "#38BDF8", fontWeight: "bold" }}>Sign Up</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>
