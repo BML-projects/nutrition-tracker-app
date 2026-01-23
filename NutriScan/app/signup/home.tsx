@@ -12,6 +12,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { styles } from "../../src/styles/home";
 import { Images } from "../../src/constants/images";
+import * as ImagePicker from "expo-image-picker";
+
 
 // Define the shape of data coming from the backend
 interface CalendarDay {
@@ -108,6 +110,35 @@ export default function Home() {
             </View>
         );
     }
+    const pickImageFromGallery = async () => {
+        // Ask permission
+        const permissionResult =
+            await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (!permissionResult.granted) {
+            Alert.alert("Permission required", "Gallery access is needed.");
+            return;
+        }
+
+        // Open gallery
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            const imageUri = result.assets[0].uri;
+            console.log("Selected Image:", imageUri);
+
+            // Navigate and pass image if needed
+            router.push({
+                pathname: "/signup/fooddetails",
+                params: { imageUri },
+            });
+        }
+    };
+
 
     return (
         <View style={styles.container}>
@@ -197,20 +228,25 @@ export default function Home() {
                         ))}
                     </View>
                 ) : (
-                    <View style={styles.emptyBox}>
+                    <TouchableOpacity
+                        style={styles.emptyBox}
+                        onPress={() => router.push("/signup/fooddetails")}
+                        activeOpacity={0.8}
+                    >
                         <Text style={styles.emptyTitle}>
                             NO recent meals recorded
                         </Text>
                         <Text style={styles.emptySubtitle}>
                             Tap to add one.
                         </Text>
-                    </View>
+                    </TouchableOpacity>
+
                 )}
 
                 {/* Floating Add Button */}
                 <TouchableOpacity
                     style={styles.addButton}
-                    onPress={() => router.push("./signup/fooddetails")}
+                    onPress={pickImageFromGallery}
                 >
                     <Ionicons name="add" size={32} color="#000" />
                 </TouchableOpacity>
