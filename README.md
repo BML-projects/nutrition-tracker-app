@@ -14,10 +14,10 @@
 
 | Name | Role | Responsibilities |
 |------|------|------------------|
-| [Your Name] | Team Lead | Full-stack, Project Management |
-| [Member 2] | Mobile Developer | React Native, UI/UX |
-| [Member 3] | Backend Developer | API Development, Database |
-| [Member 4] | AI/ML Engineer | Model Training, Computer Vision |
+| Aayush Kunwar| backend, AI | Full-stack, Project Management |
+| Shahid Miya | UI/UX designer,Frpntend,Documentation | React Native, UI/UX |
+| Ayush Luitel| Frontend,AI | API Development, Database |
+| Nabraj Rijal| Research, Frontend | Model Training, Computer Vision |
 
 ## 🚀 Quick Start for Team Members
 
