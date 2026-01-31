@@ -16,7 +16,7 @@ Thumbs.db
 # Optional: editor files
 .vscode/
 .idea/
-myenv
+venv
 .venv
+_pycache__/
 venv311
-_pycache_/
