@@ -16,5 +16,6 @@ Thumbs.db
 # Optional: editor files
 .vscode/
 .idea/
-myenv
+venv
 .venv
+venv311
