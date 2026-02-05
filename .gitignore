@@ -18,4 +18,5 @@ Thumbs.db
 .idea/
 venv
 .venv
+_pycache__/
 venv311

@@ -6,19 +6,20 @@ const AdminLogin = () => {
   const [password, setPassword] = useState<string>("");
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await axiosInstance.post("/admin/login", {
-        email,
-        password,
-      });
+  e.preventDefault();
+  try {
+    const res = await axiosInstance.post("/admin/login", {
+      email,
+      password,
+    });
 
-      localStorage.setItem("adminToken", res.data.token);
-      window.location.href = "/dashboard";
-    } catch (error) {
-      alert("Invalid admin credentials");
-    }
-  };
+    localStorage.setItem("adminToken", res.data.token);
+    window.location.href = "/dashboard"; // redirect to admin dashboard
+  } catch (error: any) {
+    alert(error.response?.data?.message || "Invalid admin credentials");
+  }
+};
+
 
   return (
     <form onSubmit={handleLogin}>

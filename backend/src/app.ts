@@ -6,6 +6,7 @@ import { errorHandler, notFound } from "./middleware/error.middleware";
 import dotenv from "dotenv";
 import { link } from "fs";
 import profileRoutes from "./routes/profile.routes";  
+import adminRoutes from "./routes/adminRoutes";
 
 
 dotenv.config();  link
@@ -84,7 +85,8 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
-app.use("/api/profile", profileRoutes);  // Added profile routes
+app.use("/api/profile", profileRoutes);
+app.use("/admin", adminRoutes);
 
 // 404 handler
 app.use(notFound);
