@@ -1,4 +1,6 @@
 # 🍎 AI Nutrition Tracker - Final Year Project
+npx expo start --tunnel
+
 
 
 ## 📱 Features

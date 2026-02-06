@@ -1,121 +1,116 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// const API_URL = 'http://192.168.1.72:3000';
-const API_URL = "http://192.168.182.42:4000";
+const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-console.log('🌐 Profile API URL set to:', API_URL);
+if (!API_URL) {
+  throw new Error("❌ EXPO_PUBLIC_BACKEND_URL is missing in .env");
+}
 
+const API_BASE = `${API_URL}/api`;
+
+// ================== GET PROFILE ==================
 export const getProfile = async () => {
   try {
-    console.log('📱 [getProfile] Starting...');
+    console.log("📱 [getProfile] Starting...");
 
-    const token = await AsyncStorage.getItem('accessToken');
-    console.log('📱 [getProfile] Token:', token ? 'Exists' : 'Missing');
+    const token = await AsyncStorage.getItem("accessToken");
+    console.log("📱 [getProfile] Token:", token ? "Exists" : "Missing");
 
     if (!token) {
-      throw new Error('No token found in storage');
+      throw new Error("No token found in storage");
     }
 
-    const profileUrl = `${API_URL}/api/profile`;
-    console.log('📱 [getProfile] Calling:', profileUrl);
+    const profileUrl = `${API_BASE}/profile`;
+    console.log("📱 [getProfile] Calling:", profileUrl);
 
     const response = await fetch(profileUrl, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
     });
 
-    console.log('📱 [getProfile] Response status:', response.status);
+    console.log("📱 [getProfile] Response status:", response.status);
 
     const text = await response.text();
-    console.log('📱 [getProfile] Response text:', text);
+    console.log("📱 [getProfile] Response text:", text);
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${text}`);
     }
 
-    const data = JSON.parse(text);
-    console.log('📱 [getProfile] Success!');
-    return data;
-
+    return JSON.parse(text);
   } catch (error: any) {
-    console.error('📱 [getProfile] Error:', error.message);
+    console.error("📱 [getProfile] Error:", error.message);
     throw error;
   }
 };
 
-
-
+// ================== UPDATE ACTIVITY ==================
 export const updateActivityLevel = async (activityLevel: string) => {
   try {
-    const token = await AsyncStorage.getItem('accessToken');
+    const token = await AsyncStorage.getItem("accessToken");
 
     if (!token) {
-      throw new Error('No authentication token found');
+      throw new Error("No authentication token found");
     }
 
-    const response = await fetch(`${API_URL}/api/profile/activity-level`, {
-      method: 'PATCH',
+    const response = await fetch(`${API_BASE}/profile/activity-level`, {
+      method: "PATCH",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ activityLevel }),
     });
 
+    const text = await response.text();
+
     if (!response.ok) {
-      throw new Error('Failed to update activity level');
+      throw new Error(`HTTP ${response.status}: ${text}`);
     }
 
-    return await response.json();
+    return JSON.parse(text);
   } catch (error) {
-    console.error('Update activity level error:', error);
+    console.error("Update activity level error:", error);
     throw error;
   }
 };
 
-
-
-
+// ================== UPDATE GOAL ==================
 export const updateGoal = async (goal: string) => {
   try {
-    console.log('🎯 [updateGoal] Starting...');
+    console.log("🎯 [updateGoal] Starting...");
 
-    const token = await AsyncStorage.getItem('accessToken');
-    console.log('🎯 [updateGoal] Token:', token ? 'Exists' : 'Missing');
+    const token = await AsyncStorage.getItem("accessToken");
+    console.log("🎯 [updateGoal] Token:", token ? "Exists" : "Missing");
 
     if (!token) {
-      throw new Error('No authentication token found');
+      throw new Error("No authentication token found");
     }
 
-    console.log('🎯 [updateGoal] Updating goal to:', goal);
-
-    const response = await fetch(`${API_URL}/api/profile/goal`, {
-      method: 'PATCH',
+    const response = await fetch(`${API_BASE}/profile/goal`, {
+      method: "PATCH",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ goal }),
     });
 
-    console.log('🎯 [updateGoal] Response status:', response.status);
+    console.log("🎯 [updateGoal] Response status:", response.status);
 
     const text = await response.text();
-    console.log('🎯 [updateGoal] Response text:', text);
+    console.log("🎯 [updateGoal] Response text:", text);
 
     if (!response.ok) {
-      throw new Error(`Failed to update goal: ${text}`);
+      throw new Error(`HTTP ${response.status}: ${text}`);
     }
 
-    const data = JSON.parse(text);
-    console.log('🎯 [updateGoal] Success:', data);
-    return data;
-
+    return JSON.parse(text);
   } catch (error) {
-    console.error('🎯 [updateGoal] Error:', error);
+    console.error("🎯 [updateGoal] Error:", error);
     throw error;
   }
 };
