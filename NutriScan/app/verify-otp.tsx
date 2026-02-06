@@ -12,8 +12,9 @@ import {
 } from "react-native";
 import { styles } from "../src/styles/login";
 import { verifyOTP, forgotPassword } from "@/services/auth-api";
-import { showError, showSuccess } from "@/src/helper/toast";
-import { KeyboardToastWrapper } from "@/src/helper/keyboardToast";
+import { KeyboardAwareContainer } from "@/src/components/KeyboardAwareContainer";
+import { showError, showSuccess } from "@/src/helper/keyboardToast"; 
+
 
 export default function VerifyOTP() {
   const router = useRouter();
@@ -108,7 +109,7 @@ export default function VerifyOTP() {
   };
 
   return (
-    <KeyboardToastWrapper>
+    <KeyboardAwareContainer>
       <View style={styles.container}>
         {/* Back Button */}
         <TouchableOpacity
@@ -169,7 +170,7 @@ export default function VerifyOTP() {
           </Text>
         </TouchableOpacity>
       </View>
-    </KeyboardToastWrapper>
+    </KeyboardAwareContainer>
   );
 }
 

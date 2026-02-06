@@ -93,12 +93,12 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#999',
   },
-  pickersContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 30,
-    height: 250,
-    gap: 16,
-  },
+pickersContainer: {
+  flexDirection: 'row',
+  gap: 16,
+  marginBottom: 20, // optional spacing
+},
+
   pickerColumn: {
     flex: 1,
   },
@@ -117,6 +117,22 @@ export const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     borderRadius: 16,
     overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: '#e0e0e0',
+  },
+    backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+  },
+  backButtonCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 1.5,
     borderColor: '#e0e0e0',
   },

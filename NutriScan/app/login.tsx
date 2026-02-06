@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Text,
   TextInput,
@@ -14,10 +14,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { styles } from "../src/styles/login";
 import { login } from "../services/auth-api";
-import { KeyboardToastWrapper } from "@/src/helper/keyboardToast";
+import { KeyboardAwareContainer } from "@/src/components/KeyboardAwareContainer";
 
 export default function Login() {
   const router = useRouter();
+  const passwordRef = useRef<TextInput>(null);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -101,10 +102,10 @@ export default function Login() {
   };
 
   return (
-    <KeyboardToastWrapper>
+    <KeyboardAwareContainer enableScroll={false}>
       <View style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-        
+
         {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.iconContainer}>
@@ -139,6 +140,7 @@ export default function Login() {
                 onChangeText={(text) => {
                   setEmail(text);
                   if (emailError) setEmailError("");
+                  if (generalError) setGeneralError("");
                 }}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -146,8 +148,9 @@ export default function Login() {
                 editable={!loading}
                 onFocus={() => setEmailFocused(true)}
                 onBlur={() => setEmailFocused(false)}
-                autoComplete="off"
-                textContentType="none"
+                returnKeyType="next"
+                blurOnSubmit={false}
+                onSubmitEditing={() => passwordRef.current?.focus()}
               />
             </View>
             {emailError ? (
@@ -173,6 +176,7 @@ export default function Login() {
                 style={styles.inputIcon}
               />
               <TextInput
+                ref={passwordRef}
                 style={styles.input}
                 placeholder="Enter your password"
                 placeholderTextColor="#999"
@@ -180,13 +184,15 @@ export default function Login() {
                 onChangeText={(text) => {
                   setPassword(text);
                   if (passwordError) setPasswordError("");
+                  if (generalError) setGeneralError("");
                 }}
                 secureTextEntry={secure}
                 editable={!loading}
                 onFocus={() => setPasswordFocused(true)}
                 onBlur={() => setPasswordFocused(false)}
-                autoComplete="off"
-                textContentType="none"
+                returnKeyType="done"
+                blurOnSubmit={true}
+                onSubmitEditing={handleLogin}
               />
               <TouchableOpacity
                 onPress={() => setSecure(!secure)}
@@ -254,7 +260,7 @@ export default function Login() {
             </LinearGradient>
           </TouchableOpacity>
 
-        {/* Signup Link */}
+          {/* Signup Link */}
           <View style={styles.signupContainer}>
             <Text style={styles.signupText}>Don't have an account? </Text>
             <TouchableOpacity onPress={() => router.push("./signup")}>
@@ -264,6 +270,6 @@ export default function Login() {
 
         </View>
       </View>
-    </KeyboardToastWrapper>
+    </KeyboardAwareContainer>
   );
 }

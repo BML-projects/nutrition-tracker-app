@@ -104,6 +104,17 @@ export default function GoalScreen() {
 
   return (
     <View style={styles.container}>
+
+          {/* Back Button */}
+                              <TouchableOpacity
+                                style={styles.backButton}
+                                onPress={() => router.back()}
+                                disabled={loading}
+                              >
+                                <View style={styles.backButtonCircle}>
+                                  <Ionicons name="arrow-back" size={24} color="#000" />
+                                </View>
+                              </TouchableOpacity>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
       {/* Header */}

@@ -2,15 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  View,
+  Text,
+  TouchableOpacity,
   FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
-  Text,
-  TouchableOpacity,
-  View,
   StatusBar,
 } from "react-native";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 import { ITEM_HEIGHT, styles } from "../../src/styles/measurement";
 import { useSignup } from "@/src/context/SignupContext";
 
@@ -26,13 +26,8 @@ export default function Measurements() {
   const [weight, setWeight] = useState<number>(54);
 
   const handleNext = () => {
-    setData({
-      height,
-      weight,
-    });
-
+    setData({ height, weight });
     console.log("Saved measurements:", { height, weight });
-
     router.replace("/signup/goal");
   };
 
@@ -40,65 +35,68 @@ export default function Measurements() {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.iconContainer}>
-          <Ionicons name="fitness" size={40} color="#000" />
+      {/* Back Button */}
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <View style={styles.backButtonCircle}>
+          <Ionicons name="arrow-back" size={24} color="#000" />
         </View>
-        <Text style={styles.title}>Enter your measurements</Text>
-        <Text style={styles.subtitle}>
-          We will use this to create your personalized plan
-        </Text>
-      </View>
+      </TouchableOpacity>
 
-      {/* Metric Badge */}
-      <View style={styles.metricBadge}>
-        <Ionicons name="analytics" size={16} color="#000" />
-        <Text style={styles.metricText}>Metric System</Text>
-      </View>
-
-      {/* Values Display */}
-      <View style={styles.valuesDisplay}>
-        <View style={styles.valueCard}>
-          <Text style={styles.valueLabel}>Height</Text>
-          <Text style={styles.valueNumber}>{height}</Text>
-          <Text style={styles.valueUnit}>cm</Text>
+      {/* Content - No ScrollView needed */}
+      <View style={{ flex: 1, paddingHorizontal: 30 }}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.iconContainer}>
+            <Ionicons name="fitness" size={40} color="#000" />
+          </View>
+          <Text style={styles.title}>Enter your measurements</Text>
+          <Text style={styles.subtitle}>
+            We will use this to create your personalized plan
+          </Text>
         </View>
-        <View style={styles.valueCard}>
-          <Text style={styles.valueLabel}>Weight</Text>
-          <Text style={styles.valueNumber}>{weight}</Text>
-          <Text style={styles.valueUnit}>kg</Text>
+
+        {/* Metric Badge */}
+        <View style={styles.metricBadge}>
+          <Ionicons name="analytics" size={16} color="#000" />
+          <Text style={styles.metricText}>Metric System</Text>
+        </View>
+
+        {/* Values Display */}
+        <View style={styles.valuesDisplay}>
+          <View style={styles.valueCard}>
+            <Text style={styles.valueLabel}>Height</Text>
+            <Text style={styles.valueNumber}>{height}</Text>
+            <Text style={styles.valueUnit}>cm</Text>
+          </View>
+          <View style={styles.valueCard}>
+            <Text style={styles.valueLabel}>Weight</Text>
+            <Text style={styles.valueNumber}>{weight}</Text>
+            <Text style={styles.valueUnit}>kg</Text>
+          </View>
+        </View>
+
+        {/* Pickers */}
+        <View style={{ flexDirection: "row", gap: 16, flex: 1 }}>
+          <CustomPicker
+            label="Height (cm)"
+            data={HEIGHTS}
+            initialValue={165}
+            onValueChange={setHeight}
+          />
+          <CustomPicker
+            label="Weight (kg)"
+            data={WEIGHTS}
+            initialValue={54}
+            onValueChange={setWeight}
+          />
         </View>
       </View>
 
-      {/* Pickers */}
-      <View style={styles.pickersContainer}>
-        <CustomPicker
-          label="Height (cm)"
-          data={HEIGHTS}
-          unit="cm"
-          initialValue={165}
-          onValueChange={setHeight}
-        />
-
-        <CustomPicker
-          label="Weight (kg)"
-          data={WEIGHTS}
-          unit="kg"
-          initialValue={54}
-          onValueChange={setWeight}
-        />
-      </View>
-
-      {/* Next Button */}
+      {/* Sticky Footer */}
       <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.nextButton} 
-          onPress={handleNext}
-          activeOpacity={0.9}
-        >
+        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
           <LinearGradient
-            colors={['#000', '#2a2a2a']}
+            colors={["#000", "#2a2a2a"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.gradientButton}
@@ -115,11 +113,9 @@ export default function Measurements() {
 /* =======================
    Custom Picker Component
 ======================= */
-
 interface PickerProps {
   label: string;
   data: number[];
-  unit: string;
   initialValue: number;
   onValueChange: (val: number) => void;
 }
@@ -127,7 +123,6 @@ interface PickerProps {
 const CustomPicker = ({
   label,
   data,
-  unit,
   initialValue,
   onValueChange,
 }: PickerProps) => {
@@ -138,18 +133,14 @@ const CustomPicker = ({
     const index = Math.round(y / ITEM_HEIGHT);
     setActiveIndex(index);
 
-    if (data[index] !== undefined) {
-      onValueChange(data[index]);
-    }
+    if (data[index] !== undefined) onValueChange(data[index]);
   };
 
   return (
     <View style={styles.pickerColumn}>
       <Text style={styles.pickerLabel}>{label}</Text>
-
       <View style={styles.pickerWrapper}>
         <View style={styles.selectionIndicator} pointerEvents="none" />
-
         <FlatList
           data={data}
           keyExtractor={(item) => item.toString()}
@@ -177,7 +168,7 @@ const CustomPicker = ({
                   style={[
                     styles.itemText,
                     isActive && styles.activeItemText,
-                    { opacity }
+                    { opacity },
                   ]}
                 >
                   {item}
