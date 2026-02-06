@@ -1,5 +1,5 @@
 import React from "react";
-import { Keyboard, TouchableWithoutFeedback, ScrollView, Platform, KeyboardAvoidingView} from "react-native";
+import { Keyboard, TouchableWithoutFeedback, ScrollView, Platform, KeyboardAvoidingView, View} from "react-native";
 import Toast from "react-native-toast-message";
 
 interface Props {
@@ -16,16 +16,19 @@ export const KeyboardToastWrapper: React.FC<Props> = ({ children }) => {
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 20}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {children}
-        </ScrollView>
-      </TouchableWithoutFeedback>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ flex: 1 }}>
+            {children}
+          </View>
+        </TouchableWithoutFeedback>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };

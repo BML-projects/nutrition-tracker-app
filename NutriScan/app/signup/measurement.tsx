@@ -8,7 +8,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  StatusBar,
 } from "react-native";
+import { LinearGradient } from 'expo-linear-gradient';
 import { ITEM_HEIGHT, styles } from "../../src/styles/measurement";
 import { useSignup } from "@/src/context/SignupContext";
 
@@ -24,7 +26,6 @@ export default function Measurements() {
   const [weight, setWeight] = useState<number>(54);
 
   const handleNext = () => {
-    // ✅ Save to global signup context
     setData({
       height,
       weight,
@@ -37,20 +38,43 @@ export default function Measurements() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Enter your body measurements</Text>
+        <View style={styles.iconContainer}>
+          <Ionicons name="fitness" size={40} color="#000" />
+        </View>
+        <Text style={styles.title}>Enter your measurements</Text>
         <Text style={styles.subtitle}>
           We will use this to create your personalized plan
         </Text>
       </View>
 
+      {/* Metric Badge */}
       <View style={styles.metricBadge}>
-        <Text style={styles.metricText}>Metric</Text>
+        <Ionicons name="analytics" size={16} color="#000" />
+        <Text style={styles.metricText}>Metric System</Text>
       </View>
 
+      {/* Values Display */}
+      <View style={styles.valuesDisplay}>
+        <View style={styles.valueCard}>
+          <Text style={styles.valueLabel}>Height</Text>
+          <Text style={styles.valueNumber}>{height}</Text>
+          <Text style={styles.valueUnit}>cm</Text>
+        </View>
+        <View style={styles.valueCard}>
+          <Text style={styles.valueLabel}>Weight</Text>
+          <Text style={styles.valueNumber}>{weight}</Text>
+          <Text style={styles.valueUnit}>kg</Text>
+        </View>
+      </View>
+
+      {/* Pickers */}
       <View style={styles.pickersContainer}>
         <CustomPicker
-          label="Height"
+          label="Height (cm)"
           data={HEIGHTS}
           unit="cm"
           initialValue={165}
@@ -58,7 +82,7 @@ export default function Measurements() {
         />
 
         <CustomPicker
-          label="Weight"
+          label="Weight (kg)"
           data={WEIGHTS}
           unit="kg"
           initialValue={54}
@@ -66,15 +90,22 @@ export default function Measurements() {
         />
       </View>
 
+      {/* Next Button */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-          <Text style={styles.nextButtonText}>Next</Text>
-          <Ionicons
-            name="arrow-forward"
-            size={25}
-            color="#fff"
-            style={styles.arrow}
-          />
+        <TouchableOpacity 
+          style={styles.nextButton} 
+          onPress={handleNext}
+          activeOpacity={0.9}
+        >
+          <LinearGradient
+            colors={['#000', '#2a2a2a']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.gradientButton}
+          >
+            <Text style={styles.nextButtonText}>Next</Text>
+            <Ionicons name="arrow-forward" size={22} color="#fff" />
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </View>
@@ -117,7 +148,7 @@ const CustomPicker = ({
       <Text style={styles.pickerLabel}>{label}</Text>
 
       <View style={styles.pickerWrapper}>
-        <View style={styles.selectionLines} pointerEvents="none" />
+        <View style={styles.selectionIndicator} pointerEvents="none" />
 
         <FlatList
           data={data}
@@ -134,20 +165,22 @@ const CustomPicker = ({
             index,
           })}
           initialScrollIndex={initialValue - 1}
-          contentContainerStyle={{ paddingVertical: ITEM_HEIGHT }}
+          contentContainerStyle={{ paddingVertical: ITEM_HEIGHT * 2 }}
           renderItem={({ item, index }) => {
             const isActive = index === activeIndex;
+            const distance = Math.abs(index - activeIndex);
+            const opacity = Math.max(0.3, 1 - distance * 0.3);
+
             return (
               <View style={styles.itemContainer}>
                 <Text
                   style={[
                     styles.itemText,
-                    isActive
-                      ? styles.activeItemText
-                      : styles.inactiveItemText,
+                    isActive && styles.activeItemText,
+                    { opacity }
                   ]}
                 >
-                  {item} <Text style={{ fontSize: 14 }}>{unit}</Text>
+                  {item}
                 </Text>
               </View>
             );

@@ -6,9 +6,9 @@ export const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    paddingTop: 80,
+    paddingTop: 60,
     paddingHorizontal: 30,
-    paddingBottom: 40,
+    paddingBottom: 30,
     alignItems: 'center',
   },
   iconContainer: {
@@ -115,77 +115,47 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
     flex: 1,
   },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 30,
-  },
-  forgotPasswordText: {
-    color: '#000',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  loginButton: {
+  nextButton: {
     borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: 30,
+    marginTop: 10,
+    marginBottom: 25,
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
   },
-  loginButtonDisabled: {
+  nextButtonDisabled: {
     elevation: 2,
     shadowOpacity: 0.05,
   },
   gradientButton: {
+    flexDirection: 'row',
     paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
     height: 60,
+    gap: 10,
   },
-  loginButtonText: {
+  nextButtonText: {
     fontSize: 18,
     fontWeight: '700',
     color: '#fff',
     letterSpacing: 0.5,
   },
-  loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dots: {
-    flexDirection: 'row',
-    marginLeft: 8,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#fff',
-    marginHorizontal: 2,
-  },
-  dot1: {
-    opacity: 0.4,
-  },
-  dot2: {
-    opacity: 0.6,
-  },
-  dot3: {
-    opacity: 0.8,
-  },
-  signupContainer: {
+  loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
   },
-  signupText: {
+  loginText: {
     color: '#666',
     fontSize: 15,
     fontWeight: '400',
   },
-  signupLink: {
+  loginLink: {
     color: '#000',
     fontSize: 15,
     fontWeight: '700',
