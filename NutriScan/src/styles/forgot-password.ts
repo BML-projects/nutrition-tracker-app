@@ -1,3 +1,4 @@
+// src/styles/forgot-password.ts
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
@@ -5,10 +6,26 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+  },
+  backButtonCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#e0e0e0',
+  },
   header: {
-    paddingTop: 60,
+    paddingTop: 120,
     paddingHorizontal: 30,
-    paddingBottom: 30,
+    paddingBottom: 40,
     alignItems: 'center',
   },
   iconContainer: {
@@ -26,13 +43,17 @@ export const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '700',
     color: '#000',
-    marginBottom: 8,
+    marginBottom: 12,
     letterSpacing: 0.5,
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#666',
     fontWeight: '400',
+    textAlign: 'center',
+    lineHeight: 22,
+    paddingHorizontal: 10,
   },
   formContainer: {
     flex: 1,
@@ -83,9 +104,6 @@ export const styles = StyleSheet.create({
     fontWeight: '400',
     backgroundColor: 'transparent',
   },
-  eyeIcon: {
-    padding: 4,
-  },
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -115,65 +133,77 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
     flex: 1,
   },
-  nextButton: {
+  sendButton: {
     borderRadius: 16,
     overflow: 'hidden',
+    marginBottom: 30,
     marginTop: 10,
-    marginBottom: 25,
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
   },
-  nextButtonDisabled: {
+  sendButtonDisabled: {
     elevation: 2,
     shadowOpacity: 0.05,
   },
   gradientButton: {
-    flexDirection: 'row',
     paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
     height: 60,
-    gap: 10,
   },
-
-  backButton: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    zIndex: 10,
-  },
-  backButtonCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#f5f5f5',
-    justifyContent: 'center',
+  buttonContent: {
+    flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#e0e0e0',
+    justifyContent: 'center',
   },
-
-  nextButtonText: {
+  sendButtonText: {
     fontSize: 18,
     fontWeight: '700',
     color: '#fff',
     letterSpacing: 0.5,
   },
-  loginContainer: {
+  arrowIcon: {
+    marginLeft: 8,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dots: {
+    flexDirection: 'row',
+    marginLeft: 8,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#fff',
+    marginHorizontal: 2,
+  },
+  dot1: {
+    opacity: 0.4,
+  },
+  dot2: {
+    opacity: 0.6,
+  },
+  dot3: {
+    opacity: 0.8,
+  },
+  backToLoginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 1,
+    marginTop: 10,
   },
-  loginText: {
+  backToLoginText: {
     color: '#666',
     fontSize: 15,
     fontWeight: '400',
   },
-  loginLink: {
+  backToLoginLink: {
     color: '#000',
     fontSize: 15,
     fontWeight: '700',

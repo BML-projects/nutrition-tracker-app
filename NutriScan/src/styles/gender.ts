@@ -125,6 +125,22 @@ export const styles = StyleSheet.create({
     height: 60,
     gap: 10,
   },
+    backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+  },
+  backButtonCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#e0e0e0',
+  },
   nextButtonText: {
     fontSize: 18,
     fontWeight: '700',

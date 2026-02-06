@@ -1,22 +1,28 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Text,
   TextInput,
   TouchableOpacity,
   View,
   StatusBar,
+  Keyboard,
 } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSignup } from "../../src/context/SignupContext";
 import { styles } from "../../src/styles/signup";
 import { checkEmailExists } from "@/services/auth-api";
-import { KeyboardToastWrapper } from "@/src/helper/keyboardToast";
+import { KeyboardAwareContainer } from "@/src/components/KeyboardAwareContainer";
 
 export default function Signup() {
   const router = useRouter();
   const { data, setData } = useSignup();
+
+  // Refs for input navigation
+  const emailRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
 
   const [secure, setSecure] = useState(true);
   const [secureConfirm, setSecureConfirm] = useState(true);
@@ -41,6 +47,8 @@ export default function Signup() {
   };
 
   const handleNext = async () => {
+    Keyboard.dismiss();
+
     // Reset errors
     setNameError("");
     setEmailError("");
@@ -111,9 +119,20 @@ export default function Signup() {
   };
 
   return (
-    <KeyboardToastWrapper>
+    <KeyboardAwareContainer enableScroll={true}>
       <View style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+
+        {/* Back Button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+          disabled={loading}
+        >
+          <View style={styles.backButtonCircle}>
+            <Ionicons name="arrow-back" size={24} color="#000" />
+          </View>
+        </TouchableOpacity>
 
         {/* Header */}
         <View style={styles.header}>
@@ -124,13 +143,13 @@ export default function Signup() {
           <Text style={styles.subtitle}>Sign up to get started</Text>
         </View>
 
-         {/* Login Link */}
-          <View style={styles.loginContainer}>
-            <Text style={styles.loginText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => router.push("/login")}>
-              <Text style={styles.loginLink}>Login</Text>
-            </TouchableOpacity>
-          </View>
+        {/* Login Link */}
+        <View style={styles.loginContainer}>
+          <Text style={styles.loginText}>Already have an account? </Text>
+          <TouchableOpacity onPress={() => router.push("/login")}>
+            <Text style={styles.loginLink}>Login</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Form */}
         <View style={styles.formContainer}>
@@ -138,15 +157,17 @@ export default function Signup() {
           {/* Full Name */}
           <View style={styles.inputWrapper}>
             <Text style={styles.label}>Full Name</Text>
-            <View style={[
-              styles.inputContainer,
-              nameFocused && styles.inputContainerFocused,
-              nameError && styles.inputContainerError
-            ]}>
-              <Ionicons 
-                name="person-outline" 
-                size={22} 
-                color={nameError ? "#FF3B30" : nameFocused ? "#000" : "#999"} 
+            <View
+              style={[
+                styles.inputContainer,
+                nameFocused && styles.inputContainerFocused,
+                nameError && styles.inputContainerError,
+              ]}
+            >
+              <Ionicons
+                name="person-outline"
+                size={22}
+                color={nameError ? "#FF3B30" : nameFocused ? "#000" : "#999"}
                 style={styles.inputIcon}
               />
               <TextInput
@@ -157,37 +178,45 @@ export default function Signup() {
                 onChangeText={(text) => {
                   setData({ ...data, fullName: text });
                   if (nameError) setNameError("");
+                  if (generalError) setGeneralError("");
                 }}
                 editable={!loading}
                 onFocus={() => setNameFocused(true)}
                 onBlur={() => setNameFocused(false)}
+                returnKeyType="next"
+                blurOnSubmit={false}
+                onSubmitEditing={() => emailRef.current?.focus()}
+                autoCorrect={false}
                 autoComplete="off"
-                textContentType="none"
+                autoCapitalize="words"
               />
             </View>
-            {nameError ? (
+            {nameError && (
               <View style={styles.errorContainer}>
                 <Ionicons name="alert-circle" size={16} color="#FF3B30" />
                 <Text style={styles.errorText}>{nameError}</Text>
               </View>
-            ) : null}
+            )}
           </View>
 
           {/* Email */}
           <View style={styles.inputWrapper}>
             <Text style={styles.label}>Email Address</Text>
-            <View style={[
-              styles.inputContainer,
-              emailFocused && styles.inputContainerFocused,
-              emailError && styles.inputContainerError
-            ]}>
-              <Ionicons 
-                name="mail-outline" 
-                size={22} 
-                color={emailError ? "#FF3B30" : emailFocused ? "#000" : "#999"} 
+            <View
+              style={[
+                styles.inputContainer,
+                emailFocused && styles.inputContainerFocused,
+                emailError && styles.inputContainerError,
+              ]}
+            >
+              <Ionicons
+                name="mail-outline"
+                size={22}
+                color={emailError ? "#FF3B30" : emailFocused ? "#000" : "#999"}
                 style={styles.inputIcon}
               />
               <TextInput
+                ref={emailRef}
                 style={styles.input}
                 placeholder="Enter your email"
                 placeholderTextColor="#999"
@@ -195,39 +224,46 @@ export default function Signup() {
                 onChangeText={(text) => {
                   setData({ ...data, email: text });
                   if (emailError) setEmailError("");
+                  if (generalError) setGeneralError("");
                 }}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 editable={!loading}
                 onFocus={() => setEmailFocused(true)}
                 onBlur={() => setEmailFocused(false)}
+                returnKeyType="next"
+                blurOnSubmit={false}
+                onSubmitEditing={() => passwordRef.current?.focus()}
+                autoCorrect={false}
                 autoComplete="off"
-                textContentType="none"
               />
             </View>
-            {emailError ? (
+            {emailError && (
               <View style={styles.errorContainer}>
                 <Ionicons name="alert-circle" size={16} color="#FF3B30" />
                 <Text style={styles.errorText}>{emailError}</Text>
               </View>
-            ) : null}
+            )}
           </View>
 
           {/* Password */}
           <View style={styles.inputWrapper}>
             <Text style={styles.label}>Password</Text>
-            <View style={[
-              styles.inputContainer,
-              passwordFocused && styles.inputContainerFocused,
-              passwordError && styles.inputContainerError
-            ]}>
-              <Ionicons 
-                name="lock-closed-outline" 
-                size={22} 
-                color={passwordError ? "#FF3B30" : passwordFocused ? "#000" : "#999"} 
+            <View
+              style={[
+                styles.inputContainer,
+                passwordFocused && styles.inputContainerFocused,
+                passwordError && styles.inputContainerError,
+              ]}
+            >
+              <Ionicons
+                name="lock-closed-outline"
+                size={22}
+                color={passwordError ? "#FF3B30" : passwordFocused ? "#000" : "#999"}
                 style={styles.inputIcon}
               />
               <TextInput
+                ref={passwordRef}
                 style={styles.input}
                 placeholder="Enter your password"
                 placeholderTextColor="#999"
@@ -235,13 +271,17 @@ export default function Signup() {
                 onChangeText={(text) => {
                   setData({ ...data, password: text });
                   if (passwordError) setPasswordError("");
+                  if (generalError) setGeneralError("");
                 }}
                 secureTextEntry={secure}
                 editable={!loading}
                 onFocus={() => setPasswordFocused(true)}
                 onBlur={() => setPasswordFocused(false)}
+                returnKeyType="next"
+                blurOnSubmit={false}
+                onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+                autoCorrect={false}
                 autoComplete="off"
-                textContentType="none"
               />
               <TouchableOpacity
                 onPress={() => setSecure(!secure)}
@@ -255,29 +295,32 @@ export default function Signup() {
                 />
               </TouchableOpacity>
             </View>
-            {passwordError ? (
+            {passwordError && (
               <View style={styles.errorContainer}>
                 <Ionicons name="alert-circle" size={16} color="#FF3B30" />
                 <Text style={styles.errorText}>{passwordError}</Text>
               </View>
-            ) : null}
+            )}
           </View>
 
           {/* Confirm Password */}
           <View style={styles.inputWrapper}>
             <Text style={styles.label}>Confirm Password</Text>
-            <View style={[
-              styles.inputContainer,
-              confirmPasswordFocused && styles.inputContainerFocused,
-              confirmPasswordError && styles.inputContainerError
-            ]}>
-              <Ionicons 
-                name="lock-closed-outline" 
-                size={22} 
-                color={confirmPasswordError ? "#FF3B30" : confirmPasswordFocused ? "#000" : "#999"} 
+            <View
+              style={[
+                styles.inputContainer,
+                confirmPasswordFocused && styles.inputContainerFocused,
+                confirmPasswordError && styles.inputContainerError,
+              ]}
+            >
+              <Ionicons
+                name="lock-closed-outline"
+                size={22}
+                color={confirmPasswordError ? "#FF3B30" : confirmPasswordFocused ? "#000" : "#999"}
                 style={styles.inputIcon}
               />
               <TextInput
+                ref={confirmPasswordRef}
                 style={styles.input}
                 placeholder="Confirm your password"
                 placeholderTextColor="#999"
@@ -285,13 +328,17 @@ export default function Signup() {
                 onChangeText={(text) => {
                   setData({ ...data, confirmPassword: text });
                   if (confirmPasswordError) setConfirmPasswordError("");
+                  if (generalError) setGeneralError("");
                 }}
                 secureTextEntry={secureConfirm}
                 editable={!loading}
                 onFocus={() => setConfirmPasswordFocused(true)}
                 onBlur={() => setConfirmPasswordFocused(false)}
+                returnKeyType="done"
+                blurOnSubmit={true}
+                onSubmitEditing={handleNext}
+                autoCorrect={false}
                 autoComplete="off"
-                textContentType="none"
               />
               <TouchableOpacity
                 onPress={() => setSecureConfirm(!secureConfirm)}
@@ -305,12 +352,12 @@ export default function Signup() {
                 />
               </TouchableOpacity>
             </View>
-            {confirmPasswordError ? (
+            {confirmPasswordError && (
               <View style={styles.errorContainer}>
                 <Ionicons name="alert-circle" size={16} color="#FF3B30" />
                 <Text style={styles.errorText}>{confirmPasswordError}</Text>
               </View>
-            ) : null}
+            )}
           </View>
 
           {/* General Error */}
@@ -341,12 +388,9 @@ export default function Signup() {
             </LinearGradient>
           </TouchableOpacity>
 
-         
         </View>
 
-        {/* Footer */}
-
       </View>
-    </KeyboardToastWrapper>
+    </KeyboardAwareContainer>
   );
 }

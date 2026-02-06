@@ -1,18 +1,20 @@
 // app/reset-password.tsx
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  ActivityIndicator,
+  StatusBar,
+  Keyboard,
 } from "react-native";
+import { LinearGradient } from 'expo-linear-gradient';
 import { styles } from "../src/styles/login";
 import { resetPassword } from "@/services/auth-api";
-import { showError, showSuccess } from "@/src/helper/toast";
-import { KeyboardToastWrapper } from "@/src/helper/keyboardToast";
+import { KeyboardAwareContainer } from "@/src/components/KeyboardAwareContainer";
+import { showError, showSuccess } from "@/src/helper/keyboardToast"; // ✅ Fixed import
 
 export default function ResetPassword() {
   const router = useRouter();
@@ -20,11 +22,21 @@ export default function ResetPassword() {
   const email = params.email as string;
   const otp = params.otp as string;
 
+  const confirmPasswordRef = useRef<TextInput>(null);
+
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [secureNew, setSecureNew] = useState(true);
   const [secureConfirm, setSecureConfirm] = useState(true);
   const [loading, setLoading] = useState(false);
+  
+  // Focus states
+  const [newPasswordFocused, setNewPasswordFocused] = useState(false);
+  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
+
+  // Error states
+  const [newPasswordError, setNewPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
   const validatePassword = (password: string): string | null => {
     if (password.length < 8) {
@@ -46,21 +58,34 @@ export default function ResetPassword() {
   };
 
   const handleResetPassword = async () => {
-    if (!newPassword || !confirmPassword) {
-      showError("Please fill all fields");
-      return;
+    Keyboard.dismiss();
+
+    // Reset errors
+    setNewPasswordError("");
+    setConfirmPasswordError("");
+
+    let hasError = false;
+
+    if (!newPassword) {
+      setNewPasswordError("Password is required");
+      hasError = true;
+    } else {
+      const validationError = validatePassword(newPassword);
+      if (validationError) {
+        setNewPasswordError(validationError);
+        hasError = true;
+      }
     }
 
-    if (newPassword !== confirmPassword) {
-      showError("Passwords do not match");
-      return;
+    if (!confirmPassword) {
+      setConfirmPasswordError("Please confirm your password");
+      hasError = true;
+    } else if (newPassword !== confirmPassword) {
+      setConfirmPasswordError("Passwords do not match");
+      hasError = true;
     }
 
-    const validationError = validatePassword(newPassword);
-    if (validationError) {
-      showError(validationError);
-      return;
-    }
+    if (hasError) return;
 
     try {
       setLoading(true);
@@ -72,10 +97,10 @@ export default function ResetPassword() {
         console.log("✅ Password reset successfully");
         showSuccess("Password reset successfully");
 
-        // Navigate to login after 1 second
+        // Navigate to login after 1.5 seconds
         setTimeout(() => {
           router.replace("/login");
-        }, 1000);
+        }, 1500);
       } else {
         showError(response.message || "Failed to reset password");
       }
@@ -88,96 +113,182 @@ export default function ResetPassword() {
   };
 
   return (
-    <KeyboardToastWrapper>
+    <KeyboardAwareContainer enableScroll={false}>
       <View style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+
         {/* Back Button */}
         <TouchableOpacity
-          style={{ position: "absolute", top: 50, left: 20 }}
+          style={styles.backButton}
           onPress={() => router.back()}
           disabled={loading}
         >
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <View style={styles.backButtonCircle}>
+            <Ionicons name="arrow-back" size={24} color="#000" />
+          </View>
         </TouchableOpacity>
 
-        <Text style={styles.title}>Reset Password</Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.iconContainer}>
+            <Ionicons name="lock-closed" size={40} color="#000" />
+          </View>
+          <Text style={styles.title}>Reset Password</Text>
+          <Text style={styles.subtitle}>Create a new password for your account</Text>
+        </View>
 
-        <Text style={[styles.subtitle, { marginBottom: 30 }]}>
-          Create a new password for your account
-        </Text>
+        {/* Form */}
+        <View style={styles.formContainer}>
+          
+          {/* New Password */}
+          <View style={styles.inputWrapper}>
+            <Text style={styles.label}>New Password</Text>
+            <View style={[
+              styles.inputContainer,
+              newPasswordFocused && styles.inputContainerFocused,
+              newPasswordError && styles.inputContainerError
+            ]}>
+              <Ionicons 
+                name="lock-closed-outline" 
+                size={22} 
+                color={newPasswordError ? "#FF3B30" : newPasswordFocused ? "#000" : "#999"} 
+                style={styles.inputIcon}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter new password"
+                placeholderTextColor="#999"
+                value={newPassword}
+                onChangeText={(text) => {
+                  setNewPassword(text);
+                  if (newPasswordError) setNewPasswordError("");
+                }}
+                secureTextEntry={secureNew}
+                editable={!loading}
+                onFocus={() => setNewPasswordFocused(true)}
+                onBlur={() => setNewPasswordFocused(false)}
+                returnKeyType="next"
+                blurOnSubmit={false}
+                onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+                autoCorrect={false}
+                autoComplete="off"
+              />
+              <TouchableOpacity
+                onPress={() => setSecureNew(!secureNew)}
+                disabled={loading}
+                style={styles.eyeIcon}
+              >
+                <Ionicons
+                  name={secureNew ? "eye-off-outline" : "eye-outline"}
+                  size={22}
+                  color={newPasswordError ? "#FF3B30" : newPasswordFocused ? "#000" : "#999"}
+                />
+              </TouchableOpacity>
+            </View>
+            {newPasswordError ? (
+              <View style={styles.errorContainer}>
+                <Ionicons name="alert-circle" size={16} color="#FF3B30" />
+                <Text style={styles.errorText}>{newPasswordError}</Text>
+              </View>
+            ) : null}
+          </View>
 
-        {/* New Password */}
-        <View style={styles.passwordContainer}>
-          <TextInput
-            style={styles.passwordInput}
-            placeholder="Enter new password"
-            placeholderTextColor="#999"
-            value={newPassword}
-            onChangeText={setNewPassword}
-            secureTextEntry={secureNew}
-            editable={!loading}
-          />
+          {/* Confirm Password */}
+          <View style={styles.inputWrapper}>
+            <Text style={styles.label}>Confirm Password</Text>
+            <View style={[
+              styles.inputContainer,
+              confirmPasswordFocused && styles.inputContainerFocused,
+              confirmPasswordError && styles.inputContainerError
+            ]}>
+              <Ionicons 
+                name="lock-closed-outline" 
+                size={22} 
+                color={confirmPasswordError ? "#FF3B30" : confirmPasswordFocused ? "#000" : "#999"} 
+                style={styles.inputIcon}
+              />
+              <TextInput
+                ref={confirmPasswordRef}
+                style={styles.input}
+                placeholder="Confirm new password"
+                placeholderTextColor="#999"
+                value={confirmPassword}
+                onChangeText={(text) => {
+                  setConfirmPassword(text);
+                  if (confirmPasswordError) setConfirmPasswordError("");
+                }}
+                secureTextEntry={secureConfirm}
+                editable={!loading}
+                onFocus={() => setConfirmPasswordFocused(true)}
+                onBlur={() => setConfirmPasswordFocused(false)}
+                returnKeyType="done"
+                blurOnSubmit={true}
+                onSubmitEditing={handleResetPassword}
+                autoCorrect={false}
+                autoComplete="off"
+              />
+              <TouchableOpacity
+                onPress={() => setSecureConfirm(!secureConfirm)}
+                disabled={loading}
+                style={styles.eyeIcon}
+              >
+                <Ionicons
+                  name={secureConfirm ? "eye-off-outline" : "eye-outline"}
+                  size={22}
+                  color={confirmPasswordError ? "#FF3B30" : confirmPasswordFocused ? "#000" : "#999"}
+                />
+              </TouchableOpacity>
+            </View>
+            {confirmPasswordError ? (
+              <View style={styles.errorContainer}>
+                <Ionicons name="alert-circle" size={16} color="#FF3B30" />
+                <Text style={styles.errorText}>{confirmPasswordError}</Text>
+              </View>
+            ) : null}
+          </View>
+
+          {/* Password Requirements */}
+          <View style={styles.requirementsContainer}>
+            <Text style={styles.requirementsTitle}>Password must contain:</Text>
+            <Text style={styles.requirementsText}>
+              • At least 8 characters{"\n"}
+              • One uppercase letter (A-Z){"\n"}
+              • One lowercase letter (a-z){"\n"}
+              • One number (0-9){"\n"}
+              • One special character (@$!%*?&#)
+            </Text>
+          </View>
+
+          {/* Reset Password Button */}
           <TouchableOpacity
-            onPress={() => setSecureNew(!secureNew)}
+            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+            onPress={handleResetPassword}
+            activeOpacity={0.9}
             disabled={loading}
           >
-            <Ionicons
-              name={secureNew ? "eye-off-outline" : "eye-outline"}
-              size={20}
-              color="#666"
-            />
+            <LinearGradient
+              colors={loading ? ['#d0d0d0', '#b0b0b0'] : ['#000', '#2a2a2a']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.gradientButton}
+            >
+              {loading ? (
+                <View style={styles.loadingContainer}>
+                  <Text style={styles.loginButtonText}>Resetting</Text>
+                  <View style={styles.dots}>
+                    <View style={[styles.dot, styles.dot1]} />
+                    <View style={[styles.dot, styles.dot2]} />
+                    <View style={[styles.dot, styles.dot3]} />
+                  </View>
+                </View>
+              ) : (
+                <Text style={styles.loginButtonText}>Reset Password</Text>
+              )}
+            </LinearGradient>
           </TouchableOpacity>
-        </View>
 
-        {/* Confirm Password */}
-        <View style={styles.passwordContainer}>
-          <TextInput
-            style={styles.passwordInput}
-            placeholder="Confirm new password"
-            placeholderTextColor="#999"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry={secureConfirm}
-            editable={!loading}
-          />
-          <TouchableOpacity
-            onPress={() => setSecureConfirm(!secureConfirm)}
-            disabled={loading}
-          >
-            <Ionicons
-              name={secureConfirm ? "eye-off-outline" : "eye-outline"}
-              size={20}
-              color="#666"
-            />
-          </TouchableOpacity>
         </View>
-
-        {/* Password Requirements */}
-        <View style={{ marginBottom: 20, paddingHorizontal: 5 }}>
-          <Text style={{ fontSize: 12, color: "#666", marginBottom: 5 }}>
-            Password must contain:
-          </Text>
-          <Text style={{ fontSize: 11, color: "#666" }}>
-            • At least 8 characters{"\n"}
-            • One uppercase letter{"\n"}
-            • One lowercase letter{"\n"}
-            • One number{"\n"}
-            • One special character (@$!%*?&#)
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          style={[styles.loginButton, loading && { opacity: 0.7 }]}
-          onPress={handleResetPassword}
-          activeOpacity={0.8}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.loginButtonText}>Reset Password</Text>
-          )}
-        </TouchableOpacity>
       </View>
-    </KeyboardToastWrapper>
+    </KeyboardAwareContainer>
   );
 }

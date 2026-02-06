@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { router, useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
   FlatList,
@@ -52,6 +52,16 @@ export default function DateOfBirth() {
 
   return (
     <View style={styles.container}>
+        {/* Back Button */}
+                              <TouchableOpacity
+                                style={styles.backButton}
+                                onPress={() => router.back()}
+                                // disabled={loading}
+                              >
+                                <View style={styles.backButtonCircle}>
+                                  <Ionicons name="arrow-back" size={24} color="#000" />
+                                </View>
+                              </TouchableOpacity>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
       {/* Header */}
@@ -162,7 +172,10 @@ const CustomPicker = ({
   };
 
   return (
+    
     <View style={styles.pickerColumn}>
+      
+        
       <Text style={styles.pickerLabel}>{label}</Text>
 
       <View style={styles.pickerWrapper}>
@@ -196,6 +209,7 @@ const CustomPicker = ({
 
             return (
               <View style={styles.itemContainer}>
+                
                 <Text
                   style={[
                     styles.itemText,

@@ -98,6 +98,24 @@ selectionIndicator: {
   borderColor: '#000',
   zIndex: 1,
 },
+ backButton: {
+  position: 'absolute',
+  top: 40, // distance from top, adjust if needed
+  left: 20, // distance from left
+  zIndex: 10,
+},
+
+backButtonCircle: {
+  backgroundColor: '#fff', // optional
+  padding: 10,
+  borderRadius: 30,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.3,
+  shadowRadius: 2,
+  elevation: 5, // for Android shadow
+},
+
 
 
 

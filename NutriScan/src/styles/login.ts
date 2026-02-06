@@ -11,6 +11,42 @@ export const styles = StyleSheet.create({
     paddingBottom: 40,
     alignItems: 'center',
   },
+
+  // Add to existing styles
+requirementsContainer: {
+  marginBottom: 20,
+  paddingHorizontal: 5,
+  paddingVertical: 12,
+  backgroundColor: '#f8f9fa',
+  borderRadius: 8,
+  borderLeftWidth: 3,
+  borderLeftColor: '#000',
+},
+requirementsTitle: {
+  fontSize: 12,
+  fontWeight: '600',
+  color: '#333',
+  marginBottom: 8,
+},
+requirementsText: {
+  fontSize: 11,
+  color: '#666',
+  lineHeight: 18,
+},
+backButton: {
+  position: 'absolute',
+  top: 50,
+  left: 20,
+  zIndex: 10,
+},
+backButtonCircle: {
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: '#f0f0f0',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
   iconContainer: {
     width: 80,
     height: 80,

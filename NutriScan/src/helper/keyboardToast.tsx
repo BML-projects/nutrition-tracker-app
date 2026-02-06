@@ -1,41 +1,5 @@
-import React from "react";
-import { Keyboard, TouchableWithoutFeedback, ScrollView, Platform, KeyboardAvoidingView, View} from "react-native";
 import Toast from "react-native-toast-message";
 
-interface Props {
-  children: React.ReactNode;
-}
-
-/**
- * Wrap your screen in <KeyboardToastWrapper> to:
- * 1. Dismiss keyboard when tapping outside
- * 2. Provide proper KeyboardAvoiding behavior
- */
-export const KeyboardToastWrapper: React.FC<Props> = ({ children }) => {
-  return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
-    >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={{ flex: 1 }}>
-            {children}
-          </View>
-        </TouchableWithoutFeedback>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
-};
-
-/**
- * Toast helpers
- */
 export const showError = (message: string, bottomOffset = 190) => {
   Toast.show({
     type: "error",
@@ -43,7 +7,6 @@ export const showError = (message: string, bottomOffset = 190) => {
     text2: message,
     position: "bottom",
     bottomOffset,
-    keyboardOffset: bottomOffset, // stick above button
     visibilityTime: 3000,
     autoHide: true,
   });
@@ -56,7 +19,18 @@ export const showSuccess = (message: string, bottomOffset = 190) => {
     text2: message,
     position: "bottom",
     bottomOffset,
-    keyboardOffset: bottomOffset,
+    visibilityTime: 3000,
+    autoHide: true,
+  });
+};
+
+export const showInfo = (message: string, bottomOffset = 190) => {
+  Toast.show({
+    type: "info",
+    text1: "Info",
+    text2: message,
+    position: "bottom",
+    bottomOffset,
     visibilityTime: 3000,
     autoHide: true,
   });
