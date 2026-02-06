@@ -3,107 +3,142 @@ import { StyleSheet } from "react-native";
 export const ITEM_HEIGHT = 50;
 
 export const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#ffffff",
-        paddingHorizontal: 24,
-        paddingTop: 60,
-    },
-
-    /* --- HEADER --- */
-    header: { marginBottom: 50 },
-    title: {
-        fontSize: 22,
-        fontWeight: "bold",
-        color: "#000",
-        textAlign: "left",
-        marginBottom: 8,
-    },
-    subtitle: {
-        fontSize: 14,
-        color: "#666",
-        textAlign: "left",
-        lineHeight: 20,
-    },
-
-    /* --- PICKER CONTAINER --- */
-    pickersContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        paddingHorizontal: 10,
-        marginBottom: 20,
-    },
-    pickerColumn: {
-        alignItems: "center",
-        width: "30%", // 3 Columns
-    },
-
-    /* --- WHEEL MECHANISM --- */
-    pickerWrapper: {
-        height: ITEM_HEIGHT * 3, // Shows exactly 3 items
-        width: "100%",
-        position: "relative",
-    },
-
-    // Black Lines Overlay
-    selectionLines: {
-        position: "absolute",
-        top: ITEM_HEIGHT,
-        height: ITEM_HEIGHT,
-        width: "100%",
-        borderTopWidth: 2,
-        borderBottomWidth: 2,
-        borderColor: "#000",
-        zIndex: 10,
-    },
-
-    /* --- ITEM STYLING (Centering Logic) --- */
-    itemContainer: {
-        height: ITEM_HEIGHT,
-        justifyContent: "center", // Vertically centers the text container
-        alignItems: "center",     // Horizontally centers the text
-    },
-    itemText: {
-        fontSize: 18,
-        // Crucial for vertical alignment consistency
-        textAlignVertical: 'center',
-        includeFontPadding: false,
-        fontWeight: "600",
-    },
-    activeItemText: {
-        color: "#000",
-        fontWeight: "bold",
-        fontSize: 20,
-    },
-    inactiveItemText: {
-        color: "#ccc",
-        fontSize: 18,
-    },
-
-    /* --- FOOTER --- */
-    footer: {
-        flex: 1,
-        justifyContent: "flex-end",
-        marginBottom: 30,
-    },
-    nextButton: {
-        flexDirection: "row",
-        alignSelf: "center",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#000",
-        width: "70%",
-        paddingVertical: 16,
-        borderRadius: 30,
-        marginBottom: 80,
-    },
-    nextButtonText: {
-        color: "#fff",
-        fontSize: 20,
-        fontWeight: "600",
-        marginRight: 10,
-    },
-    arrow: {
-        marginLeft: 5,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    paddingTop: 60,
+    paddingHorizontal: 30,
+    paddingBottom: 30,
+    alignItems: 'center',
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 8,
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#666',
+    fontWeight: '400',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  pickerSection: {
+    flex: 1,
+    paddingHorizontal: 30,
+  },
+  dateDisplay: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 30,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+  },
+  dateText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#000',
+    letterSpacing: 0.5,
+  },
+  pickersContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    height: 250,
+    gap: 12,
+  },
+  pickerColumn: {
+    flex: 1,
+  },
+  pickerLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 10,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  pickerWrapper: {
+    height: 250,
+    position: 'relative',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: '#e0e0e0',
+  },
+  selectionIndicator: {
+    position: 'absolute',
+    top: '50%',
+    left: 0,
+    right: 0,
+    height: ITEM_HEIGHT,
+    marginTop: -ITEM_HEIGHT / 2,
+    backgroundColor: '#fff',
+    borderTopWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: '#000',
+    zIndex: 1,
+  },
+  itemContainer: {
+    height: ITEM_HEIGHT,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  itemText: {
+    fontSize: 20,
+    fontWeight: '500',
+    color: '#999',
+  },
+  activeItemText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#000',
+  },
+  footer: {
+    paddingHorizontal: 30,
+    paddingBottom: 40,
+    paddingTop: 20,
+  },
+  nextButton: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+  },
+  gradientButton: {
+    flexDirection: 'row',
+    paddingVertical: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 60,
+    gap: 10,
+  },
+  nextButtonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: 0.5,
+  },
 });

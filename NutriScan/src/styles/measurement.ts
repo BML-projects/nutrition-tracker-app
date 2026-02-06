@@ -1,130 +1,179 @@
 import { StyleSheet } from "react-native";
 
-// 1. Export this so the .tsx file can use it for calculations
 export const ITEM_HEIGHT = 50;
 
 export const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#ffffff",
-        paddingHorizontal: 24,
-        paddingTop: 60,
-    },
-
-    header: {
-        marginBottom: 20,
-    },
-    title: {
-        fontSize: 22,
-        fontWeight: "bold",
-        color: "#000",
-        textAlign: "center",
-        marginBottom: 8,
-    },
-    subtitle: {
-        fontSize: 14,
-        color: "#777",
-        textAlign: "center",
-        lineHeight: 20,
-    },
-
-    metricBadge: {
-        backgroundColor: "#D37034",
-        alignSelf: "flex-start",
-        paddingVertical: 8,
-        paddingHorizontal: 20,
-        borderRadius: 20,
-        marginBottom: 40,
-        marginTop: 10,
-    },
-    metricText: {
-        color: "#fff",
-        fontWeight: "700",
-        fontSize: 14,
-    },
-
-    pickersContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        paddingHorizontal: 20,
-        marginBottom: 20,
-    },
-    pickerColumn: {
-        alignItems: "center",
-        width: "45%",
-    },
-    pickerLabel: {
-        fontSize: 18,
-        fontWeight: "600",
-        color: "#000",
-        marginBottom: 15,
-    },
-
-    pickerWrapper: {
-        height: ITEM_HEIGHT * 3,
-        width: "100%",
-        position: "relative",
-    },
-
-    selectionLines: {
-        position: "absolute",
-        top: ITEM_HEIGHT,
-        height: ITEM_HEIGHT,
-        width: "100%",
-        borderTopWidth: 2,
-        borderBottomWidth: 2,
-        borderColor: "#000",
-        zIndex: 10,
-    },
-
-    // --- NEW: This centers the text container vertically ---
-    itemContainer: {
-        height: ITEM_HEIGHT,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-
-    itemText: {
-        fontSize: 18,
-        // --- NEW: These two lines fix the Android alignment issue ---
-        textAlignVertical: "center",
-        includeFontPadding: false,
-    },
-
-    activeItemText: {
-        color: "#000",
-        fontWeight: "700",
-        fontSize: 22,
-    },
-    inactiveItemText: {
-        color: "#aaa",
-        fontSize: 18,
-    },
-
-    footer: {
-        flex: 1,
-        justifyContent: "flex-end",
-        marginBottom: 30,
-    },
-    nextButton: {
-        flexDirection: "row",
-        alignSelf: "center",
-        justifyContent: "center",
-        alignItems: "center", // Ensures arrow and text are aligned
-        backgroundColor: "#000",
-        width: "70%",
-        paddingVertical: 16,
-        borderRadius: 30,
-        marginBottom: 80,
-    },
-    nextButtonText: {
-        color: "#fff",
-        fontSize: 20,
-        fontWeight: "600",
-        marginRight: 10,
-    },
-
-    arrow: {
-        marginLeft: 5,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    paddingTop: 60,
+    paddingHorizontal: 30,
+    paddingBottom: 20,
+    alignItems: 'center',
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 8,
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#666',
+    fontWeight: '400',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  metricBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    alignSelf: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginTop: 20,
+    marginBottom: 20,
+    borderWidth: 1.5,
+    borderColor: '#e0e0e0',
+    gap: 6,
+  },
+  metricText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#000',
+    letterSpacing: 0.5,
+  },
+  valuesDisplay: {
+    flexDirection: 'row',
+    paddingHorizontal: 30,
+    gap: 16,
+    marginBottom: 30,
+  },
+  valueCard: {
+    flex: 1,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+  },
+  valueLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  valueNumber: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 4,
+  },
+  valueUnit: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#999',
+  },
+  pickersContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 30,
+    height: 250,
+    gap: 16,
+  },
+  pickerColumn: {
+    flex: 1,
+  },
+  pickerLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 10,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  pickerWrapper: {
+    height: 250,
+    position: 'relative',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: '#e0e0e0',
+  },
+  selectionIndicator: {
+    position: 'absolute',
+    top: '50%',
+    left: 0,
+    right: 0,
+    height: ITEM_HEIGHT,
+    marginTop: -ITEM_HEIGHT / 2,
+    backgroundColor: '#fff',
+    borderTopWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: '#000',
+    zIndex: 1,
+  },
+  itemContainer: {
+    height: ITEM_HEIGHT,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  itemText: {
+    fontSize: 20,
+    fontWeight: '500',
+    color: '#999',
+  },
+  activeItemText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#000',
+  },
+  footer: {
+    paddingHorizontal: 30,
+    paddingBottom: 40,
+    paddingTop: 30,
+  },
+  nextButton: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+  },
+  gradientButton: {
+    flexDirection: 'row',
+    paddingVertical: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 60,
+    gap: 10,
+  },
+  nextButtonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: 0.5,
+  },
 });

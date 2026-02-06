@@ -1,86 +1,137 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#fff",
-        paddingHorizontal: 24,
-        paddingTop: 60,
-        paddingBottom: 30,
-        justifyContent: "space-between",
-    },
-
-    title: {
-        fontSize: 22,
-        fontWeight: "700",
-        color: "#000",
-        marginBottom: 6,
-    },
-
-    subtitle: {
-        fontSize: 14,
-        color: "#777",
-        marginBottom: 30,
-    },
-
-    option: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 18,
-    },
-
-    radioOuter: {
-        width: 18,
-        height: 18,
-        borderRadius: 9,
-        borderWidth: 1.8,
-        borderColor: "#000",
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 10,
-    },
-
-    radioInner: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: "#000",
-    },
-
-    optionText: {
-        fontSize: 16,
-        color: "#000",
-    },
-
-    button: {
-        flexDirection: "row",
-        alignSelf: "center",
-        justifyContent: "center",
-        backgroundColor: "#000",
-        width: "70%",
-        paddingVertical: 16,
-        borderRadius: 30,
-        marginBottom: 80,
-    },
-
-    buttonDisabled: {
-        backgroundColor: "#ccc", // greyed out
-    },
-
-    buttonContent: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    buttonText: {
-        color: "#fff",
-        fontSize: 20,
-        fontWeight: "600",
-        marginRight: 10,
-    },
-
-    arrow: {
-        marginLeft: 5,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingHorizontal: 30,
+  },
+  header: {
+    paddingTop: 60,
+    paddingBottom: 40,
+    alignItems: 'center',
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 8,
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#666',
+    fontWeight: '400',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  optionsContainer: {
+    flex: 1,
+    paddingTop: 20,
+  },
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    padding: 20,
+    marginBottom: 16,
+  },
+  optionActive: {
+    backgroundColor: '#fff',
+    borderColor: '#000',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  optionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  iconWrapper: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  optionText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#666',
+    letterSpacing: 0.3,
+  },
+  optionTextActive: {
+    color: '#000',
+    fontWeight: '700',
+  },
+  radioOuter: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
+    borderColor: '#ccc',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radioInner: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#000',
+  },
+  footer: {
+    paddingBottom: 40,
+    paddingTop: 20,
+  },
+  nextButton: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+  },
+  nextButtonDisabled: {
+    elevation: 2,
+    shadowOpacity: 0.05,
+  },
+  gradientButton: {
+    flexDirection: 'row',
+    paddingVertical: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 60,
+    gap: 10,
+  },
+  nextButtonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: 0.5,
+  },
+  nextButtonTextDisabled: {
+    color: '#999',
+  },
 });
