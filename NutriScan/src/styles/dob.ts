@@ -85,19 +85,22 @@ export const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#e0e0e0',
   },
-  selectionIndicator: {
-    position: 'absolute',
-    top: '50%',
-    left: 0,
-    right: 0,
-    height: ITEM_HEIGHT,
-    marginTop: -ITEM_HEIGHT / 2,
-    backgroundColor: '#fff',
-    borderTopWidth: 2,
-    borderBottomWidth: 2,
-    borderColor: '#000',
-    zIndex: 1,
-  },
+selectionIndicator: {
+  position: 'absolute',
+  top: '50%',
+  left: 0,
+  right: 0,
+  height: ITEM_HEIGHT,
+  marginTop: -ITEM_HEIGHT / 2, // exactly half
+  backgroundColor: 'transparent',
+  borderTopWidth: 2,
+  borderBottomWidth: 2,
+  borderColor: '#000',
+  zIndex: 1,
+},
+
+
+
   itemContainer: {
     height: ITEM_HEIGHT,
     justifyContent: 'center',
