@@ -124,6 +124,14 @@ export default function Signup() {
           <Text style={styles.subtitle}>Sign up to get started</Text>
         </View>
 
+         {/* Login Link */}
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>Already have an account? </Text>
+            <TouchableOpacity onPress={() => router.push("/login")}>
+              <Text style={styles.loginLink}>Login</Text>
+            </TouchableOpacity>
+          </View>
+
         {/* Form */}
         <View style={styles.formContainer}>
           
@@ -333,13 +341,7 @@ export default function Signup() {
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* Login Link */}
-          <View style={styles.loginContainer}>
-            <Text style={styles.loginText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => router.push("/login")}>
-              <Text style={styles.loginLink}>Login</Text>
-            </TouchableOpacity>
-          </View>
+         
         </View>
 
         {/* Footer */}

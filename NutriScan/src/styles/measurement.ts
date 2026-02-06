@@ -127,7 +127,7 @@ export const styles = StyleSheet.create({
     right: 0,
     height: ITEM_HEIGHT,
     marginTop: -ITEM_HEIGHT / 2,
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     borderTopWidth: 2,
     borderBottomWidth: 2,
     borderColor: '#000',
