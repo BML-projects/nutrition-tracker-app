@@ -1,97 +1,90 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import authRoutes from "./routes/auth.routes";
-import { errorHandler, notFound } from "./middleware/error.middleware";
 import dotenv from "dotenv";
-import { link } from "fs";
-import profileRoutes from "./routes/profile.routes";  
+
+import authRoutes from "./routes/auth.routes";
+import profileRoutes from "./routes/profile.routes";
 import adminRoutes from "./routes/adminRoutes";
+import { errorHandler, notFound } from "./middleware/error.middleware";
 
-
-dotenv.config();  link
+dotenv.config();
 
 const app = express();
 
-const allowedOrigins = process.env.FRONTEND_URL 
-  ? process.env.FRONTEND_URL.split(",").map(origin => origin.trim())
-  : ["http://localhost:8081", "http://192.168.1.72:8081"];
+// ================== CORS SETUP ==================
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman)
+    if (!origin) return callback(null, true);
 
-console.log("Allowed Origins for CORS:", allowedOrigins);
-
-// Configure CORS properly
-const corsOptions = {
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    // Allow requests with no origin (like mobile apps, curl requests)
-    if (!origin) {
-      console.log("No origin header - allowing request");
+    // Allow localhost + local IPs
+    if (
+      origin.includes("localhost") ||
+      origin.includes("127.0.0.1") ||
+      origin.includes("192.168.") ||
+      origin.includes("10.") ||
+      origin.includes("172.")
+    ) {
       return callback(null, true);
     }
-    
-    // Check if origin is in allowed list
-    if (allowedOrigins.includes(origin)) {
-      console.log(`Origin ${origin} allowed`);
+
+    // Allow Expo domains (Expo Go / Expo web)
+    if (origin.includes("exp.direct") || origin.includes("expo.dev")) {
       return callback(null, true);
     }
-    
-    // For development, you can also allow any localhost or 192.168.x.x
-    if (process.env.NODE_ENV === 'development') {
-      const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1');
-      const isLocalNetwork = origin.includes('192.168.');
-      const isExpo = origin.includes('exp://');
-      
-      if (isLocalhost || isLocalNetwork || isExpo) {
-        console.log(`Development origin ${origin} allowed`);
-        return callback(null, true);
-      }
+
+    // Allow ngrok frontend calls
+    if (origin.includes("ngrok-free.dev")) {
+      return callback(null, true);
     }
-    
-    console.log(`Origin ${origin} not allowed by CORS`);
-    return callback(new Error('Not allowed by CORS'), false);
+
+    console.log("❌ Blocked by CORS:", origin);
+    return callback(new Error("Not allowed by CORS"), false);
   },
+
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  exposedHeaders: ['set-cookie'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-// Apply CORS middleware - this handles both regular and OPTIONS requests
+// ✅ Preflight FIRST (Express 5 fix)
+app.options(/.*/, cors(corsOptions));
+
+// ✅ Apply CORS
 app.use(cors(corsOptions));
 
-// IMPORTANT: Remove app.options('*', cors()) - it's not needed!
-
+// ================== MIDDLEWARE ==================
 app.use(express.json());
-app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-/* 🔥 ROOT ROUTE */
+// ================== ROOT & HEALTH ==================
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
     message: "Server is running 🚀",
-    cors: allowedOrigins
   });
 });
 
-// Health check
 app.get("/health", (req, res) => {
   res.json({
     status: "healthy",
-    cors: allowedOrigins,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
+app.get("/ping", (req, res) => {
+  res.json({ success: true, message: "pong" });
+});
+
+// ================== ROUTES ==================
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/admin", adminRoutes);
 
-// 404 handler
+// ================== ERROR HANDLING ==================
 app.use(notFound);
-
-// Error handler
 app.use(errorHandler);
 
 export default app;

@@ -9,76 +9,70 @@ import API from "@/services/auth-api";
 
 export default function GoalScreen() {
   const [goal, setGoal] = useState<"lose" | "maintain" | "gain" | null>(null);
+
   const router = useRouter();
   const { data, setData } = useSignup();
 
   const isButtonDisabled = goal === null;
 
   const handleSignup = async () => {
-    if (!goal) return;
+    if (!goal) {
+      Alert.alert("Error", "Please select your goal");
+      return;
+    }
+
+    // ✅ store selected goal into context
+    setData({ goal });
+
+    // Validate required fields
+    if (
+      !data.fullName ||
+      !data.email ||
+      !data.password ||
+      !data.gender ||
+      !data.dob ||
+      !data.height ||
+      !data.weight
+    ) {
+      Alert.alert("Error", "Please fill all required fields");
+      return;
+    }
+
+    const payload = {
+      fullName: data.fullName.trim(),
+      email: data.email.trim().toLowerCase(),
+      password: data.password,
+      confirmPassword: data.password,
+      gender: data.gender,
+      dob: new Date(data.dob).toISOString(),
+      height: Number(data.height),
+      weight: Number(data.weight),
+      goal: goal, // ✅ use local goal state
+    };
 
     try {
-      // Save goal to context
-      setData({ goal });
-
-      const payload = {
-        ...data,
-        goal,
-        height: Number(data.height),
-        weight: Number(data.weight),
-      };
-
-      console.log("FINAL PAYLOAD:", payload);
-      
-      if (!data.email || !data.password || !data.gender || !data.dob || !data.height || !data.weight) {
-        Alert.alert("Error", "Incomplete signup data");
-        return;
-      }
-
-      console.log('🚀 Sending signup request...');
       const res = await API.post("/auth/signup", payload);
 
-      console.log('✅ Signup response:', res.data);
-
-      if (res.status === 201 && res.data) {
-        // ✅ CRITICAL: Save the access token
-        if (res.data.accessToken) {
-          await AsyncStorage.setItem('accessToken', res.data.accessToken);
-          console.log('✅ Access token saved to AsyncStorage');
-        } else {
-          console.warn('⚠️ No accessToken in response');
-        }
-
-        // ✅ Save user data if available
-        if (res.data.user) {
-          await AsyncStorage.setItem('userData', JSON.stringify(res.data.user));
-          console.log('✅ User data saved to AsyncStorage');
-        }
-
-        // Show success message
-        Alert.alert(
-          "Success!", 
-          "Your account has been created successfully.",
-          [
-            {
-              text: "OK",
-              onPress: () => router.replace("./home")
-            }
-          ]
-        );
+      if (res.data.accessToken) {
+        await AsyncStorage.setItem("accessToken", res.data.accessToken);
       }
+
+      if (res.data.user) {
+        await AsyncStorage.setItem("userData", JSON.stringify(res.data.user));
+      }
+
+      // ✅ Navigate instantly (no alert needed)
+      router.replace("./home");
     } catch (error: any) {
-      console.error('❌ Signup error:', error);
-      
-      if (error.response?.data?.errors) {
-        Alert.alert("Signup Error", error.response.data.errors.join("\n"));
-      } else if (error.response?.data?.message) {
-        Alert.alert("Signup Error", error.response.data.message);
-      } else if (error.message?.includes('timeout')) {
-        Alert.alert("Signup Error", "Request timed out. Please try again.");
-      } else {
-        Alert.alert("Signup Error", error.message || "Something went wrong. Try again.");
-      }
+      console.error("Signup error full:", error.response?.data || error.message);
+
+      Alert.alert(
+        "Signup Error",
+        error.response?.data?.message ||
+          error.response?.data?.errors?.[0]?.msg ||
+          error.message ||
+          "Something went wrong."
+      );
     }
   };
 
@@ -124,7 +118,6 @@ export default function GoalScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* SIGNUP BUTTON */}
       <TouchableOpacity
         style={[styles.button, isButtonDisabled && styles.buttonDisabled]}
         onPress={handleSignup}
@@ -133,7 +126,12 @@ export default function GoalScreen() {
       >
         <View style={styles.buttonContent}>
           <Text style={styles.buttonText}>Sign Up</Text>
-          <Ionicons name="arrow-forward" size={25} color="#fff" style={styles.arrow} />
+          <Ionicons
+            name="arrow-forward"
+            size={25}
+            color="#fff"
+            style={styles.arrow}
+          />
         </View>
       </TouchableOpacity>
     </View>
