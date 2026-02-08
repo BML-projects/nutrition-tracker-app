@@ -375,17 +375,20 @@ export default function Signup() {
             activeOpacity={0.9}
             disabled={loading}
           >
-            <LinearGradient
-              colors={loading ? ['#d0d0d0', '#b0b0b0'] : ['#000', '#2a2a2a']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.gradientButton}
-            >
-              <Text style={styles.nextButtonText}>
-                {loading ? "Checking..." : "Next"}
-              </Text>
-              <Ionicons name="arrow-forward" size={22} color="#fff" />
-            </LinearGradient>
+<LinearGradient
+  colors={loading ? ['#d0d0d0', '#b0b0b0'] : ['#000', '#2a2a2a']}
+  start={{ x: 0, y: 0 }}
+  end={{ x: 1, y: 0 }}
+  style={styles.gradientButton}
+>
+  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+    <Text style={styles.nextButtonText}>
+      {loading ? "Checking..." : "Next"}
+    </Text>
+    <Ionicons name="arrow-forward" size={22} color="#fff" style={{ marginLeft: 8 }} />
+  </View>
+</LinearGradient>
+
           </TouchableOpacity>
 
         </View>
