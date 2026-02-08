@@ -1,360 +1,632 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  /* ================= Screen ================= */
+  /* ================= Screen & Container ================= */
   screen: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#f8f9fa",
   },
 
   container: {
-    padding: 16,
-    paddingBottom: 90,
+    padding: 20,
+    paddingBottom: 100,
   },
 
-  title: {
-    fontSize: 28,
-    fontWeight: "700",
-    marginBottom: 12,
-    marginTop: 20,
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
-  section: {
-    marginBottom: 20,
-  },
-
-  /* ================= Section Badge ================= */
-  sectionBadge: {
-    backgroundColor: "#D37034",
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 20,
-    marginBottom: 8,
-    color: "#000",
-    fontWeight: "600",
-  },
-
-  /* ================= Cards ================= */
-  card: {
-    backgroundColor: "#E5E5E5",
-    borderRadius: 16,
-    padding: 14,
-  },
-
-  cardTitle: {
+  loadingText: {
+    marginTop: 16,
     fontSize: 16,
-    fontWeight: "700",
-    color: "#000",
-    marginBottom: 5,
+    color: '#666',
+    fontWeight: '500',
   },
 
-  cardSub: {
-    fontSize: 12,
+  /* ================= Header ================= */
+  header: {
+    marginBottom: 24,
+    paddingTop: 10,
+  },
+
+  headerTitle: {
+    fontSize: 34,
+    fontWeight: "800",
+    color: "#000",
+    marginBottom: 4,
+  },
+
+  headerSubtitle: {
+    fontSize: 16,
     color: "#666",
-    marginBottom: 15,
+    fontWeight: "400",
   },
 
-  /* ================= Rows ================= */
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  /* ================= Profile Hero Card ================= */
+  profileHeroCard: {
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 24,
     alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
 
-  rowLabel: {
-    fontSize: 14,
-    color: "#333",
-    fontWeight: "500",
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: 16,
   },
 
-  rowRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-
-  valueText: {
-    fontWeight: "600",
-    color: "#000",
-    fontSize: 14,
-  },
-
-  /* ================= Appearance ================= */
-  appearancePill: {
-    flexDirection: "row",
-    alignItems: "center",
+  avatarGradient: {
     backgroundColor: "#D37034",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 16,
-    gap: 4,
-  },
-
-  appearanceText: {
-    color: "#000",
-    fontWeight: "600",
-  },
-
-  optionBox: {
-    backgroundColor: "#f2f2f2",
-    borderRadius: 12,
-    marginTop: 6,
-    marginBottom: 10,
-  },
-
-  optionRow: {
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-
-  optionText: {
-    fontSize: 14,
-    color: "#333",
-  },
-
-  /* ================= Profile ================= */
-  profileCard: {
-    backgroundColor: "#E5E5E5",
-    borderRadius: 16,
-    padding: 16,
-    alignItems: "center",
-    marginBottom: 10,
-  },
-
-  avatar: {
-    backgroundColor: "#D37034",
-    height: 70,
-    width: 70,
-    borderRadius: 35,
+    height: 90,
+    width: 90,
+    borderRadius: 45,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 12,
+    shadowColor: "#D37034",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
 
-  username: {
-    fontSize: 18,
+  avatarBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 2,
+  },
+
+  profileName: {
+    fontSize: 24,
     fontWeight: "700",
     color: "#000",
     marginBottom: 4,
   },
 
-  email: {
-    fontSize: 14,
+  profileEmail: {
+    fontSize: 15,
     color: "#666",
-    marginBottom: 15,
+    marginBottom: 20,
   },
 
   editProfileButton: {
-    marginTop: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 25,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 28,
     backgroundColor: '#D37034',
-    borderRadius: 8,
+    borderRadius: 12,
+    shadowColor: "#D37034",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
 
   editProfileButtonText: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 15,
+  },
+
+  /* ================= Health Metrics Grid ================= */
+  metricsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    gap: 12,
+  },
+
+  metricCard: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 16,
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+
+  metricIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+
+  metricValue: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#000',
+    marginBottom: 4,
+  },
+
+  metricLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 4,
+  },
+
+  metricSubtext: {
+    fontSize: 11,
+    color: '#999',
+  },
+
+  metricBadge: {
+    marginTop: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+
+  metricBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+
+  /* ================= Sections ================= */
+  section: {
+    marginBottom: 24,
+  },
+
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 8,
+  },
+
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#000",
+  },
+
+  /* ================= Cards ================= */
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 18,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+
+  /* ================= Goal Selector ================= */
+  goalSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+
+  goalSelectorLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+
+  goalIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#fef3e7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  goalSelectorLabel: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 2,
+  },
+
+  goalSelectorValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#000',
+  },
+
+  /* ================= Options Container ================= */
+  optionsContainer: {
+    marginTop: 16,
+    gap: 10,
+  },
+
+  optionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+
+  optionItemActive: {
+    backgroundColor: '#e7f5ff',
+    borderColor: '#D37034',
+  },
+
+  optionIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+
+  optionText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333',
+  },
+
+  /* ================= Activity Options ================= */
+  activityOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 14,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+
+  activityOptionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+
+  activityOptionLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 2,
+  },
+
+  activityOptionDesc: {
+    fontSize: 12,
+    color: '#666',
+  },
+
+  /* ================= Calories Comparison ================= */
+  caloriesComparison: {
+    marginTop: 20,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+
+  caloriesComparisonTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 16,
     textAlign: 'center',
   },
 
-  menuItem: {
-    backgroundColor: "#E5E5E5",
-    borderRadius: 14,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 8,
+  caloriesRow: {
+    flexDirection: 'row',
+    gap: 10,
   },
 
-  menuText: {
-    fontWeight: "600",
+  caloriesItem: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 14,
+    padding: 14,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+
+  caloriesItemActive: {
+    backgroundColor: '#fef3e7',
+    borderColor: '#D37034',
+  },
+
+  caloriesLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#666',
+    marginTop: 6,
+    marginBottom: 4,
+  },
+
+  caloriesValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#000',
+  },
+
+  caloriesUnit: {
+    fontSize: 11,
+    color: '#999',
+    marginTop: 2,
+  },
+
+  /* ================= Personal Info Rows ================= */
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f5f5f5',
+  },
+
+  infoLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+
+  infoIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#fef3e7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+
+  infoLabel: {
+    fontSize: 15,
+    color: '#666',
+    fontWeight: '500',
+  },
+
+  infoValue: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#000',
+  },
+
+  /* ================= Quick Actions ================= */
+  actionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+
+  logoutCard: {
+    borderWidth: 1,
+    borderColor: '#fee2e2',
+  },
+
+  actionIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+
+  actionContent: {
+    flex: 1,
+  },
+
+  actionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 2,
+  },
+
+  actionSubtitle: {
+    fontSize: 13,
+    color: '#666',
+  },
+
+  /* ================= Modal Styles ================= */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "#000000aa",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modalContent: {
+    backgroundColor: "#fff",
+    margin: 20,
+    borderRadius: 20,
+    padding: 24,
+    width: '90%',
+    maxWidth: 400,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    marginBottom: 20,
+    color: "#000",
+    textAlign: "center",
+  },
+
+  /* ================= Photo Picker ================= */
+  photoPickerContainer: {
+    alignSelf: "center",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
+  photoCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "#f0f0f0",
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 3,
+    borderColor: "#D37034",
+  },
+
+  photoImage: {
+    width: 100,
+    height: 100,
+  },
+
+  photoPickerText: {
+    marginTop: 8,
+    fontSize: 13,
+    color: "#666",
+    fontWeight: "500",
+  },
+
+  /* ================= Input Fields ================= */
+  input: {
+    backgroundColor: "#f8f9fa",
+    borderRadius: 12,
+    padding: 14,
     fontSize: 15,
     color: "#000",
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+
+  /* ================= Gender Selector ================= */
+  genderContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+    gap: 8,
+  },
+
+  genderButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 10,
+    backgroundColor: "#f0f0f0",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+
+  genderButtonActive: {
+    backgroundColor: "#fef3e7",
+    borderColor: "#D37034",
+  },
+
+  genderButtonText: {
+    color: "#666",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+
+  genderButtonTextActive: {
+    color: "#D37034",
+  },
+
+  /* ================= Modal Actions ================= */
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+    gap: 12,
+  },
+
+  cancelButton: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 10,
+    backgroundColor: "#f0f0f0",
+    alignItems: "center",
+  },
+
+  cancelButtonText: {
+    color: "#666",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+
+  saveButton: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 10,
+    backgroundColor: "#D37034",
+    alignItems: "center",
+    shadowColor: "#D37034",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  saveButtonText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 15,
   },
 
   /* ================= Bottom Navigation ================= */
   nav: {
     position: "absolute",
     bottom: 0,
-    height: 80,
+    height: 70,
     width: "100%",
-    backgroundColor: "#333",
+    backgroundColor: "#1a1a1a",
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
+    paddingHorizontal: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 10,
+  },
+
+  navButton: {
+    padding: 10,
   },
 
   navActive: {
-    backgroundColor: "#32CD32",
-    padding: 10,
-    borderRadius: 12,
-  },
-
-  /* ================= New Styles for Goal Comparison ================= */
-  goalComparisonContainer: {
-    marginTop: 20,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 15,
-    borderWidth: 1,
-    borderColor: '#e9ecef',
-  },
-
-  goalComparisonTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 12,
-    color: '#333',
-    textAlign: 'center',
-  },
-
-  goalComparisonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-
-  goalComparisonItem: {
-    flex: 1,
-    alignItems: 'center',
+    backgroundColor: "#D37034",
     padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    marginHorizontal: 4,
-    borderWidth: 1,
-    borderColor: '#dee2e6',
-  },
-
-  goalComparisonItemActive: {
-    backgroundColor: '#e7f5ff',
-    borderColor: '#339af0',
-    borderWidth: 2,
-  },
-
-  goalComparisonLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#495057',
-    marginBottom: 4,
-  },
-
-  goalComparisonCalories: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#212529',
-  },
-
-  goalComparisonDescription: {
-    fontSize: 10,
-    color: '#868e96',
-    textAlign: 'center',
-    marginTop: 2,
-  },
-
-  goalComparisonNote: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 8,
-    fontStyle: 'italic',
-  },
-
-  /* ================= User Details Section ================= */
-  userDetailsSection: {
-    marginTop: 20,
-    paddingTop: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-  },
-  
-  detailsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 15,
-    color: '#000',
-  },
-  
-  detailsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  
-  detailLabel: {
-    fontSize: 14,
-    color: '#666',
-    flex: 1,
-  },
-  
-  detailValue: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#000',
-    flex: 1,
-    textAlign: 'right',
-  },
-
-  /* ================= Health Metrics ================= */
-  metricsContainer: {
-    marginTop: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    padding: 15,
-  },
-
-  metricItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  metricLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-    marginBottom: 6,
-  },
-
-  metricValue: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#D37034',
-    marginBottom: 2,
-  },
-
-  metricSubtitle: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 2,
-  },
-
-
-
-
-
-
-
-
-
-
-  /* ================= Refresh Control ================= */
-  refreshControl: {
-    backgroundColor: 'transparent',
+    borderRadius: 16,
+    shadowColor: "#D37034",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
   },
 });

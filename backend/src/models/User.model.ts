@@ -12,6 +12,8 @@ export interface IUser extends Document {
   bmi?: number;
   bmr?: number;
   dailyCalories?: number;
+  activityLevel?: "sedentary" | "light" | "moderate" | "active" | "very_active"; // <- added
+  profilePhoto?: string; // <- added
   resetPasswordOTP?: string;
   resetPasswordOTPExpiry?: Date;
 }
@@ -29,6 +31,8 @@ const userSchema = new Schema<IUser>(
     bmi: { type: Number },
     bmr: { type: Number },
     dailyCalories: { type: Number },
+    activityLevel: { type: String, enum: ["sedentary", "light", "moderate", "active", "very_active"], default: "moderate" }, // <- added
+    profilePhoto: { type: String, default: "" }, // <- added
     resetPasswordOTP: { type: String, select: false },
     resetPasswordOTPExpiry: { type: Date, select: false },
   },

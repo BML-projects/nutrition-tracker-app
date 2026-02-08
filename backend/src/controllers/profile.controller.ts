@@ -1,11 +1,157 @@
 import { Request, Response } from 'express';
 import User from '../models/User.model';
+import bcrypt from 'bcryptjs';
 import {
       calculateBMI,
       calculateBMR,
       calculateDailyCalories,
       calculateGoalCalories
 } from '../utils/calculations';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+
+
+
+// ==================== Multer setup for profile photo ====================
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = 'uploads/';
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + ext);
+  }
+});
+export const upload = multer({ storage });
+
+// ==================== UPDATE PROFILE DETAILS ====================
+export const updateProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
+
+    // Accept both 'fullname' and 'fullName' for compatibility
+    const { fullname, fullName, gender, height, weight, dob } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+
+    // Update fields if provided
+    if (fullname || fullName) user.fullname = fullname || fullName;
+    if (gender) user.gender = gender;
+    if (height) user.height = Number(height);
+    if (weight) user.weight = Number(weight);
+    if (dob) user.dob = new Date(dob);
+
+    // Recalculate BMI & BMR
+    const birthYear = user.dob.getFullYear();
+    const age = new Date().getFullYear() - birthYear;
+
+    user.bmi = calculateBMI(user.height, user.weight);
+    user.bmr = calculateBMR(user.height, user.weight, age, user.gender);
+    user.dailyCalories = calculateDailyCalories(user.bmr, user.goal, user.activityLevel || 'moderate');
+
+    await user.save();
+
+    res.json({ success: true, user });
+  } catch (error: any) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ success: false, error: 'Server error', message: error.message });
+  }
+};
+
+// ==================== UPLOAD PROFILE PHOTO ====================
+export const uploadProfilePhoto = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
+
+    if (!req.file) return res.status(400).json({ success: false, error: 'No file uploaded' });
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+
+    // Store the uploaded filename
+    user.profilePhoto = req.file.filename;
+    await user.save();
+
+    res.json({ success: true, profilePhoto: user.profilePhoto });
+  } catch (error: any) {
+    console.error('Upload profile photo error:', error);
+    res.status(500).json({ success: false, error: 'Server error', message: error.message });
+  }
+};
+
+// ==================== CHANGE PASSWORD ====================
+export const changePassword = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const { currentPassword, newPassword } = req.body;
+
+    console.log('🔐 [Change Password] Starting for user:', userId);
+
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
+
+    // Validate input
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Current password and new password are required' 
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'New password must be at least 6 characters long' 
+      });
+    }
+
+    // Find user with password field
+    const user = await User.findById(userId).select('+password');
+    
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    
+    if (!isPasswordValid) {
+      return res.status(401).json({ 
+        success: false, 
+        error: 'Current password is incorrect' 
+      });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password
+    user.password = hashedPassword;
+    await user.save();
+
+    console.log('🔐 [Change Password] Success for user:', userId);
+
+    res.json({ 
+      success: true, 
+      message: 'Password changed successfully' 
+    });
+  } catch (error: any) {
+    console.error('🔐 [Change Password] Error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Server error', 
+      message: error.message 
+    });
+  }
+};
 
 // Get user profile
 export const getProfile = async (req: Request, res: Response) => {
@@ -56,7 +202,7 @@ export const getProfile = async (req: Request, res: Response) => {
     const response = {
       success: true,
       user: {        
-      id: user._id,
+        id: user._id,
         fullName: user.fullname,
         email: user.email,
         gender: user.gender,
@@ -68,7 +214,7 @@ export const getProfile = async (req: Request, res: Response) => {
         bmr: user.bmr,
         dailyCalories: user.dailyCalories,
         activityLevel: user.activityLevel || 'moderate',
-       
+        profilePhoto: user.profilePhoto,
       },
       goalCalories: allGoalCalories
     };
