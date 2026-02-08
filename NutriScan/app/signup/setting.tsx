@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
+import { Image } from "react-native";
 import {
     ActivityIndicator,
     Alert,
@@ -335,9 +336,24 @@ export default function SettingsScreen() {
           {/* ================= PROFILE HERO CARD ================= */}
           <View style={styles.profileHeroCard}>
             <View style={styles.avatarContainer}>
-              <View style={styles.avatarGradient}>
-                <Ionicons name="person" size={50} color="#fff" />
-              </View>
+              <View style={styles.avatarContainer}>
+  {user?.profilePhoto ? (
+    <Image
+      source={{ uri: user.profilePhoto }}
+      style={styles.avatarImage}
+      resizeMode="cover"
+    />
+  ) : (
+    <View style={styles.avatarGradient}>
+      <Ionicons name="person" size={50} color="#fff" />
+    </View>
+  )}
+
+  <View style={styles.avatarBadge}>
+    <Ionicons name="checkmark-circle" size={24} color="#10b981" />
+  </View>
+</View>
+
               <View style={styles.avatarBadge}>
                 <Ionicons name="checkmark-circle" size={24} color="#10b981" />
               </View>

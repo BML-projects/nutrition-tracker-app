@@ -135,15 +135,16 @@ export const uploadProfilePhoto = async (photo: any) => {
       throw new Error("No authentication token found");
     }
 
-    const formData = new FormData();
-    const photoFile = {
-      uri: photo.uri,
-      type: 'image/jpeg',
-      name: 'profile.jpg',
-    };
-    formData.append('profilePhoto', photoFile as any);
+const formData = new FormData();
 
-    const url = `${API_BASE}/profile/photo`;
+formData.append('photo', {
+  uri: photo.uri,
+  name: photo.fileName ?? 'profile.jpg',
+  type: photo.type ?? 'image/jpeg',
+} as any);
+
+
+    const url = `${API_BASE}/profile/upload-photo`;
     console.log("📸 [uploadProfilePhoto] URL:", url);
 
     const response = await fetch(url, {

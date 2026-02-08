@@ -67,23 +67,30 @@ export const updateProfile = async (req: Request, res: Response) => {
 export const uploadProfilePhoto = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
-    if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
 
-    if (!req.file) return res.status(400).json({ success: false, error: 'No file uploaded' });
+    const file = (req as any).files?.photo?.[0];
+    if (!file) {
+      return res.status(400).json({ success: false, error: 'No file uploaded' });
+    }
 
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
 
-    // Store the uploaded filename
-    user.profilePhoto = req.file.filename;
-    await user.save();
+user.profilePhoto = `/uploads/${file.filename}`;
+await user.save();
 
     res.json({ success: true, profilePhoto: user.profilePhoto });
   } catch (error: any) {
     console.error('Upload profile photo error:', error);
-    res.status(500).json({ success: false, error: 'Server error', message: error.message });
+    res.status(500).json({ success: false, error: 'Server error' });
   }
 };
+
 
 // ==================== CHANGE PASSWORD ====================
 export const changePassword = async (req: Request, res: Response) => {

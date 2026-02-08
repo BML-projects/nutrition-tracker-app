@@ -619,6 +619,21 @@ export const styles = StyleSheet.create({
     padding: 10,
   },
 
+  //  avatarGradient: {
+  //   width: 80,
+  //   height: 80,
+  //   borderRadius: 40,
+  //   justifyContent: "center",
+  //   alignItems: "center",
+  //   backgroundColor: "#D37034", // or your gradient
+  // },
+
+  avatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+
   navActive: {
     backgroundColor: "#D37034",
     padding: 12,
