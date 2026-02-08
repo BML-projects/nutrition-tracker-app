@@ -85,36 +85,36 @@ export const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#e0e0e0',
   },
-selectionIndicator: {
-  position: 'absolute',
-  top: '50%',
-  left: 0,
-  right: 0,
-  height: ITEM_HEIGHT,
-  marginTop: -ITEM_HEIGHT / 2, // exactly half
-  backgroundColor: 'transparent',
-  borderTopWidth: 2,
-  borderBottomWidth: 2,
-  borderColor: '#000',
-  zIndex: 1,
-},
- backButton: {
-  position: 'absolute',
-  top: 40, // distance from top, adjust if needed
-  left: 20, // distance from left
-  zIndex: 10,
-},
+  selectionIndicator: {
+    position: 'absolute',
+    top: '50%',
+    left: 0,
+    right: 0,
+    height: ITEM_HEIGHT,
+    marginTop: -ITEM_HEIGHT / 2, // exactly half
+    backgroundColor: 'transparent',
+    borderTopWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: '#000',
+    zIndex: 1,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 40, // distance from top, adjust if needed
+    left: 20, // distance from left
+    zIndex: 10,
+  },
 
-backButtonCircle: {
-  backgroundColor: '#fff', // optional
-  padding: 10,
-  borderRadius: 30,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.3,
-  shadowRadius: 2,
-  elevation: 5, // for Android shadow
-},
+  backButtonCircle: {
+    backgroundColor: '#fff', // optional
+    padding: 10,
+    borderRadius: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 5, // for Android shadow
+  },
 
 
 
@@ -161,5 +161,21 @@ backButtonCircle: {
     fontWeight: '700',
     color: '#fff',
     letterSpacing: 0.5,
+  },
+
+  selectionLines: {
+    position: 'absolute',
+    top: '50%',
+    left: 0,
+    right: 0,
+    height: ITEM_HEIGHT,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+    transform: [{ translateY: -ITEM_HEIGHT / 2 }],
+  },
+
+  arrow: {
+    marginLeft: 8,
   },
 });
