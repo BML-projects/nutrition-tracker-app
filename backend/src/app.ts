@@ -8,6 +8,9 @@ import profileRoutes from "./routes/profile.routes";
 import adminRoutes from "./routes/adminRoutes";
 import { errorHandler, notFound } from "./middleware/error.middleware";
 import path from "path/win32";
+import foodRoutes from "./routes/food.routes";
+import mealRoutes from "./routes/mealRoutes";
+
 
 dotenv.config();
 
@@ -85,6 +88,8 @@ app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/admin", adminRoutes);
+app.use("/api/food", foodRoutes);
+app.use("/api/meals", mealRoutes);
 
 // ================== ERROR HANDLING ==================
 app.use(notFound);

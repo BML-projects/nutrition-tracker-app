@@ -13,6 +13,7 @@ import { useRouter } from "expo-router";
 import { styles } from "../../src/styles/home";
 import { Images } from "../../src/constants/images";
 import * as ImagePicker from "expo-image-picker";
+import BottomNav from "./ButtomNav";
 
 
 // Define the shape of data coming from the backend
@@ -253,23 +254,7 @@ export default function Home() {
             </ScrollView>
 
             {/* Bottom Navigation Bar */}
-            <View style={styles.bottomNav}>
-                <TouchableOpacity onPress={() => router.replace("./home")}>
-                    <Ionicons name="home" size={26} color="#fff" />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => router.push("/signup/scan")}>
-                    <Ionicons name="camera" size={26} color="#aaa" />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => router.push("/signup/analytics")}>
-                    <Ionicons name="bar-chart" size={26} color="#aaa" />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => router.push("/signup/setting")}>
-                    <Ionicons name="settings" size={26} color="#aaa" />
-                </TouchableOpacity>
-            </View>
+             <BottomNav /> 
         </View>
     );
 }

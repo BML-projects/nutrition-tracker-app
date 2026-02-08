@@ -1,226 +1,478 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-    View,
-    Text,
-    Image,
-    ScrollView,
-    TouchableOpacity,
-    ActivityIndicator,
-    FlatList,
-    StyleSheet,
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  TextInput,
+  Modal,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from 'expo-linear-gradient';
 import axios from "axios";
+import { Ingredient, Prediction } from "@/src/types/index";
+import { styles } from "@/src/styles/fooddetails";
 
-// ----------------- Replace with your FastAPI host -----------------
-const FASTAPI_HOST = "http://127.0.0.1:8000/predict"; // use PC LAN IP for physical device
+const BACKEND_HOST = "https://unnominal-nonfashionable-marcela.ngrok-free.dev/api/food/predict";
 
-// ----------------- Types -----------------
-type Ingredient = {
-    name: string;
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-};
+const MEAL_TYPES = [
+  { id: 'breakfast', label: 'Breakfast', icon: 'sunny', color: '#FF9800' },
+  { id: 'lunch', label: 'Lunch', icon: 'restaurant', color: '#4CAF50' },
+  { id: 'dinner', label: 'Dinner', icon: 'moon', color: '#673AB7' },
+  { id: 'snack', label: 'Snack', icon: 'fast-food', color: '#FF5722' },
+  { id: 'dessert', label: 'Dessert', icon: 'ice-cream', color: '#E91E63' },
+];
 
-type Prediction = {
-    class: string;
-    confidence: number;
-};
+const PORTION_PRESETS = [
+  { label: '0.25x', multiplier: 0.25 },
+  { label: '0.5x', multiplier: 0.5 },
+  { label: '1x', multiplier: 1 },
+  { label: '1.5x', multiplier: 1.5 },
+  { label: '2x', multiplier: 2 },
+];
 
-// ----------------- Main Screen -----------------
 export default function FoodDetailScreen() {
-    const router = useRouter();
-    const params = useLocalSearchParams();
+  const router = useRouter();
+  const params = useLocalSearchParams();
 
-    const imageUri = params.imageUri as string;
+  const imageUri = params.imageUri as string;
 
-    const [foodName, setFoodName] = useState(
-        (params.foodName as string) ?? "Food Analysis"
-    );
-    const [calories, setCalories] = useState(Number(params.calories ?? 0));
-    const [protein, setProtein] = useState(Number(params.protein ?? 0));
-    const [carbs, setCarbs] = useState(Number(params.carbs ?? 0));
-    const [fat, setFat] = useState(Number(params.fat ?? 0));
-    const [analysis, setAnalysis] = useState(
-        (params.analysis as string) ?? "AI analysis will appear here after scanning the food image."
-    );
-    const [ingredients, setIngredients] = useState<Ingredient[]>(
-        params.ingredients ? JSON.parse(params.ingredients as string) : []
-    );
-    const [loading, setLoading] = useState(false);
-    const [top5, setTop5] = useState<Prediction[]>([]);
+  // Original nutrition values (from API)
+  const [originalCalories, setOriginalCalories] = useState(0);
+  const [originalProtein, setOriginalProtein] = useState(0);
+  const [originalCarbs, setOriginalCarbs] = useState(0);
+  const [originalFat, setOriginalFat] = useState(0);
 
-    const onUpdatePress = () => {
-        console.log("UPDATE CLICKED");
-        // TODO: save data to backend or global store
+  // Display values (adjusted by weight)
+  const [foodName, setFoodName] = useState((params.foodName as string) ?? "Food Analysis");
+  const [calories, setCalories] = useState(0);
+  const [protein, setProtein] = useState(0);
+  const [carbs, setCarbs] = useState(0);
+  const [fat, setFat] = useState(0);
+  
+  const [analysis, setAnalysis] = useState(
+    (params.analysis as string) ?? "Tap 'Scan Food' to analyze the nutritional content"
+  );
+  const [ingredients, setIngredients] = useState<Ingredient[]>(
+    params.ingredients ? JSON.parse(params.ingredients as string) : []
+  );
+  const [loading, setLoading] = useState(false);
+  const [top5, setTop5] = useState<Prediction[]>([]);
+  const [scanned, setScanned] = useState(false);
+
+  // Weight/Portion controls
+  const [weight, setWeight] = useState("100");
+  const [portionMultiplier, setPortionMultiplier] = useState(1);
+  const [showWeightModal, setShowWeightModal] = useState(false);
+
+  // Meal type selection
+  const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
+
+  // Calculate nutrition based on weight
+  useEffect(() => {
+    if (originalCalories > 0) {
+      const multiplier = (parseFloat(weight) / 100) * portionMultiplier;
+      setCalories(Math.round(originalCalories * multiplier));
+      setProtein(Math.round(originalProtein * multiplier));
+      setCarbs(Math.round(originalCarbs * multiplier));
+      setFat(Math.round(originalFat * multiplier));
+    }
+  }, [weight, portionMultiplier, originalCalories]);
+
+  const onUpdatePress = () => {
+    if (!selectedMealType) {
+      alert("Please select a meal type");
+      return;
+    }
+
+    const mealData = {
+      foodName,
+      calories,
+      protein,
+      carbs,
+      fat,
+      weight: parseFloat(weight),
+      mealType: selectedMealType,
+      imageUri,
+      timestamp: new Date().toISOString(),
     };
 
-    // ----------------- Upload Image -----------------
-    const uploadImage = async () => {
-        if (!imageUri) return;
-        setLoading(true);
+    console.log("SAVING MEAL:", mealData);
+    // TODO: Save to backend or AsyncStorage
+    alert(`Added to ${MEAL_TYPES.find(m => m.id === selectedMealType)?.label}!`);
+  };
 
-        try {
-            // Convert blob URI to a real file
-            const responseBlob = await fetch(imageUri);
-            const blob = await responseBlob.blob();
+  const uploadImage = async () => {
+    if (!imageUri || !BACKEND_HOST) return;
+    setLoading(true);
 
-            const formData = new FormData();
-            formData.append("image", blob, "food.jpg");
+    try {
+      const responseBlob = await fetch(imageUri);
+      const blob = await responseBlob.blob();
 
-            const response = await axios.post(FASTAPI_HOST, formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+      const formData = new FormData();
+      formData.append("file", blob, "food.jpg");
 
-            // Update top-1 prediction only
-            setFoodName(response.data.top1.class);
-            setAnalysis(
-                `AI Prediction Confidence: ${Math.round(response.data.top1.confidence * 100)}%`
-            );
-            setTop5(response.data.top5 ?? []);
+      const response = await axios.post(BACKEND_HOST, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-        } catch (err) {
-            console.error(err);
-            setAnalysis("Prediction failed. Please try again.");
-        } finally {
-            setLoading(false);
-        }
-    };
+      const data = response.data;
+      console.log("FULL RESPONSE:", data);
 
+      setFoodName(data.top1.class);
+      setAnalysis(`AI detected with ${Math.round(data.top1.confidence * 100)}% confidence`);
+      setScanned(true);
 
-    return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-            {/* ----------------- Image ----------------- */}
-            <View style={styles.imageWrapper}>
-                {imageUri ? (
-                    <Image source={{ uri: imageUri }} style={styles.image} />
-                ) : (
-                    <View style={[styles.image, { justifyContent: "center", alignItems: "center" }]}>
-                        <Text>No image selected</Text>
-                    </View>
-                )}
+      if (data.nutrition) {
+        // Store original values
+        setOriginalCalories(data.nutrition.calories ?? 0);
+        setOriginalProtein(data.nutrition.protein ?? 0);
+        setOriginalCarbs(data.nutrition.carbs ?? 0);
+        setOriginalFat(data.nutrition.fat ?? 0);
 
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                    <Feather name="arrow-left" size={22} color="#000" />
+        // Set display values (will be adjusted by weight)
+        setCalories(data.nutrition.calories ?? 0);
+        setProtein(data.nutrition.protein ?? 0);
+        setCarbs(data.nutrition.carbs ?? 0);
+        setFat(data.nutrition.fat ?? 0);
+      }
+
+      setIngredients([
+        {
+          name: data.top1.class,
+          calories: data.nutrition?.calories ?? 0,
+          protein: data.nutrition?.protein ?? 0,
+          carbs: data.nutrition?.carbs ?? 0,
+          fat: data.nutrition?.fat ?? 0,
+        },
+      ]);
+
+      if (data.top5) {
+        setTop5(data.top5);
+      }
+
+    } catch (err: any) {
+      console.error(err);
+      setAnalysis("Prediction failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalMacros = protein + carbs + fat;
+  const proteinPercentage = totalMacros > 0 ? (protein / totalMacros) * 100 : 0;
+  const carbsPercentage = totalMacros > 0 ? (carbs / totalMacros) * 100 : 0;
+  const fatPercentage = totalMacros > 0 ? (fat / totalMacros) * 100 : 0;
+
+  return (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      
+      {/* Hero Image Section */}
+      <View style={styles.heroSection}>
+        {imageUri ? (
+          <>
+            <Image source={{ uri: imageUri }} style={styles.heroImage} />
+            <LinearGradient
+              colors={['transparent', 'rgba(0,0,0,0.7)']}
+              style={styles.imageGradient}
+            />
+          </>
+        ) : (
+          <View style={styles.placeholderImage}>
+            <Ionicons name="camera-outline" size={60} color="#ccc" />
+            <Text style={styles.placeholderText}>No image selected</Text>
+          </View>
+        )}
+
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="#000" />
+        </TouchableOpacity>
+
+        {imageUri && (
+          <TouchableOpacity 
+            style={styles.scanButton} 
+            onPress={uploadImage}
+            disabled={loading}
+          >
+            <LinearGradient
+              colors={loading ? ['#999', '#777'] : ['#4CAF50', '#45a049']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.scanGradient}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <>
+                  <Ionicons name="scan" size={20} color="#fff" />
+                  <Text style={styles.scanText}>SCAN FOOD</Text>
+                </>
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* Content Section */}
+      <View style={styles.contentSection}>
+        
+        {/* Food Name & Status Badge */}
+        <View style={styles.titleRow}>
+          <Text style={styles.foodTitle}>{foodName}</Text>
+          {scanned && (
+            <View style={styles.verifiedBadge}>
+              <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+              <Text style={styles.verifiedText}>Verified</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Analysis */}
+        <View style={styles.analysisCard}>
+          <Ionicons name="sparkles" size={18} color="#FF9800" />
+          <Text style={styles.analysisText}>{analysis}</Text>
+        </View>
+
+        {/* Portion/Weight Adjustment */}
+        {scanned && (
+          <View style={styles.portionSection}>
+            <Text style={styles.sectionTitle}>Adjust Portion</Text>
+            
+            {/* Quick Portion Buttons */}
+            <View style={styles.portionPresets}>
+              {PORTION_PRESETS.map((preset) => (
+                <TouchableOpacity
+                  key={preset.label}
+                  style={[
+                    styles.portionPresetButton,
+                    portionMultiplier === preset.multiplier && styles.portionPresetButtonActive
+                  ]}
+                  onPress={() => setPortionMultiplier(preset.multiplier)}
+                >
+                  <Text style={[
+                    styles.portionPresetText,
+                    portionMultiplier === preset.multiplier && styles.portionPresetTextActive
+                  ]}>
+                    {preset.label}
+                  </Text>
                 </TouchableOpacity>
-
-                {imageUri && (
-                    <TouchableOpacity style={styles.scanButton} onPress={uploadImage}>
-                        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.scanText}>SCAN FOOD</Text>}
-                    </TouchableOpacity>
-                )}
+              ))}
             </View>
 
-            {/* ----------------- Title ----------------- */}
-            <Text style={styles.title}>{foodName}</Text>
-
-
-            {/* ----------------- Nutrition ----------------- */}
-            <View style={styles.card}>
-                <NutritionRow label="Calories (kcal)" value={calories} />
-                <NutritionRow label="Protein (g)" value={protein} icon="arm-flex" />
-                <NutritionRow label="Carbs (g)" value={carbs} icon="bread-slice" />
-                <NutritionRow label="Fat (g)" value={fat} icon="oil" />
-            </View>
-
-            {/* ----------------- Analysis ----------------- */}
-            <Text style={styles.analysisText}>{analysis}</Text>
-
-            {/* ----------------- Top-5 Predictions ----------------- */}
-            {top5.length > 0 && (
-                <View style={{ marginVertical: 12 }}>
-                    <Text style={styles.sectionTitle}>Top 5 Predictions</Text>
-                    <FlatList
-                        data={top5}
-                        keyExtractor={(item) => item.class}
-                        renderItem={({ item }) => (
-                            <View style={styles.predictionRow}>
-                                <Text style={{ flex: 1 }}>{item.class}</Text>
-                                <View style={styles.barBackground}>
-                                    <View style={[styles.barFill, { width: `${item.confidence * 100}%` }]} />
-                                </View>
-                                <Text style={{ width: 50, textAlign: "right" }}>{Math.round(item.confidence * 100)}%</Text>
-                            </View>
-                        )}
-                    />
-                </View>
-            )}
-
-            {/* ----------------- Ingredients ----------------- */}
-            <Text style={styles.sectionTitle}>Ingredients</Text>
-            {ingredients.length > 0 ? (
-                ingredients.map((item, index) => (
-                    <View key={index} style={styles.ingredientCard}>
-                        <Text style={styles.ingredientTitle}>{item.name} ({item.calories} Kcal)</Text>
-                        <View style={styles.macroRow}>
-                            <MacroItem icon="arm-flex" value={`${item.protein}g`} />
-                            <MacroItem icon="bread-slice" value={`${item.carbs}g`} />
-                            <MacroItem icon="oil" value={`${item.fat}g`} />
-                        </View>
-                    </View>
-                ))
-            ) : (
-                <Text style={{ opacity: 0.6, marginTop: 8 }}>
-                    Ingredients will appear after analysis.
-                </Text>
-            )}
-
-            <TouchableOpacity style={styles.updateButton} onPress={onUpdatePress}>
-                <Text style={styles.updateText}>UPDATE</Text>
+            {/* Weight Input */}
+            <TouchableOpacity 
+              style={styles.weightCard}
+              onPress={() => setShowWeightModal(true)}
+            >
+              <View style={styles.weightIconCircle}>
+                <MaterialCommunityIcons name="weight-gram" size={24} color="#2196F3" />
+              </View>
+              <View style={styles.weightInfo}>
+                <Text style={styles.weightLabel}>Weight (grams)</Text>
+                <Text style={styles.weightValue}>{weight}g</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#999" />
             </TouchableOpacity>
-        </ScrollView>
-    );
-}
+          </View>
+        )}
 
-// ----------------- Components -----------------
-function NutritionRow({ label, value, icon }: { label: string; value: number; icon?: string }) {
-    return (
-        <View style={styles.nutritionRow}>
-            <View style={styles.rowLeft}>
-                {icon && <MaterialCommunityIcons name={icon as any} size={18} color="#4CAF50" />}
-                <Text style={styles.rowLabel}>{label}</Text>
+        {/* Calories Card - Hero */}
+        <View style={styles.caloriesHero}>
+          <LinearGradient
+            colors={['#FF6B6B', '#FF8E53']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.caloriesGradient}
+          >
+            <View style={styles.caloriesContent}>
+              <Ionicons name="flame" size={40} color="#fff" />
+              <View style={styles.caloriesTextContainer}>
+                <Text style={styles.caloriesValue}>{calories}</Text>
+                <Text style={styles.caloriesLabel}>Calories</Text>
+              </View>
             </View>
-            <Text style={styles.rowValue}>{value}</Text>
+            <View style={styles.caloriesPattern} />
+          </LinearGradient>
         </View>
-    );
-}
 
-function MacroItem({ icon, value }: { icon: string; value: string }) {
-    return (
-        <View style={styles.macroItem}>
-            <MaterialCommunityIcons name={icon as any} size={16} color="#FFA726" />
-            <Text style={styles.macroText}>{value}</Text>
+        {/* Macros Cards Grid */}
+        <Text style={styles.sectionTitle}>Macronutrients</Text>
+        <View style={styles.macrosGrid}>
+          
+          <View style={styles.macroCard}>
+            <View style={[styles.macroIconCircle, { backgroundColor: '#E3F2FD' }]}>
+              <MaterialCommunityIcons name="arm-flex" size={28} color="#2196F3" />
+            </View>
+            <Text style={styles.macroValue}>{protein}g</Text>
+            <Text style={styles.macroLabel}>Protein</Text>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { 
+                width: `${proteinPercentage}%`, 
+                backgroundColor: '#2196F3' 
+              }]} />
+            </View>
+          </View>
+
+          <View style={styles.macroCard}>
+            <View style={[styles.macroIconCircle, { backgroundColor: '#FFF3E0' }]}>
+              <MaterialCommunityIcons name="bread-slice" size={28} color="#FF9800" />
+            </View>
+            <Text style={styles.macroValue}>{carbs}g</Text>
+            <Text style={styles.macroLabel}>Carbs</Text>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { 
+                width: `${carbsPercentage}%`, 
+                backgroundColor: '#FF9800' 
+              }]} />
+            </View>
+          </View>
+
+          <View style={styles.macroCard}>
+            <View style={[styles.macroIconCircle, { backgroundColor: '#F3E5F5' }]}>
+              <MaterialCommunityIcons name="water" size={28} color="#9C27B0" />
+            </View>
+            <Text style={styles.macroValue}>{fat}g</Text>
+            <Text style={styles.macroLabel}>Fat</Text>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { 
+                width: `${fatPercentage}%`, 
+                backgroundColor: '#9C27B0' 
+              }]} />
+            </View>
+          </View>
+
         </View>
-    );
-}
 
-// ----------------- Styles -----------------
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#fff", padding: 12 },
-    imageWrapper: { position: "relative" },
-    image: { width: "100%", height: 250, borderRadius: 12 },
-    backButton: { position: "absolute", top: 20, left: 20, backgroundColor: "#fff", padding: 6, borderRadius: 20 },
-    scanButton: { position: "absolute", bottom: 10, right: 10, backgroundColor: "#4CAF50", padding: 10, borderRadius: 8 },
-    scanText: { color: "#fff", fontWeight: "bold" },
-    title: { fontSize: 22, fontWeight: "bold", marginTop: 12 },
-    card: { backgroundColor: "#f7f7f7", borderRadius: 12, padding: 12, marginVertical: 12 },
-    nutritionRow: { flexDirection: "row", justifyContent: "space-between", marginVertical: 4 },
-    rowLeft: { flexDirection: "row", alignItems: "center" },
-    rowLabel: { marginLeft: 6 },
-    rowValue: { fontWeight: "bold" },
-    analysisText: { marginVertical: 8, fontStyle: "italic" },
-    sectionTitle: { fontSize: 18, fontWeight: "bold", marginTop: 12 },
-    ingredientCard: { backgroundColor: "#f2f2f2", padding: 8, borderRadius: 8, marginVertical: 4 },
-    ingredientTitle: { fontWeight: "bold" },
-    macroRow: { flexDirection: "row", marginTop: 4, justifyContent: "space-between" },
-    macroItem: { flexDirection: "row", alignItems: "center" },
-    macroText: { marginLeft: 4 },
-    updateButton: { backgroundColor: "#2196F3", padding: 12, borderRadius: 8, marginVertical: 12, alignItems: "center" },
-    updateText: { color: "#fff", fontWeight: "bold" },
-    predictionRow: { flexDirection: "row", alignItems: "center", marginVertical: 4 },
-    barBackground: { height: 8, backgroundColor: "#e0e0e0", flex: 1, marginHorizontal: 6, borderRadius: 4 },
-    barFill: { height: 8, backgroundColor: "#4CAF50", borderRadius: 4 },
-});
+        {/* Meal Type Selection */}
+        {scanned && (
+          <View style={styles.mealTypeSection}>
+            <Text style={styles.sectionTitle}>Select Meal Type</Text>
+            <View style={styles.mealTypesGrid}>
+              {MEAL_TYPES.map((meal) => (
+                <TouchableOpacity
+                  key={meal.id}
+                  style={[
+                    styles.mealTypeCard,
+                    selectedMealType === meal.id && styles.mealTypeCardActive
+                  ]}
+                  onPress={() => setSelectedMealType(meal.id)}
+                  activeOpacity={0.7}
+                >
+                  <View style={[
+                    styles.mealTypeIconCircle,
+                    { backgroundColor: selectedMealType === meal.id ? meal.color : '#f5f5f5' }
+                  ]}>
+                    <Ionicons 
+                      name={meal.icon as any} 
+                      size={24} 
+                      color={selectedMealType === meal.id ? '#fff' : meal.color} 
+                    />
+                  </View>
+                  <Text style={[
+                    styles.mealTypeLabel,
+                    selectedMealType === meal.id && { color: meal.color, fontWeight: '700' }
+                  ]}>
+                    {meal.label}
+                  </Text>
+                  {selectedMealType === meal.id && (
+                    <View style={[styles.mealTypeCheckmark, { backgroundColor: meal.color }]}>
+                      <Ionicons name="checkmark" size={14} color="#fff" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Top 5 Predictions */}
+        {top5.length > 0 && (
+          <View style={styles.predictionsSection}>
+            <Text style={styles.sectionTitle}>AI Predictions</Text>
+            {top5.map((item, index) => (
+              <View key={item.class} style={styles.predictionItem}>
+                <View style={styles.predictionRank}>
+                  <Text style={styles.rankNumber}>#{index + 1}</Text>
+                </View>
+                <View style={styles.predictionContent}>
+                  <Text style={styles.predictionName}>{item.class}</Text>
+                  <View style={styles.confidenceBar}>
+                    <View style={[styles.confidenceFill, { 
+                      width: `${item.confidence * 100}%` 
+                    }]} />
+                  </View>
+                </View>
+                <Text style={styles.confidenceText}>
+                  {Math.round(item.confidence * 100)}%
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Update Button */}
+        {scanned && (
+          <TouchableOpacity 
+            style={styles.updateButton} 
+            onPress={onUpdatePress}
+            activeOpacity={0.9}
+          >
+            <LinearGradient
+              colors={selectedMealType ? ['#4CAF50', '#45a049'] : ['#999', '#777']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.updateGradient}
+            >
+              <Ionicons name="checkmark-circle" size={22} color="#fff" />
+              <Text style={styles.updateText}>
+                {selectedMealType ? 'SAVE TO DIARY' : 'SELECT MEAL TYPE'}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
+
+      </View>
+
+      {/* Weight Input Modal */}
+      <Modal
+        visible={showWeightModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowWeightModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Enter Weight (grams)</Text>
+            <TextInput
+              style={styles.weightInput}
+              value={weight}
+              onChangeText={setWeight}
+              keyboardType="numeric"
+              placeholder="100"
+              autoFocus
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => setShowWeightModal(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalSaveButton}
+                onPress={() => setShowWeightModal(false)}
+              >
+                <Text style={styles.modalSaveText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+    </ScrollView>
+  );
+}

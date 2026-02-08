@@ -9,6 +9,7 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { styles } from "../../src/styles/scan";
+import BottomNav from "./ButtomNav";
 
 export default function CameraScreen() {
     const router = useRouter();
@@ -96,24 +97,7 @@ export default function CameraScreen() {
             </View>
 
             {/* ================= Bottom Navigation ================= */}
-            <View style={styles.nav}>
-                <TouchableOpacity onPress={() => router.push("/signup/home")}>
-                    <Ionicons name="home-outline" size={24} color="#aaa" />
-                </TouchableOpacity>
-
-                {/* Active Camera Tab */}
-                <View style={styles.navActive}>
-                    <Ionicons name="camera" size={24} color="#000" />
-                </View>
-
-                <TouchableOpacity onPress={() => router.push("/signup/analytics")}>
-                    <Ionicons name="bar-chart-outline" size={24} color="#aaa" />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => router.push("/signup/setting")}>
-                    <Ionicons name="settings-outline" size={24} color="#aaa" />
-                </TouchableOpacity>
-            </View>
+             <BottomNav /> 
         </View>
     );
 }
