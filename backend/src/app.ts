@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.routes";
 import profileRoutes from "./routes/profile.routes";
 import adminRoutes from "./routes/adminRoutes";
 import { errorHandler, notFound } from "./middleware/error.middleware";
+import path from "path/win32";
 
 dotenv.config();
 
@@ -77,6 +78,8 @@ app.get("/health", (req, res) => {
 app.get("/ping", (req, res) => {
   res.json({ success: true, message: "pong" });
 });
+
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // ================== ROUTES ==================
 app.use("/api/auth", authRoutes);
