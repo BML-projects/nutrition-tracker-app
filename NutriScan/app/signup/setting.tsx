@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import EditProfileModal from "./editprofilemodal";
 import { styles } from "../../src/styles/setting";
+import BottomNav from "./ButtomNav";
 
 /* ================= INTERFACES ================= */
 interface GoalCalories {
@@ -663,32 +664,7 @@ export default function SettingsScreen() {
       )}
 
       {/* ================= BOTTOM NAV ================= */}
-      <View style={styles.nav}>
-        <TouchableOpacity 
-          style={styles.navButton}
-          onPress={() => router.push("./home")}
-        >
-          <Ionicons name="home-outline" size={26} color="#aaa" />
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.navButton}
-          onPress={() => router.push("/signup/scan")}
-        >
-          <Ionicons name="camera-outline" size={26} color="#aaa" />
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.navButton}
-          onPress={() => router.push("/signup/analytics")}
-        >
-          <Ionicons name="bar-chart-outline" size={26} color="#aaa" />
-        </TouchableOpacity>
-
-        <View style={styles.navActive}>
-          <Ionicons name="settings" size={24} color="#fff" />
-        </View>
-      </View>
+        <BottomNav /> 
     </View>
   );
 }

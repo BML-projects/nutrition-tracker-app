@@ -8,6 +8,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { styles } from "../../src/styles/analytics";
+import BottomNav from "./ButtomNav";
 
 // Define the time ranges for our charts
 type Range = "7 days" | "30 days" | "90 days";
@@ -206,24 +207,7 @@ export default function AnalyticsScreen() {
             </ScrollView>
 
             {/* Bottom Navigation */}
-            <View style={styles.nav}>
-                <TouchableOpacity onPress={() => router.push("/signup/home")}>
-                    <Ionicons name="home-outline" size={24} color="#aaa" />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => router.push("/signup/scan")}>
-                    <Ionicons name="camera-outline" size={24} color="#aaa" />
-                </TouchableOpacity>
-
-                {/* Active Tab Highlight */}
-                <View style={styles.navActive}>
-                    <Ionicons name="bar-chart" size={24} color="#000" />
-                </View>
-
-                <TouchableOpacity onPress={() => router.push("/signup/setting")}>
-                    <Ionicons name="settings-outline" size={24} color="#aaa" />
-                </TouchableOpacity>
-            </View>
+              <BottomNav /> 
         </View>
     );
 }
