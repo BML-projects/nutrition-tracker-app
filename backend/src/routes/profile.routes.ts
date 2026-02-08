@@ -1,15 +1,15 @@
 import express from 'express';
-import { getProfile, updateActivityLevel, updateGoal } from '../controllers/profile.controller';
+import { getProfile, updateProfile, uploadProfilePhoto, updateActivityLevel, updateGoal, upload, changePassword } from '../controllers/profile.controller';
 import { protect } from '../middleware/auth.middleware';
 
 const router = express.Router();
 
-// Apply auth to all profile routes
-router.use(protect);
-
-// Profile routes
-router.get('/', getProfile);
-router.patch('/goal', updateGoal);
-router.patch('/activity-level', updateActivityLevel);
+// All routes protected
+router.get('/', protect, getProfile);
+router.patch('/', protect, updateProfile);
+router.post('/upload-photo', protect, upload.single('photo'), uploadProfilePhoto);
+router.patch('/activity-level', protect, updateActivityLevel);
+router.patch('/goal', protect, updateGoal);
+router.patch('/change-password', protect, changePassword);
 
 export default router;
