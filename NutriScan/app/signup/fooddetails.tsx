@@ -40,8 +40,8 @@ export default function FoodDetailScreen() {
   const params = useLocalSearchParams();
 
   const imageUri = params.imageUri as string;
-  const isViewMode = params.isViewMode === 'true'; // Check if viewing saved meal
-  const mealId = params.mealId as string; // For viewing saved meals
+  const isViewMode = params.isViewMode === 'true';
+  const mealId = params.mealId as string;
 
   // Original nutrition values (from API)
   const [originalCalories, setOriginalCalories] = useState(0);
@@ -135,14 +135,15 @@ export default function FoodDetailScreen() {
       fat,
       weight: parseFloat(weight),
       mealType: selectedMealType,
-      imageUri,
+      imageUri, // This will be handled properly in meal-api.ts
       timestamp: new Date().toISOString(),
     };
 
     try {
       setLoading(true);
+      console.log("💾 Saving meal with data:", mealData);
       const savedMeal = await mealAPI.saveMeal(mealData);
-      console.log("MEAL SAVED:", savedMeal);
+      console.log("✅ MEAL SAVED:", savedMeal);
       
       alert(`Added to ${MEAL_TYPES.find(m => m.id === selectedMealType)?.label}!`);
       
@@ -151,7 +152,7 @@ export default function FoodDetailScreen() {
         router.back();
       }, 500);
     } catch (error: any) {
-      console.error("Error saving meal:", error);
+      console.error("❌ Error saving meal:", error);
       alert("Failed to save meal. Please try again.");
     } finally {
       setLoading(false);
@@ -159,68 +160,86 @@ export default function FoodDetailScreen() {
   };
 
   const uploadImage = async () => {
-  if (!imageUri) return;
-
-  setLoading(true);
-
-  try {
-    const formData = new FormData();
-
-    formData.append("file", {
-      uri: imageUri,
-      name: "food.jpg",
-      type: "image/jpeg",
-    } as any);
-
-    const response = await axios.post(
-      "https://unnominal-nonfashionable-marcela.ngrok-free.dev/api/food/predict",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-
-    const data = response.data;
-    console.log("FULL RESPONSE:", data);
-
-    setFoodName(data.top1.class);
-    setAnalysis(`AI detected with ${Math.round(data.top1.confidence * 100)}% confidence`);
-    setScanned(true);
-
-    if (data.nutrition) {
-      setOriginalCalories(data.nutrition.calories ?? 0);
-      setOriginalProtein(data.nutrition.protein ?? 0);
-      setOriginalCarbs(data.nutrition.carbs ?? 0);
-      setOriginalFat(data.nutrition.fat ?? 0);
-
-      setCalories(data.nutrition.calories ?? 0);
-      setProtein(data.nutrition.protein ?? 0);
-      setCarbs(data.nutrition.carbs ?? 0);
-      setFat(data.nutrition.fat ?? 0);
+    if (!imageUri) {
+      setAnalysis("No image selected");
+      return;
     }
 
-    setIngredients([
-      {
-        name: data.top1.class,
-        calories: data.nutrition?.calories ?? 0,
-        protein: data.nutrition?.protein ?? 0,
-        carbs: data.nutrition?.carbs ?? 0,
-        fat: data.nutrition?.fat ?? 0,
-      },
-    ]);
+    setLoading(true);
 
-    if (data.top5) setTop5(data.top5);
+    try {
+      const formData = new FormData();
 
-  } catch (err: any) {
-    console.error("UPLOAD ERROR:", err?.response?.data || err.message);
-    setAnalysis("Prediction failed. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+      // Ensure proper image format for FormData
+      const imageFile = {
+        uri: imageUri,
+        name: `food_${Date.now()}.jpg`,
+        type: 'image/jpeg',
+      };
 
+      formData.append("file", imageFile as any);
+
+      console.log("📤 Uploading image to:", BACKEND_HOST);
+      console.log("📤 Image URI:", imageUri);
+
+      const response = await axios.post(BACKEND_HOST, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "Accept": "application/json",
+        },
+        timeout: 30000, // 30 seconds
+      });
+
+      const data = response.data;
+      console.log("✅ FULL RESPONSE:", data);
+
+      setFoodName(data.top1.class);
+      setAnalysis(`AI detected with ${Math.round(data.top1.confidence * 100)}% confidence`);
+      setScanned(true);
+
+      if (data.nutrition) {
+        setOriginalCalories(data.nutrition.calories ?? 0);
+        setOriginalProtein(data.nutrition.protein ?? 0);
+        setOriginalCarbs(data.nutrition.carbs ?? 0);
+        setOriginalFat(data.nutrition.fat ?? 0);
+
+        setCalories(data.nutrition.calories ?? 0);
+        setProtein(data.nutrition.protein ?? 0);
+        setCarbs(data.nutrition.carbs ?? 0);
+        setFat(data.nutrition.fat ?? 0);
+      }
+
+      setIngredients([
+        {
+          name: data.top1.class,
+          calories: data.nutrition?.calories ?? 0,
+          protein: data.nutrition?.protein ?? 0,
+          carbs: data.nutrition?.carbs ?? 0,
+          fat: data.nutrition?.fat ?? 0,
+        },
+      ]);
+
+      if (data.top5) setTop5(data.top5);
+
+    } catch (err: any) {
+      console.error("❌ UPLOAD ERROR:", err);
+      console.error("❌ Error details:", err?.response?.data || err.message);
+      
+      // More detailed error message
+      let errorMessage = "Prediction failed. Please try again.";
+      if (err.code === 'ECONNABORTED') {
+        errorMessage = "Request timeout. Please check your connection.";
+      } else if (err.response?.status === 413) {
+        errorMessage = "Image too large. Please use a smaller image.";
+      } else if (err.message.includes('Network')) {
+        errorMessage = "Network error. Please check your connection.";
+      }
+      
+      setAnalysis(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const totalMacros = protein + carbs + fat;
   const proteinPercentage = totalMacros > 0 ? (protein / totalMacros) * 100 : 0;
@@ -234,7 +253,13 @@ export default function FoodDetailScreen() {
       <View style={styles.heroSection}>
         {imageUri ? (
           <>
-            <Image source={{ uri: imageUri }} style={styles.heroImage} />
+            <Image 
+              source={{ uri: imageUri }} 
+              style={styles.heroImage}
+              onError={(error) => {
+                console.log("❌ Image load error:", error.nativeEvent.error);
+              }}
+            />
             <LinearGradient
               colors={['transparent', 'rgba(0,0,0,0.7)']}
               style={styles.imageGradient}
