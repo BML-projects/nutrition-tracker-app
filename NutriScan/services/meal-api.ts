@@ -135,66 +135,69 @@ class MealAPI {
     }
   }
 
-  async saveMeal(mealData: MealData): Promise<SavedMeal> {
-    try {
-      console.log('📤 Starting to save meal...');
-      console.log('📤 Meal data:', mealData);
-      
-      const token = await this.getAuthToken();
+ async saveMeal(mealData: MealData): Promise<SavedMeal> {
+  try {
+    console.log('📤 Starting to save meal...');
+    console.log('📤 Meal data:', mealData);
+    
+    const token = await this.getAuthToken();
 
-      if (!token) {
-        console.error('❌ No token found in AsyncStorage');
-        throw new Error('User not authenticated - No token found. Please log in again.');
-      }
-
-      console.log('🌐 API URL:', `${API_BASE_URL}/meals`);
-
-      // Create FormData for multipart upload
-      const formData = new FormData();
-      
-      // Add image if exists
-      if (mealData.imageUri && mealData.imageUri.startsWith('file://')) {
-        formData.append('image', {
-          uri: mealData.imageUri,
-          name: `meal_${Date.now()}.jpg`,
-          type: 'image/jpeg',
-        } as any);
-      }
-
-      // Add other meal data
-      formData.append('foodName', mealData.foodName);
-      formData.append('calories', mealData.calories.toString());
-      formData.append('protein', mealData.protein.toString());
-      formData.append('carbs', mealData.carbs.toString());
-      formData.append('fat', mealData.fat.toString());
-      formData.append('weight', mealData.weight.toString());
-      formData.append('mealType', mealData.mealType);
-      formData.append('timestamp', mealData.timestamp || new Date().toISOString());
-
-      const response = await axios.post(
-        `${API_BASE_URL}/meals`,
-        formData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-
-      console.log('✅ Meal saved successfully:', response.data);
-      return response.data;
-    } catch (error: any) {
-      console.error('❌ Error saving meal:', error.response?.data || error.message);
-      
-      if (error.response) {
-        console.error('❌ Response status:', error.response.status);
-        console.error('❌ Response data:', error.response.data);
-      }
-      
-      throw error;
+    if (!token) {
+      console.error('❌ No token found in AsyncStorage');
+      throw new Error('User not authenticated - No token found. Please log in again.');
     }
+
+    console.log('🌐 API URL:', `${API_BASE_URL}/meals`);
+
+    // Create FormData for multipart upload
+    const formData = new FormData();
+    
+    // Add image if exists - FIXED VERSION
+    if (mealData.imageUri && mealData.imageUri.startsWith('file://')) {
+      // React Native requires this specific format
+      const imageFile: any = {
+        uri: mealData.imageUri,
+        name: `meal_${Date.now()}.jpg`,
+        type: 'image/jpeg',
+      };
+      
+      formData.append('image', imageFile);
+    }
+
+    // Add other meal data as strings (FormData requires strings)
+    formData.append('foodName', mealData.foodName);
+    formData.append('calories', String(mealData.calories));
+    formData.append('protein', String(mealData.protein));
+    formData.append('carbs', String(mealData.carbs));
+    formData.append('fat', String(mealData.fat));
+    formData.append('weight', String(mealData.weight));
+    formData.append('mealType', mealData.mealType);
+    formData.append('timestamp', mealData.timestamp || new Date().toISOString());
+
+    const response = await axios.post(
+      `${API_BASE_URL}/meals`,
+      formData,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    console.log('✅ Meal saved successfully:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Error saving meal:', error.response?.data || error.message);
+    
+    if (error.response) {
+      console.error('❌ Response status:', error.response.status);
+      console.error('❌ Response data:', error.response.data);
+    }
+    
+    throw error;
   }
+}
 
   async getMeals(): Promise<SavedMeal[]> {
     try {

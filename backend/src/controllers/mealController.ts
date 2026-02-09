@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Meal, { IMeal } from "../models/Meal";
-import cloudinary from "../config/cloudinary";
+import cloudinary, { upload, deleteFromCloudinary } from "../middleware/upload.middleware";
 import { Readable } from "stream";
 
 // Helper function to safely get error messages
