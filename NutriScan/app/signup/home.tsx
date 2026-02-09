@@ -18,6 +18,15 @@ import { Images } from "../../src/constants/images";
 import dashboardAPI, { DashboardData } from "../../services/dashboard-api";
 import BottomNav from "./ButtomNav";
 
+
+// Helper to validate image URIs
+const isValidImageUri = (uri: string | undefined): boolean => {
+  if (!uri) return false;
+  return uri.startsWith('http://') || 
+         uri.startsWith('https://') || 
+         uri.startsWith('file://');
+};
+
 const MEAL_TYPE_COLORS: { [key: string]: string } = {
   breakfast: "#FF9800",
   lunch: "#4CAF50",
@@ -452,16 +461,19 @@ export default function Home() {
                 }
                 activeOpacity={0.7}
               >
-                {meal.imageUri ? (
-                  <Image
-                    source={{ uri: meal.imageUri }}
-                    style={styles.mealImage}
-                  />
-                ) : (
-                  <View style={styles.mealImagePlaceholder}>
-                    <Ionicons name="restaurant" size={24} color="#ccc" />
-                  </View>
-                )}
+                {meal.imageUri && isValidImageUri(meal.imageUri) ? (
+  <Image
+    source={{ uri: meal.imageUri }}
+    style={styles.mealImage}
+    onError={(e) => {
+      console.log('❌ Image load error for meal:', meal.id);
+    }}
+  />
+) : (
+  <View style={styles.mealImagePlaceholder}>
+    <Ionicons name="restaurant" size={24} color="#ccc" />
+  </View>
+)}
 
                 <View style={styles.mealInfo}>
                   <Text style={styles.mealName} numberOfLines={1}>
