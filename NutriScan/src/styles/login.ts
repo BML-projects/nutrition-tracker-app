@@ -6,47 +6,11 @@ export const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    paddingTop: 80,
+    paddingTop: 60,
     paddingHorizontal: 30,
-    paddingBottom: 40,
+    paddingBottom: 30,
     alignItems: 'center',
   },
-
-  // Add to existing styles
-requirementsContainer: {
-  marginBottom: 20,
-  paddingHorizontal: 5,
-  paddingVertical: 12,
-  backgroundColor: '#f8f9fa',
-  borderRadius: 8,
-  borderLeftWidth: 3,
-  borderLeftColor: '#000',
-},
-requirementsTitle: {
-  fontSize: 12,
-  fontWeight: '600',
-  color: '#333',
-  marginBottom: 8,
-},
-requirementsText: {
-  fontSize: 11,
-  color: '#666',
-  lineHeight: 18,
-},
-backButton: {
-  position: 'absolute',
-  top: 50,
-  left: 20,
-  zIndex: 10,
-},
-backButtonCircle: {
-  width: 40,
-  height: 40,
-  borderRadius: 20,
-  backgroundColor: '#f0f0f0',
-  justifyContent: 'center',
-  alignItems: 'center',
-},
   iconContainer: {
     width: 80,
     height: 80,
@@ -77,7 +41,7 @@ backButtonCircle: {
     paddingBottom: 40,
   },
   inputWrapper: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   label: {
     fontSize: 14,
@@ -89,12 +53,12 @@ backButtonCircle: {
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: '#e0e0e0',
     paddingHorizontal: 16,
-    height: 60,
+    height: 56,
   },
   inputContainerFocused: {
     borderColor: '#000',
@@ -107,7 +71,7 @@ backButtonCircle: {
   },
   inputContainerError: {
     borderColor: '#FF3B30',
-    backgroundColor: '#fff5f5',
+    backgroundColor: '#fff',
   },
   inputIcon: {
     marginRight: 12,
@@ -118,14 +82,17 @@ backButtonCircle: {
     color: '#000',
     fontWeight: '400',
     backgroundColor: 'transparent',
+    paddingVertical: 0,
+    height: '100%',
   },
   eyeIcon: {
-    padding: 4,
+    padding: 8,
+    marginLeft: 4,
   },
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 6,
     paddingLeft: 4,
   },
   errorText: {
@@ -142,7 +109,8 @@ backButtonCircle: {
     borderColor: '#FF3B30',
     borderRadius: 12,
     padding: 14,
-    marginBottom: 20,
+    marginBottom: 16,
+    marginTop: 4,
   },
   generalErrorText: {
     color: '#FF3B30',
@@ -153,7 +121,9 @@ backButtonCircle: {
   },
   forgotPassword: {
     alignSelf: 'flex-end',
-    marginBottom: 30,
+    marginBottom: 24,
+    marginTop: 8,
+    padding: 4,
   },
   forgotPasswordText: {
     color: '#000',
@@ -163,7 +133,7 @@ backButtonCircle: {
   loginButton: {
     borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: 30,
+    marginBottom: 24,
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -178,7 +148,7 @@ backButtonCircle: {
     paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 60,
+    height: 56,
   },
   loginButtonText: {
     fontSize: 18,
@@ -214,7 +184,6 @@ backButtonCircle: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
   },
   signupText: {
     color: '#666',

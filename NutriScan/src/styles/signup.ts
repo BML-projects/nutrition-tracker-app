@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
   header: {
     paddingTop: 60,
     paddingHorizontal: 30,
-    paddingBottom: 30,
+    paddingBottom: 24,
     alignItems: 'center',
   },
   iconContainer: {
@@ -37,11 +37,11 @@ export const styles = StyleSheet.create({
   formContainer: {
     flex: 1,
     paddingHorizontal: 30,
-    paddingTop: 20,
+    paddingTop: 16,
     paddingBottom: 40,
   },
   inputWrapper: {
-    marginBottom: 24,
+    marginBottom: 18,
   },
   label: {
     fontSize: 14,
@@ -53,12 +53,12 @@ export const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: '#e0e0e0',
     paddingHorizontal: 16,
-    height: 60,
+    height: 56,
   },
   inputContainerFocused: {
     borderColor: '#000',
@@ -71,7 +71,7 @@ export const styles = StyleSheet.create({
   },
   inputContainerError: {
     borderColor: '#FF3B30',
-    backgroundColor: '#fff5f5',
+    backgroundColor: '#fff',
   },
   inputIcon: {
     marginRight: 12,
@@ -82,14 +82,17 @@ export const styles = StyleSheet.create({
     color: '#000',
     fontWeight: '400',
     backgroundColor: 'transparent',
+    paddingVertical: 0,
+    height: '100%',
   },
   eyeIcon: {
-    padding: 4,
+    padding: 8,
+    marginLeft: 4,
   },
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 6,
     paddingLeft: 4,
   },
   errorText: {
@@ -106,7 +109,8 @@ export const styles = StyleSheet.create({
     borderColor: '#FF3B30',
     borderRadius: 12,
     padding: 14,
-    marginBottom: 20,
+    marginBottom: 16,
+    marginTop: 4,
   },
   generalErrorText: {
     color: '#FF3B30',
@@ -118,8 +122,8 @@ export const styles = StyleSheet.create({
   nextButton: {
     borderRadius: 16,
     overflow: 'hidden',
-    marginTop: 10,
-    marginBottom: 25,
+    marginTop: 16,
+    marginBottom: 20,
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -135,10 +139,9 @@ export const styles = StyleSheet.create({
     paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 60,
+    height: 56,
     gap: 10,
   },
-
   backButton: {
     position: 'absolute',
     top: 50,
@@ -155,7 +158,6 @@ export const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#e0e0e0',
   },
-
   nextButtonText: {
     fontSize: 18,
     fontWeight: '700',
@@ -166,7 +168,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 1,
+    marginBottom: 16,
   },
   loginText: {
     color: '#666',

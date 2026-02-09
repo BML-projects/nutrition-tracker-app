@@ -8,6 +8,7 @@ import {
   View,
   Keyboard,
   StatusBar,
+  Platform,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -70,21 +71,21 @@ export default function Login() {
 
       const data = await login(email.trim(), password.trim());
 
-     if (data.success) {
-  await AsyncStorage.setItem("accessToken", data.accessToken);
+      if (data.success) {
+        await AsyncStorage.setItem("accessToken", data.accessToken);
 
-  if (data.user) {
-    await AsyncStorage.setItem("userData", JSON.stringify(data.user));
-  }
+        if (data.user) {
+          await AsyncStorage.setItem("userData", JSON.stringify(data.user));
+        }
 
-  // ✅ STORE USER ID (VERY IMPORTANT)
-  if (data.user?.id) {
-    await AsyncStorage.setItem("userId", data.user.id);
-  }
+        // ✅ STORE USER ID (VERY IMPORTANT)
+        if (data.user?.id) {
+          await AsyncStorage.setItem("userId", data.user.id);
+        }
 
-  console.log("✅ Login successful, token + userId stored");
+        console.log("✅ Login successful, token + userId stored");
 
-  router.replace("./signup/home");
+        router.replace("./signup/home");
 
       } else {
         console.log("❌ Login failed:", data.message);
@@ -108,7 +109,7 @@ export default function Login() {
   };
 
   return (
-    <KeyboardAwareContainer enableScroll={false}>
+    <KeyboardAwareContainer enableScroll={true}>
       <View style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
@@ -151,12 +152,15 @@ export default function Login() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                autoComplete="email"
+                textContentType="emailAddress"
                 editable={!loading}
                 onFocus={() => setEmailFocused(true)}
                 onBlur={() => setEmailFocused(false)}
                 returnKeyType="next"
                 blurOnSubmit={false}
                 onSubmitEditing={() => passwordRef.current?.focus()}
+                importantForAutofill="yes"
               />
             </View>
             {emailError ? (
@@ -193,17 +197,21 @@ export default function Login() {
                   if (generalError) setGeneralError("");
                 }}
                 secureTextEntry={secure}
+                autoComplete="password"
+                textContentType="password"
                 editable={!loading}
                 onFocus={() => setPasswordFocused(true)}
                 onBlur={() => setPasswordFocused(false)}
                 returnKeyType="done"
                 blurOnSubmit={true}
                 onSubmitEditing={handleLogin}
+                importantForAutofill="yes"
               />
               <TouchableOpacity
                 onPress={() => setSecure(!secure)}
                 disabled={loading}
                 style={styles.eyeIcon}
+                activeOpacity={0.7}
               >
                 <Ionicons
                   name={secure ? "eye-off-outline" : "eye-outline"}
@@ -232,6 +240,7 @@ export default function Login() {
           <TouchableOpacity
             style={styles.forgotPassword}
             onPress={() => router.push("./forgot-password")}
+            activeOpacity={0.7}
           >
             <Text style={styles.forgotPasswordText}>
               Forgot Password?
@@ -269,7 +278,10 @@ export default function Login() {
           {/* Signup Link */}
           <View style={styles.signupContainer}>
             <Text style={styles.signupText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => router.push("./signup")}>
+            <TouchableOpacity 
+              onPress={() => router.push("./signup")}
+              activeOpacity={0.7}
+            >
               <Text style={styles.signupLink}>Sign Up</Text>
             </TouchableOpacity>
           </View>
