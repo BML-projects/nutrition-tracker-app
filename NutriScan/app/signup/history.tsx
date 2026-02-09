@@ -16,6 +16,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { styles } from "../../src/styles/history";
 import mealAPI, { SavedMeal } from "../../services/meal-api";
 
+
+
+// Helper to validate image URIs
+const isValidImageUri = (uri: string | undefined): boolean => {
+  if (!uri) return false;
+  return uri.startsWith('http://') || 
+         uri.startsWith('https://') || 
+         uri.startsWith('file://');
+};
+
 // Meal type configurations
 const MEAL_CONFIGS = {
   breakfast: { label: 'Breakfast', icon: 'sunny', color: '#FF9800', gradient: ['#FF9800', '#F57C00'] },
@@ -332,19 +342,22 @@ export default function HistoryScreen() {
                         <Ionicons name={mealConfig.icon as any} size={16} color="#fff" />
                       </View>
 
-                      {/* Food Image */}
-                      <View style={styles.mealImageContainer}>
-                        {meal.imageUri ? (
-                          <Image 
-                            source={{ uri: meal.imageUri }} 
-                            style={styles.mealImage}
-                          />
-                        ) : (
-                          <View style={styles.mealImagePlaceholder}>
-                            <Ionicons name="image-outline" size={32} color="#ccc" />
-                          </View>
-                        )}
-                      </View>
+                     {/* Food Image */}
+<View style={styles.mealImageContainer}>
+  {meal.imageUri && isValidImageUri(meal.imageUri) ? (
+    <Image 
+      source={{ uri: meal.imageUri }} 
+      style={styles.mealImage}
+      onError={(e) => {
+        console.log('❌ Image load error for meal:', meal._id);
+      }}
+    />
+  ) : (
+    <View style={styles.mealImagePlaceholder}>
+      <Ionicons name="image-outline" size={32} color="#ccc" />
+    </View>
+  )}
+</View>
 
                       {/* Meal Info */}
                       <View style={styles.mealInfo}>
