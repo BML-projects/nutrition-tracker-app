@@ -83,7 +83,7 @@ export default function Home() {
     if (!result.canceled) {
       const imageUri = result.assets[0].uri;
       router.push({
-        pathname: "./signup/food-details",
+        pathname: "./fooddetails",
         params: { imageUri },
       });
     }
@@ -92,7 +92,7 @@ export default function Home() {
   // Navigate to meal details
   const viewMealDetails = (mealId: string, imageUri: string, foodName: string) => {
     router.push({
-      pathname: "./signup/food-details",
+      pathname: "./fooddetails",
       params: {
         imageUri,
         foodName,
