@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import axios from "axios";
 import { Ingredient, Prediction } from "@/src/types/index";
 import { styles } from "@/src/styles/fooddetails";
+import mealAPI from "@/services/meal-api";
 
 const BACKEND_HOST = "https://unnominal-nonfashionable-marcela.ngrok-free.dev/api/food/predict";
 
@@ -39,6 +40,8 @@ export default function FoodDetailScreen() {
   const params = useLocalSearchParams();
 
   const imageUri = params.imageUri as string;
+  const isViewMode = params.isViewMode === 'true'; // Check if viewing saved meal
+  const mealId = params.mealId as string; // For viewing saved meals
 
   // Original nutrition values (from API)
   const [originalCalories, setOriginalCalories] = useState(0);
@@ -71,6 +74,42 @@ export default function FoodDetailScreen() {
   // Meal type selection
   const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
 
+  // Load meal details if viewing saved meal
+  useEffect(() => {
+    if (isViewMode && mealId) {
+      loadMealDetails();
+    }
+  }, [isViewMode, mealId]);
+
+  const loadMealDetails = async () => {
+    try {
+      setLoading(true);
+      const meal = await mealAPI.getMealById(mealId);
+      
+      setFoodName(meal.foodName);
+      setCalories(meal.calories);
+      setProtein(meal.protein);
+      setCarbs(meal.carbs);
+      setFat(meal.fat);
+      setWeight(meal.weight.toString());
+      setSelectedMealType(meal.mealType);
+      setScanned(true);
+      
+      // Set original values for recalculation if needed
+      setOriginalCalories(meal.calories);
+      setOriginalProtein(meal.protein);
+      setOriginalCarbs(meal.carbs);
+      setOriginalFat(meal.fat);
+      
+      setAnalysis(`Logged meal from ${new Date(meal.timestamp).toLocaleDateString()}`);
+    } catch (error) {
+      console.error("Error loading meal:", error);
+      setAnalysis("Failed to load meal details");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Calculate nutrition based on weight
   useEffect(() => {
     if (originalCalories > 0) {
@@ -82,7 +121,7 @@ export default function FoodDetailScreen() {
     }
   }, [weight, portionMultiplier, originalCalories]);
 
-  const onUpdatePress = () => {
+  const onUpdatePress = async () => {
     if (!selectedMealType) {
       alert("Please select a meal type");
       return;
@@ -100,68 +139,88 @@ export default function FoodDetailScreen() {
       timestamp: new Date().toISOString(),
     };
 
-    console.log("SAVING MEAL:", mealData);
-    // TODO: Save to backend or AsyncStorage
-    alert(`Added to ${MEAL_TYPES.find(m => m.id === selectedMealType)?.label}!`);
-  };
-
-  const uploadImage = async () => {
-    if (!imageUri || !BACKEND_HOST) return;
-    setLoading(true);
-
     try {
-      const responseBlob = await fetch(imageUri);
-      const blob = await responseBlob.blob();
-
-      const formData = new FormData();
-      formData.append("file", blob, "food.jpg");
-
-      const response = await axios.post(BACKEND_HOST, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      const data = response.data;
-      console.log("FULL RESPONSE:", data);
-
-      setFoodName(data.top1.class);
-      setAnalysis(`AI detected with ${Math.round(data.top1.confidence * 100)}% confidence`);
-      setScanned(true);
-
-      if (data.nutrition) {
-        // Store original values
-        setOriginalCalories(data.nutrition.calories ?? 0);
-        setOriginalProtein(data.nutrition.protein ?? 0);
-        setOriginalCarbs(data.nutrition.carbs ?? 0);
-        setOriginalFat(data.nutrition.fat ?? 0);
-
-        // Set display values (will be adjusted by weight)
-        setCalories(data.nutrition.calories ?? 0);
-        setProtein(data.nutrition.protein ?? 0);
-        setCarbs(data.nutrition.carbs ?? 0);
-        setFat(data.nutrition.fat ?? 0);
-      }
-
-      setIngredients([
-        {
-          name: data.top1.class,
-          calories: data.nutrition?.calories ?? 0,
-          protein: data.nutrition?.protein ?? 0,
-          carbs: data.nutrition?.carbs ?? 0,
-          fat: data.nutrition?.fat ?? 0,
-        },
-      ]);
-
-      if (data.top5) {
-        setTop5(data.top5);
-      }
-
-    } catch (err: any) {
-      console.error(err);
-      setAnalysis("Prediction failed. Please try again.");
+      setLoading(true);
+      const savedMeal = await mealAPI.saveMeal(mealData);
+      console.log("MEAL SAVED:", savedMeal);
+      
+      alert(`Added to ${MEAL_TYPES.find(m => m.id === selectedMealType)?.label}!`);
+      
+      // Navigate back or to history
+      setTimeout(() => {
+        router.back();
+      }, 500);
+    } catch (error: any) {
+      console.error("Error saving meal:", error);
+      alert("Failed to save meal. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
+  const uploadImage = async () => {
+  if (!imageUri) return;
+
+  setLoading(true);
+
+  try {
+    const formData = new FormData();
+
+    formData.append("file", {
+      uri: imageUri,
+      name: "food.jpg",
+      type: "image/jpeg",
+    } as any);
+
+    const response = await axios.post(
+      "https://unnominal-nonfashionable-marcela.ngrok-free.dev/api/food/predict",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    const data = response.data;
+    console.log("FULL RESPONSE:", data);
+
+    setFoodName(data.top1.class);
+    setAnalysis(`AI detected with ${Math.round(data.top1.confidence * 100)}% confidence`);
+    setScanned(true);
+
+    if (data.nutrition) {
+      setOriginalCalories(data.nutrition.calories ?? 0);
+      setOriginalProtein(data.nutrition.protein ?? 0);
+      setOriginalCarbs(data.nutrition.carbs ?? 0);
+      setOriginalFat(data.nutrition.fat ?? 0);
+
+      setCalories(data.nutrition.calories ?? 0);
+      setProtein(data.nutrition.protein ?? 0);
+      setCarbs(data.nutrition.carbs ?? 0);
+      setFat(data.nutrition.fat ?? 0);
+    }
+
+    setIngredients([
+      {
+        name: data.top1.class,
+        calories: data.nutrition?.calories ?? 0,
+        protein: data.nutrition?.protein ?? 0,
+        carbs: data.nutrition?.carbs ?? 0,
+        fat: data.nutrition?.fat ?? 0,
+      },
+    ]);
+
+    if (data.top5) setTop5(data.top5);
+
+  } catch (err: any) {
+    console.error("UPLOAD ERROR:", err?.response?.data || err.message);
+    setAnalysis("Prediction failed. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const totalMacros = protein + carbs + fat;
   const proteinPercentage = totalMacros > 0 ? (protein / totalMacros) * 100 : 0;
@@ -192,7 +251,7 @@ export default function FoodDetailScreen() {
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
 
-        {imageUri && (
+        {imageUri && !isViewMode && (
           <TouchableOpacity 
             style={styles.scanButton} 
             onPress={uploadImage}
@@ -226,7 +285,7 @@ export default function FoodDetailScreen() {
           {scanned && (
             <View style={styles.verifiedBadge}>
               <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
-              <Text style={styles.verifiedText}>Verified</Text>
+              <Text style={styles.verifiedText}>{isViewMode ? 'Logged' : 'Verified'}</Text>
             </View>
           )}
         </View>
@@ -238,7 +297,7 @@ export default function FoodDetailScreen() {
         </View>
 
         {/* Portion/Weight Adjustment */}
-        {scanned && (
+        {scanned && !isViewMode && (
           <View style={styles.portionSection}>
             <Text style={styles.sectionTitle}>Adjust Portion</Text>
             
@@ -277,6 +336,22 @@ export default function FoodDetailScreen() {
               </View>
               <Ionicons name="chevron-forward" size={20} color="#999" />
             </TouchableOpacity>
+          </View>
+        )}
+
+        {/* View mode weight display */}
+        {isViewMode && (
+          <View style={styles.portionSection}>
+            <Text style={styles.sectionTitle}>Portion Size</Text>
+            <View style={styles.weightCard}>
+              <View style={styles.weightIconCircle}>
+                <MaterialCommunityIcons name="weight-gram" size={24} color="#2196F3" />
+              </View>
+              <View style={styles.weightInfo}>
+                <Text style={styles.weightLabel}>Weight</Text>
+                <Text style={styles.weightValue}>{weight}g</Text>
+              </View>
+            </View>
           </View>
         )}
 
@@ -347,10 +422,12 @@ export default function FoodDetailScreen() {
 
         </View>
 
-        {/* Meal Type Selection */}
+        {/* Meal Type Selection or Display */}
         {scanned && (
           <View style={styles.mealTypeSection}>
-            <Text style={styles.sectionTitle}>Select Meal Type</Text>
+            <Text style={styles.sectionTitle}>
+              {isViewMode ? 'Meal Type' : 'Select Meal Type'}
+            </Text>
             <View style={styles.mealTypesGrid}>
               {MEAL_TYPES.map((meal) => (
                 <TouchableOpacity
@@ -359,8 +436,9 @@ export default function FoodDetailScreen() {
                     styles.mealTypeCard,
                     selectedMealType === meal.id && styles.mealTypeCardActive
                   ]}
-                  onPress={() => setSelectedMealType(meal.id)}
-                  activeOpacity={0.7}
+                  onPress={() => !isViewMode && setSelectedMealType(meal.id)}
+                  activeOpacity={isViewMode ? 1 : 0.7}
+                  disabled={isViewMode}
                 >
                   <View style={[
                     styles.mealTypeIconCircle,
@@ -414,23 +492,30 @@ export default function FoodDetailScreen() {
           </View>
         )}
 
-        {/* Update Button */}
-        {scanned && (
+        {/* Update Button - Only show in add mode */}
+        {scanned && !isViewMode && (
           <TouchableOpacity 
             style={styles.updateButton} 
             onPress={onUpdatePress}
             activeOpacity={0.9}
+            disabled={loading}
           >
             <LinearGradient
-              colors={selectedMealType ? ['#4CAF50', '#45a049'] : ['#999', '#777']}
+              colors={selectedMealType && !loading ? ['#4CAF50', '#45a049'] : ['#999', '#777']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.updateGradient}
             >
-              <Ionicons name="checkmark-circle" size={22} color="#fff" />
-              <Text style={styles.updateText}>
-                {selectedMealType ? 'SAVE TO DIARY' : 'SELECT MEAL TYPE'}
-              </Text>
+              {loading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <>
+                  <Ionicons name="checkmark-circle" size={22} color="#fff" />
+                  <Text style={styles.updateText}>
+                    {selectedMealType ? 'SAVE TO DIARY' : 'SELECT MEAL TYPE'}
+                  </Text>
+                </>
+              )}
             </LinearGradient>
           </TouchableOpacity>
         )}

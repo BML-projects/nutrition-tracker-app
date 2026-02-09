@@ -410,35 +410,26 @@ export const login = async (req: Request, res: Response) => {
   try {
     console.log("=== LOGIN REQUEST ===");
     console.log("Request body:", req.body);
-    console.log("Request headers:", req.headers);
-    console.log("Cookies:", req.cookies);
 
     const { email, password } = req.body;
 
     if (!email || !password) {
-      console.log("Missing email or password");
       return res.status(400).json({ 
         success: false,
         message: "Email and password required" 
       });
     }
 
-    console.log("Looking for user with email:", email);
     const user = await User.findOne({ email }).select('+password');
     
     if (!user) {
-      console.log("User not found with email:", email);
       return res.status(401).json({ 
         success: false,
         message: "Invalid email or password" 
       });
     }
 
-    console.log("User found:", user._id);
-    console.log("Stored hashed password exists:", !!user.password);
-
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log("Password match:", isMatch);
     
     if (!isMatch) {
       return res.status(401).json({ 
@@ -447,28 +438,25 @@ export const login = async (req: Request, res: Response) => {
       });
     }
 
+    // Generate tokens
     const accessToken = generateAccessToken(user._id.toString());
     const refreshToken = generateRefreshToken(user._id.toString());
-
-    console.log("Tokens generated");
-    console.log("Setting cookie with refresh token");
 
     // Set refresh token cookie
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: "/",
     });
 
-    console.log("Login successful for user:", user._id);
-
+    // Return accessToken + user info
     return res.status(200).json({ 
       success: true,
       accessToken,
       user: {
-        id: user._id,
+        id: user._id.toString(),
         email: user.email,
         fullName: user.fullname,
         bmi: user.bmi,
@@ -482,6 +470,63 @@ export const login = async (req: Request, res: Response) => {
     return res.status(500).json({ 
       success: false,
       message: "Internal server error",
+      error: error.message 
+    });
+  }
+};
+
+export const getCurrentUser = async (req: Request, res: Response) => {
+  try {
+    console.log("=== GET CURRENT USER REQUEST ===");
+    
+    // The protect middleware has already set req.userId
+    const userId = (req as any).userId;
+    
+    console.log("User ID from token:", userId);
+    
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false,
+        message: "User not authenticated" 
+      });
+    }
+
+    // Optionally, fetch full user details from database
+    const user = await User.findById(userId).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    console.log("✅ Returning user info for:", userId);
+
+    // Return user info
+    res.status(200).json({
+      success: true,
+      userId: userId,
+      _id: userId,  // Include both for compatibility
+      user: {
+        id: user._id.toString(),
+        email: user.email,
+        fullName: user.fullname,
+        gender: user.gender,
+        height: user.height,
+        weight: user.weight,
+        dob: user.dob,
+        goal: user.goal,
+        bmi: user.bmi,
+        bmr: user.bmr,
+        dailyCalories: user.dailyCalories,
+      }
+    });
+  } catch (error: any) {
+    console.error("GET CURRENT USER ERROR:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Server Error", 
       error: error.message 
     });
   }

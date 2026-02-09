@@ -70,16 +70,22 @@ export default function Login() {
 
       const data = await login(email.trim(), password.trim());
 
-      if (data.success) {
-        await AsyncStorage.setItem("accessToken", data.accessToken);
+     if (data.success) {
+  await AsyncStorage.setItem("accessToken", data.accessToken);
 
-        if (data.user) {
-          await AsyncStorage.setItem("userData", JSON.stringify(data.user));
-        }
+  if (data.user) {
+    await AsyncStorage.setItem("userData", JSON.stringify(data.user));
+  }
 
-        console.log("✅ Login successful, token stored");
+  // ✅ STORE USER ID (VERY IMPORTANT)
+  if (data.user?.id) {
+    await AsyncStorage.setItem("userId", data.user.id);
+  }
 
-        router.replace("./signup/home");
+  console.log("✅ Login successful, token + userId stored");
+
+  router.replace("./signup/home");
+
       } else {
         console.log("❌ Login failed:", data.message);
         setGeneralError(data.message || "Login failed");
