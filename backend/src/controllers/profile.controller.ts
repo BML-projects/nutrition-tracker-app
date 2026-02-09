@@ -2,30 +2,12 @@ import { Request, Response } from 'express';
 import User from '../models/User.model';
 import bcrypt from 'bcryptjs';
 import {
-      calculateBMI,
-      calculateBMR,
-      calculateDailyCalories,
-      calculateGoalCalories
+  calculateBMI,
+  calculateBMR,
+  calculateDailyCalories,
+  calculateGoalCalories
 } from '../utils/calculations';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-
-
-
-// ==================== Multer setup for profile photo ====================
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = 'uploads/';
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + ext);
-  }
-});
-export const upload = multer({ storage });
+import { upload, deleteFromCloudinary } from '../middleware/upload.middleware';
 
 // ==================== UPDATE PROFILE DETAILS ====================
 export const updateProfile = async (req: Request, res: Response) => {
@@ -63,7 +45,7 @@ export const updateProfile = async (req: Request, res: Response) => {
   }
 };
 
-// ==================== UPLOAD PROFILE PHOTO ====================
+// ==================== UPLOAD PROFILE PHOTO TO CLOUDINARY ====================
 export const uploadProfilePhoto = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
@@ -71,7 +53,8 @@ export const uploadProfilePhoto = async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
-    const file = (req as any).files?.photo?.[0];
+    // Check for file - Cloudinary storage uses req.file
+    const file = req.file;
     if (!file) {
       return res.status(400).json({ success: false, error: 'No file uploaded' });
     }
@@ -81,16 +64,31 @@ export const uploadProfilePhoto = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
 
-user.profilePhoto = `/uploads/${file.filename}`;
-await user.save();
+    // Delete old profile photo from Cloudinary if exists
+    if (user.profilePhoto) {
+      await deleteFromCloudinary(user.profilePhoto);
+    }
 
-    res.json({ success: true, profilePhoto: user.profilePhoto });
+    // Save Cloudinary URL (file.path contains the Cloudinary URL)
+    user.profilePhoto = file.path;
+    await user.save();
+
+    console.log('📸 Profile photo uploaded to Cloudinary:', user.profilePhoto);
+
+    res.json({ 
+      success: true, 
+      profilePhoto: user.profilePhoto,
+      message: 'Profile photo uploaded successfully'
+    });
   } catch (error: any) {
     console.error('Upload profile photo error:', error);
-    res.status(500).json({ success: false, error: 'Server error' });
+    res.status(500).json({ 
+      success: false, 
+      error: 'Server error',
+      message: error.message 
+    });
   }
 };
-
 
 // ==================== CHANGE PASSWORD ====================
 export const changePassword = async (req: Request, res: Response) => {
@@ -160,7 +158,7 @@ export const changePassword = async (req: Request, res: Response) => {
   }
 };
 
-// Get user profile
+// ==================== GET PROFILE ====================
 export const getProfile = async (req: Request, res: Response) => {
   try {
     console.log('👤 [Get Profile] Starting...');
@@ -221,7 +219,7 @@ export const getProfile = async (req: Request, res: Response) => {
         bmr: user.bmr,
         dailyCalories: user.dailyCalories,
         activityLevel: user.activityLevel || 'moderate',
-        profilePhoto: user.profilePhoto,
+        profilePhoto: user.profilePhoto, // Cloudinary URL
       },
       goalCalories: allGoalCalories
     };
@@ -238,7 +236,7 @@ export const getProfile = async (req: Request, res: Response) => {
   }
 };
 
-// Update activity level
+// ==================== UPDATE ACTIVITY LEVEL ====================
 export const updateActivityLevel = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
@@ -291,7 +289,7 @@ export const updateActivityLevel = async (req: Request, res: Response) => {
   }
 };
 
-// Update goal with calorie recalculation
+// ==================== UPDATE GOAL ====================
 export const updateGoal = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
@@ -372,3 +370,6 @@ const getGoalExplanation = (goal: string, calories: number) => {
   };
   return explanations[goal] || 'Goal updated successfully.';
 };
+
+// Export upload middleware
+export { upload };
