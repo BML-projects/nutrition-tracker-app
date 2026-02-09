@@ -8,6 +8,7 @@ import {
   View,
   StatusBar,
   Keyboard,
+  Platform,
 } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSignup } from "../../src/context/SignupContext";
@@ -20,6 +21,7 @@ export default function Signup() {
   const { data, setData } = useSignup();
 
   // Refs for input navigation
+  const nameRef = useRef<TextInput>(null);
   const emailRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
@@ -128,6 +130,7 @@ export default function Signup() {
           style={styles.backButton}
           onPress={() => router.back()}
           disabled={loading}
+          activeOpacity={0.7}
         >
           <View style={styles.backButtonCircle}>
             <Ionicons name="arrow-back" size={24} color="#000" />
@@ -146,7 +149,10 @@ export default function Signup() {
         {/* Login Link */}
         <View style={styles.loginContainer}>
           <Text style={styles.loginText}>Already have an account? </Text>
-          <TouchableOpacity onPress={() => router.push("/login")}>
+          <TouchableOpacity 
+            onPress={() => router.push("/login")}
+            activeOpacity={0.7}
+          >
             <Text style={styles.loginLink}>Login</Text>
           </TouchableOpacity>
         </View>
@@ -171,6 +177,7 @@ export default function Signup() {
                 style={styles.inputIcon}
               />
               <TextInput
+                ref={nameRef}
                 style={styles.input}
                 placeholder="Enter your full name"
                 placeholderTextColor="#999"
@@ -187,8 +194,10 @@ export default function Signup() {
                 blurOnSubmit={false}
                 onSubmitEditing={() => emailRef.current?.focus()}
                 autoCorrect={false}
-                autoComplete="off"
+                autoComplete="name"
+                textContentType="name"
                 autoCapitalize="words"
+                importantForAutofill="no"
               />
             </View>
             {nameError && (
@@ -235,7 +244,9 @@ export default function Signup() {
                 blurOnSubmit={false}
                 onSubmitEditing={() => passwordRef.current?.focus()}
                 autoCorrect={false}
-                autoComplete="off"
+                autoComplete="email"
+                textContentType="emailAddress"
+                importantForAutofill="no"
               />
             </View>
             {emailError && (
@@ -281,12 +292,15 @@ export default function Signup() {
                 blurOnSubmit={false}
                 onSubmitEditing={() => confirmPasswordRef.current?.focus()}
                 autoCorrect={false}
-                autoComplete="off"
+                autoComplete="password-new"
+                textContentType="newPassword"
+                importantForAutofill="no"
               />
               <TouchableOpacity
                 onPress={() => setSecure(!secure)}
                 disabled={loading}
                 style={styles.eyeIcon}
+                activeOpacity={0.7}
               >
                 <Ionicons
                   name={secure ? "eye-off-outline" : "eye-outline"}
@@ -338,12 +352,15 @@ export default function Signup() {
                 blurOnSubmit={true}
                 onSubmitEditing={handleNext}
                 autoCorrect={false}
-                autoComplete="off"
+                autoComplete="password-new"
+                textContentType="newPassword"
+                importantForAutofill="no"
               />
               <TouchableOpacity
                 onPress={() => setSecureConfirm(!secureConfirm)}
                 disabled={loading}
                 style={styles.eyeIcon}
+                activeOpacity={0.7}
               >
                 <Ionicons
                   name={secureConfirm ? "eye-off-outline" : "eye-outline"}
@@ -375,20 +392,19 @@ export default function Signup() {
             activeOpacity={0.9}
             disabled={loading}
           >
-<LinearGradient
-  colors={loading ? ['#d0d0d0', '#b0b0b0'] : ['#000', '#2a2a2a']}
-  start={{ x: 0, y: 0 }}
-  end={{ x: 1, y: 0 }}
-  style={styles.gradientButton}
->
-  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
-    <Text style={styles.nextButtonText}>
-      {loading ? "Checking..." : "Next"}
-    </Text>
-    <Ionicons name="arrow-forward" size={22} color="#fff" style={{ marginLeft: 8 }} />
-  </View>
-</LinearGradient>
-
+            <LinearGradient
+              colors={loading ? ['#d0d0d0', '#b0b0b0'] : ['#000', '#2a2a2a']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.gradientButton}
+            >
+              <Text style={styles.nextButtonText}>
+                {loading ? "Checking..." : "Next"}
+              </Text>
+              {!loading && (
+                <Ionicons name="arrow-forward" size={22} color="#fff" />
+              )}
+            </LinearGradient>
           </TouchableOpacity>
 
         </View>
