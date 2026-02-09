@@ -337,24 +337,19 @@ export default function SettingsScreen() {
           {/* ================= PROFILE HERO CARD ================= */}
           <View style={styles.profileHeroCard}>
             <View style={styles.avatarContainer}>
-              <View style={styles.avatarContainer}>
-  {user?.profilePhoto ? (
-    <Image
-      source={{ uri: user.profilePhoto }}
-      style={styles.avatarImage}
-      resizeMode="cover"
-    />
-  ) : (
-    <View style={styles.avatarGradient}>
-      <Ionicons name="person" size={50} color="#fff" />
-    </View>
-  )}
-
-  <View style={styles.avatarBadge}>
-    <Ionicons name="checkmark-circle" size={24} color="#10b981" />
-  </View>
-</View>
-
+              {user?.profilePhoto ? (
+                <Image
+                  source={{ uri: user.profilePhoto }}
+                  style={styles.avatarImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={styles.avatarGradient}>
+                  <Ionicons name="person" size={50} color="#fff" />
+                </View>
+              )}
+              
+              {/* Single badge - only one! */}
               <View style={styles.avatarBadge}>
                 <Ionicons name="checkmark-circle" size={24} color="#10b981" />
               </View>
@@ -664,7 +659,7 @@ export default function SettingsScreen() {
       )}
 
       {/* ================= BOTTOM NAV ================= */}
-        <BottomNav /> 
+      <BottomNav /> 
     </View>
   );
 }

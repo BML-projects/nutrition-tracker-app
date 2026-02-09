@@ -157,7 +157,7 @@ export default function Home() {
             <View style={styles.headerActions}>
               <TouchableOpacity 
                 style={styles.profileButton}
-                onPress={() => router.push("./signup/settings")}
+                onPress={() => router.push("./setting")}
               >
                 {userInfo.profilePhoto ? (
                   <Image 
