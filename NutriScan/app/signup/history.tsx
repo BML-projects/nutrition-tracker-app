@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,12 +7,14 @@ import {
   Image,
   RefreshControl,
   StatusBar,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from 'expo-linear-gradient';
 import { styles } from "../../src/styles/history";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import mealAPI, { SavedMeal } from "../../services/meal-api";
 
 // Meal type configurations
 const MEAL_CONFIGS = {
@@ -23,42 +25,30 @@ const MEAL_CONFIGS = {
   dessert: { label: 'Dessert', icon: 'ice-cream', color: '#E91E63', gradient: ['#E91E63', '#C2185B'] },
 };
 
-interface MealEntry {
-  id: string;
-  foodName: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  weight: number;
-  mealType: string;
-  imageUri: string;
-  timestamp: string;
-}
-
 export default function HistoryScreen() {
   const router = useRouter();
-  const [meals, setMeals] = useState<MealEntry[]>([]);
+  const [meals, setMeals] = useState<SavedMeal[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadMeals();
-  }, []);
+  // Load meals when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadMeals();
+    }, [])
+  );
 
   const loadMeals = async () => {
     try {
-      const storedMeals = await AsyncStorage.getItem('mealHistory');
-      if (storedMeals) {
-        const parsedMeals = JSON.parse(storedMeals);
-        // Sort by timestamp, newest first
-        parsedMeals.sort((a: MealEntry, b: MealEntry) => 
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        );
-        setMeals(parsedMeals);
-      }
+      setLoading(true);
+      const fetchedMeals = await mealAPI.getMeals();
+      setMeals(fetchedMeals);
     } catch (error) {
       console.error('Error loading meals:', error);
+      Alert.alert('Error', 'Failed to load meal history');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,13 +59,26 @@ export default function HistoryScreen() {
   };
 
   const deleteMeal = async (id: string) => {
-    try {
-      const updatedMeals = meals.filter(meal => meal.id !== id);
-      await AsyncStorage.setItem('mealHistory', JSON.stringify(updatedMeals));
-      setMeals(updatedMeals);
-    } catch (error) {
-      console.error('Error deleting meal:', error);
-    }
+    Alert.alert(
+      'Delete Meal',
+      'Are you sure you want to delete this meal?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await mealAPI.deleteMeal(id);
+              setMeals(meals.filter(meal => meal._id !== id));
+            } catch (error) {
+              console.error('Error deleting meal:', error);
+              Alert.alert('Error', 'Failed to delete meal');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const formatTime = (timestamp: string) => {
@@ -98,12 +101,12 @@ export default function HistoryScreen() {
     } else if (date.toDateString() === yesterday.toDateString()) {
       return 'Yesterday';
     } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
   };
 
   const groupMealsByDate = () => {
-    const grouped: { [key: string]: MealEntry[] } = {};
+    const grouped: { [key: string]: SavedMeal[] } = {};
     
     meals.forEach(meal => {
       if (selectedFilter && meal.mealType !== selectedFilter) return;
@@ -118,11 +121,39 @@ export default function HistoryScreen() {
     return grouped;
   };
 
-  const getTotalCalories = (mealsList: MealEntry[]) => {
+  const getTotalCalories = (mealsList: SavedMeal[]) => {
     return mealsList.reduce((sum, meal) => sum + meal.calories, 0);
   };
 
+  const getTotalMacros = (mealsList: SavedMeal[]) => {
+    return mealsList.reduce(
+      (totals, meal) => ({
+        protein: totals.protein + meal.protein,
+        carbs: totals.carbs + meal.carbs,
+        fat: totals.fat + meal.fat,
+      }),
+      { protein: 0, carbs: 0, fat: 0 }
+    );
+  };
+
+  const viewMealDetails = (meal: SavedMeal) => {
+    router.push({
+      pathname: "./signup/food-details",
+      params: {
+        imageUri: meal.imageUri,
+        foodName: meal.foodName,
+        mealId: meal._id,
+        isViewMode: 'true',
+      }
+    });
+  };
+
   const groupedMeals = groupMealsByDate();
+  const filteredMeals = selectedFilter 
+    ? meals.filter(m => m.mealType === selectedFilter)
+    : meals;
+  const totalDayCalories = getTotalCalories(filteredMeals);
+  const totalDayMacros = getTotalMacros(filteredMeals);
 
   return (
     <View style={styles.container}>
@@ -130,7 +161,13 @@ export default function HistoryScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <View>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#000" />
+        </TouchableOpacity>
+        <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Meal History</Text>
           <Text style={styles.headerSubtitle}>{meals.length} meals logged</Text>
         </View>
@@ -141,6 +178,44 @@ export default function HistoryScreen() {
           <Ionicons name="calendar-outline" size={24} color="#000" />
         </TouchableOpacity>
       </View>
+
+      {/* Daily Summary Card */}
+      {!loading && meals.length > 0 && (
+        <View style={styles.summaryCard}>
+          <LinearGradient
+            colors={['#4CAF50', '#45a049']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.summaryGradient}
+          >
+            <View style={styles.summaryRow}>
+              <View style={styles.summaryItem}>
+                <Ionicons name="flame" size={24} color="#fff" />
+                <Text style={styles.summaryValue}>{totalDayCalories}</Text>
+                <Text style={styles.summaryLabel}>Calories</Text>
+              </View>
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryItem}>
+                <MaterialCommunityIcons name="arm-flex" size={24} color="#fff" />
+                <Text style={styles.summaryValue}>{totalDayMacros.protein}g</Text>
+                <Text style={styles.summaryLabel}>Protein</Text>
+              </View>
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryItem}>
+                <MaterialCommunityIcons name="bread-slice" size={24} color="#fff" />
+                <Text style={styles.summaryValue}>{totalDayMacros.carbs}g</Text>
+                <Text style={styles.summaryLabel}>Carbs</Text>
+              </View>
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryItem}>
+                <MaterialCommunityIcons name="water" size={24} color="#fff" />
+                <Text style={styles.summaryValue}>{totalDayMacros.fat}g</Text>
+                <Text style={styles.summaryLabel}>Fat</Text>
+              </View>
+            </View>
+          </LinearGradient>
+        </View>
+      )}
 
       {/* Filter Chips */}
       <ScrollView 
@@ -190,128 +265,133 @@ export default function HistoryScreen() {
       </ScrollView>
 
       {/* Meals List */}
-      <ScrollView
-        style={styles.mealsList}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        {Object.keys(groupedMeals).length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="restaurant-outline" size={80} color="#e0e0e0" />
-            <Text style={styles.emptyTitle}>No meals logged yet</Text>
-            <Text style={styles.emptySubtitle}>Start tracking your meals to see them here</Text>
-            <TouchableOpacity 
-              style={styles.emptyButton}
-              onPress={() => router.push("/signup/scan")}
-            >
-              <LinearGradient
-                colors={['#4CAF50', '#45a049']}
-                style={styles.emptyButtonGradient}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+          <Text style={styles.loadingText}>Loading meals...</Text>
+        </View>
+      ) : (
+        <ScrollView
+          style={styles.mealsList}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          {Object.keys(groupedMeals).length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="restaurant-outline" size={80} color="#e0e0e0" />
+              <Text style={styles.emptyTitle}>No meals logged yet</Text>
+              <Text style={styles.emptySubtitle}>
+                {selectedFilter 
+                  ? `No ${MEAL_CONFIGS[selectedFilter as keyof typeof MEAL_CONFIGS]?.label.toLowerCase()} meals found`
+                  : 'Start tracking your meals to see them here'
+                }
+              </Text>
+              <TouchableOpacity 
+                style={styles.emptyButton}
+                onPress={() => router.push("/signup/scan")}
               >
-                <Ionicons name="camera" size={20} color="#fff" />
-                <Text style={styles.emptyButtonText}>Scan Food</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          Object.entries(groupedMeals).map(([date, dateMeals]) => (
-            <View key={date} style={styles.dateSection}>
-              
-              {/* Date Header */}
-              <View style={styles.dateHeader}>
-                <Text style={styles.dateText}>{date}</Text>
-                <View style={styles.dateTotalBadge}>
-                  <Ionicons name="flame" size={14} color="#FF6B6B" />
-                  <Text style={styles.dateTotalText}>
-                    {getTotalCalories(dateMeals)} cal
-                  </Text>
-                </View>
-              </View>
-
-              {/* Meal Cards */}
-              {dateMeals.map((meal) => {
-                const mealConfig = MEAL_CONFIGS[meal.mealType as keyof typeof MEAL_CONFIGS];
+                <LinearGradient
+                  colors={['#4CAF50', '#45a049']}
+                  style={styles.emptyButtonGradient}
+                >
+                  <Ionicons name="camera" size={20} color="#fff" />
+                  <Text style={styles.emptyButtonText}>Scan Food</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            Object.entries(groupedMeals).map(([date, dateMeals]) => (
+              <View key={date} style={styles.dateSection}>
                 
-                return (
-                  <TouchableOpacity
-                    key={meal.id}
-                    style={styles.mealCard}
-                    onPress={() => router.push({
-                      pathname: "./signup/food-details",
-                      params: {
-                        imageUri: meal.imageUri,
-                        foodName: meal.foodName,
-                        calories: meal.calories,
-                        protein: meal.protein,
-                        carbs: meal.carbs,
-                        fat: meal.fat,
-                      }
-                    })}
-                    activeOpacity={0.7}
-                  >
-                    {/* Meal Type Badge */}
-                    <View style={[styles.mealTypeBadge, { backgroundColor: mealConfig.color }]}>
-                      <Ionicons name={mealConfig.icon as any} size={16} color="#fff" />
-                    </View>
+                {/* Date Header */}
+                <View style={styles.dateHeader}>
+                  <Text style={styles.dateText}>{date}</Text>
+                  <View style={styles.dateTotalBadge}>
+                    <Ionicons name="flame" size={14} color="#FF6B6B" />
+                    <Text style={styles.dateTotalText}>
+                      {getTotalCalories(dateMeals)} cal
+                    </Text>
+                  </View>
+                </View>
 
-                    {/* Food Image */}
-                    <View style={styles.mealImageContainer}>
-                      {meal.imageUri ? (
-                        <Image 
-                          source={{ uri: meal.imageUri }} 
-                          style={styles.mealImage}
-                        />
-                      ) : (
-                        <View style={styles.mealImagePlaceholder}>
-                          <Ionicons name="image-outline" size={32} color="#ccc" />
-                        </View>
-                      )}
-                    </View>
+                {/* Meal Cards */}
+                {dateMeals.map((meal) => {
+                  const mealConfig = MEAL_CONFIGS[meal.mealType as keyof typeof MEAL_CONFIGS];
+                  
+                  return (
+                    <TouchableOpacity
+                      key={meal._id}
+                      style={styles.mealCard}
+                      onPress={() => viewMealDetails(meal)}
+                      activeOpacity={0.7}
+                    >
+                      {/* Meal Type Badge */}
+                      <View style={[styles.mealTypeBadge, { backgroundColor: mealConfig.color }]}>
+                        <Ionicons name={mealConfig.icon as any} size={16} color="#fff" />
+                      </View>
 
-                    {/* Meal Info */}
-                    <View style={styles.mealInfo}>
-                      <Text style={styles.mealName} numberOfLines={1}>
-                        {meal.foodName}
-                      </Text>
-                      <Text style={styles.mealTime}>{formatTime(meal.timestamp)}</Text>
-                      <View style={styles.mealMacros}>
-                        <View style={styles.macroChip}>
-                          <MaterialCommunityIcons name="arm-flex" size={14} color="#2196F3" />
-                          <Text style={styles.macroChipText}>{meal.protein}g</Text>
-                        </View>
-                        <View style={styles.macroChip}>
-                          <MaterialCommunityIcons name="bread-slice" size={14} color="#FF9800" />
-                          <Text style={styles.macroChipText}>{meal.carbs}g</Text>
-                        </View>
-                        <View style={styles.macroChip}>
-                          <MaterialCommunityIcons name="water" size={14} color="#9C27B0" />
-                          <Text style={styles.macroChipText}>{meal.fat}g</Text>
+                      {/* Food Image */}
+                      <View style={styles.mealImageContainer}>
+                        {meal.imageUri ? (
+                          <Image 
+                            source={{ uri: meal.imageUri }} 
+                            style={styles.mealImage}
+                          />
+                        ) : (
+                          <View style={styles.mealImagePlaceholder}>
+                            <Ionicons name="image-outline" size={32} color="#ccc" />
+                          </View>
+                        )}
+                      </View>
+
+                      {/* Meal Info */}
+                      <View style={styles.mealInfo}>
+                        <Text style={styles.mealName} numberOfLines={1}>
+                          {meal.foodName}
+                        </Text>
+                        <Text style={styles.mealTime}>{formatTime(meal.timestamp)}</Text>
+                        <View style={styles.mealMacros}>
+                          <View style={styles.macroChip}>
+                            <MaterialCommunityIcons name="arm-flex" size={12} color="#2196F3" />
+                            <Text style={styles.macroChipText}>{meal.protein}g</Text>
+                          </View>
+                          <View style={styles.macroChip}>
+                            <MaterialCommunityIcons name="bread-slice" size={12} color="#FF9800" />
+                            <Text style={styles.macroChipText}>{meal.carbs}g</Text>
+                          </View>
+                          <View style={styles.macroChip}>
+                            <MaterialCommunityIcons name="water" size={12} color="#9C27B0" />
+                            <Text style={styles.macroChipText}>{meal.fat}g</Text>
+                          </View>
                         </View>
                       </View>
-                    </View>
 
-                    {/* Calories */}
-                    <View style={styles.mealCalories}>
-                      <Text style={styles.caloriesNumber}>{meal.calories}</Text>
-                      <Text style={styles.caloriesLabel}>cal</Text>
-                    </View>
+                      {/* Calories */}
+                      <View style={styles.mealCalories}>
+                        <Text style={styles.caloriesNumber}>{meal.calories}</Text>
+                        <Text style={styles.caloriesLabel}>cal</Text>
+                      </View>
 
-                    {/* Delete Button */}
-                    <TouchableOpacity
-                      style={styles.deleteButton}
-                      onPress={() => deleteMeal(meal.id)}
-                    >
-                      <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+                      {/* Delete Button */}
+                      <TouchableOpacity
+                        style={styles.deleteButton}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          deleteMeal(meal._id);
+                        }}
+                      >
+                        <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+                      </TouchableOpacity>
                     </TouchableOpacity>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          ))
-        )}
-      </ScrollView>
+                  );
+                })}
+              </View>
+            ))
+          )}
+        </ScrollView>
+      )}
     </View>
   );
 }

@@ -89,7 +89,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/admin", adminRoutes);
 app.use("/api/food", foodRoutes);
-app.use("/api/meals", mealRoutes);
+app.use('/api', mealRoutes);  
 
 // ================== ERROR HANDLING ==================
 app.use(notFound);
