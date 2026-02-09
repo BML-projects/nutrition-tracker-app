@@ -43,8 +43,6 @@ class MealAPI {
       }
       
       console.log('🔑 Token retrieved from AsyncStorage:', token ? 'EXISTS' : 'NOT FOUND');
-      console.log('🔑 Token length:', token?.length);
-      console.log('🔑 Token preview:', token?.substring(0, 20) + '...');
       
       return token;
     } catch (error) {
@@ -64,7 +62,6 @@ class MealAPI {
       }
 
       console.log('👤 Fetching user info from backend...');
-      console.log('👤 Backend URL:', `${API_BASE_URL}/auth/me`);
       
       const response = await axios.get(
         `${API_BASE_URL}/auth/me`,
@@ -100,10 +97,6 @@ class MealAPI {
       return userId;
     } catch (error: any) {
       console.error('❌ Error fetching user info from backend:', error.response?.data || error.message);
-      if (error.response) {
-        console.error('❌ Response status:', error.response.status);
-        console.error('❌ Response data:', error.response.data);
-      }
       return null;
     }
   }
@@ -151,27 +144,40 @@ class MealAPI {
 
       if (!token) {
         console.error('❌ No token found in AsyncStorage');
-        
-        // Debug: List all AsyncStorage keys
-        const allKeys = await AsyncStorage.getAllKeys();
-        console.log('📦 All AsyncStorage keys:', allKeys);
-        
         throw new Error('User not authenticated - No token found. Please log in again.');
       }
 
       console.log('🌐 API URL:', `${API_BASE_URL}/meals`);
-      console.log('🔑 Token (first 30 chars):', token.substring(0, 30) + '...');
+
+      // Create FormData for multipart upload
+      const formData = new FormData();
+      
+      // Add image if exists
+      if (mealData.imageUri && mealData.imageUri.startsWith('file://')) {
+        formData.append('image', {
+          uri: mealData.imageUri,
+          name: `meal_${Date.now()}.jpg`,
+          type: 'image/jpeg',
+        } as any);
+      }
+
+      // Add other meal data
+      formData.append('foodName', mealData.foodName);
+      formData.append('calories', mealData.calories.toString());
+      formData.append('protein', mealData.protein.toString());
+      formData.append('carbs', mealData.carbs.toString());
+      formData.append('fat', mealData.fat.toString());
+      formData.append('weight', mealData.weight.toString());
+      formData.append('mealType', mealData.mealType);
+      formData.append('timestamp', mealData.timestamp || new Date().toISOString());
 
       const response = await axios.post(
         `${API_BASE_URL}/meals`,
-        {
-          ...mealData,
-          timestamp: mealData.timestamp || new Date().toISOString(),
-        },
+        formData,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            'Content-Type': 'multipart/form-data',
           },
         }
       );
@@ -180,7 +186,6 @@ class MealAPI {
       return response.data;
     } catch (error: any) {
       console.error('❌ Error saving meal:', error.response?.data || error.message);
-      console.error('❌ Full error:', error);
       
       if (error.response) {
         console.error('❌ Response status:', error.response.status);
@@ -191,48 +196,42 @@ class MealAPI {
     }
   }
 
- async getMeals(): Promise<SavedMeal[]> {
-  try {
-    console.log("📥 Fetching meals...");
+  async getMeals(): Promise<SavedMeal[]> {
+    try {
+      console.log("📥 Fetching meals...");
 
-    const token = await this.getAuthToken();
-    const userId = await this.getUserId();
+      const token = await this.getAuthToken();
 
-    if (!token) {
-      console.error("❌ No token found");
-      throw new Error("User not authenticated - No token found");
+      if (!token) {
+        console.error("❌ No token found");
+        throw new Error("User not authenticated - No token found");
+      }
+
+      console.log("🌐 API URL:", `${API_BASE_URL}/meals`);
+
+      const response = await axios.get(`${API_BASE_URL}/meals`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("📥 Raw response:", response.data);
+
+      // Make sure we always return an array
+      const mealsArray =
+        Array.isArray(response.data) ? response.data :
+        Array.isArray(response.data.meals) ? response.data.meals :
+        Array.isArray(response.data.data) ? response.data.data :
+        [];
+
+      console.log("✅ Fetched meals:", mealsArray.length, "meals");
+
+      return mealsArray;
+    } catch (error: any) {
+      console.error("❌ Error fetching meals:", error.response?.data || error.message);
+      return []; // Prevent crash
     }
-
-    if (!userId) {
-      console.error("❌ No user ID found");
-      throw new Error("User not authenticated - No user ID found. Please log in again.");
-    }
-
-    console.log("🌐 API URL:", `${API_BASE_URL}/meals/${userId}`);
-
-    const response = await axios.get(`${API_BASE_URL}/meals`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log("📥 Raw response:", response.data);
-
-    // ✅ Make sure we always return an array
-    const mealsArray =
-      Array.isArray(response.data) ? response.data :
-      Array.isArray(response.data.meals) ? response.data.meals :
-      Array.isArray(response.data.data) ? response.data.data :
-      [];
-
-    console.log("✅ Fetched meals:", mealsArray.length, "meals");
-
-    return mealsArray;
-  } catch (error: any) {
-    console.error("❌ Error fetching meals:", error.response?.data || error.message);
-    return []; // ✅ Prevent crash
   }
-}
 
   async deleteMeal(mealId: string): Promise<void> {
     try {

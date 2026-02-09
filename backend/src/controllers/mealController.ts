@@ -1,10 +1,38 @@
 import { Request, Response } from "express";
-import Meal, { IMeal } from "../models/Meal"
+import Meal, { IMeal } from "../models/Meal";
+import cloudinary from "../config/cloudinary";
+import { Readable } from "stream";
 
 // Helper function to safely get error messages
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) return error.message;
   return String(error);
+};
+
+// Helper function to upload image to Cloudinary
+const uploadToCloudinary = async (fileBuffer: Buffer, fileName: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "nutriscan/meals",
+        public_id: `meal_${Date.now()}_${fileName}`,
+        resource_type: "auto",
+      },
+      (error, result) => {
+        if (error) {
+          console.error("Cloudinary upload error:", error);
+          reject(error);
+        } else if (result) {
+          resolve(result.secure_url);
+        } else {
+          reject(new Error("Upload failed - no result"));
+        }
+      }
+    );
+
+    const readableStream = Readable.from(fileBuffer);
+    readableStream.pipe(uploadStream);
+  });
 };
 
 // ------------------------- Meal Controllers -------------------------
@@ -30,6 +58,26 @@ export const addMeal = async (req: Request, res: Response) => {
       });
     }
 
+    let cloudinaryUrl = "";
+
+    // Handle image upload if present
+    if (req.file) {
+      console.log("📸 Uploading image to Cloudinary...");
+      try {
+        cloudinaryUrl = await uploadToCloudinary(req.file.buffer, req.file.originalname);
+        console.log("✅ Image uploaded to Cloudinary:", cloudinaryUrl);
+      } catch (uploadError) {
+        console.error("❌ Cloudinary upload failed:", uploadError);
+        return res.status(500).json({ 
+          message: "Failed to upload image", 
+          error: getErrorMessage(uploadError) 
+        });
+      }
+    } else if (imageUri) {
+      // If imageUri is provided as base64 or URL
+      cloudinaryUrl = imageUri;
+    }
+
     const newMeal = new Meal({
       user: userId,
       foodName,
@@ -39,11 +87,13 @@ export const addMeal = async (req: Request, res: Response) => {
       fat: fat || 0,
       weight: weight || 100,
       mealType,
-      imageUri: imageUri || "",
+      imageUri: cloudinaryUrl,
       timestamp: new Date(),
     });
 
     const savedMeal = await newMeal.save();
+    console.log("✅ Meal saved to database:", savedMeal._id);
+    
     res.status(201).json(savedMeal);
   } catch (error: unknown) {
     const message = getErrorMessage(error);
@@ -61,7 +111,11 @@ export const getMeals = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const meals = await Meal.find({ user: authenticatedUserId }).sort({ timestamp: -1 });
+    const meals = await Meal.find({ user: authenticatedUserId })
+      .sort({ timestamp: -1 })
+      .lean(); // Use lean() for better performance
+
+    console.log(`✅ Fetched ${meals.length} meals for user ${authenticatedUserId}`);
 
     res.status(200).json(meals);
   } catch (error: unknown) {
@@ -70,7 +124,6 @@ export const getMeals = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server Error", error: message });
   }
 };
-
 
 // Get a single meal by ID
 export const getMealById = async (req: Request, res: Response) => {
@@ -216,7 +269,27 @@ export const updateMeal = async (req: Request, res: Response) => {
       });
     }
 
-    const updatedMeal = await Meal.findByIdAndUpdate(mealId, updateData, { new: true, runValidators: true });
+    // Handle image upload if new image is provided
+    if (req.file) {
+      try {
+        const cloudinaryUrl = await uploadToCloudinary(req.file.buffer, req.file.originalname);
+        updateData.imageUri = cloudinaryUrl;
+        
+        // Optionally delete old image from Cloudinary
+        if (meal.imageUri && meal.imageUri.includes('cloudinary')) {
+          const publicId = meal.imageUri.split('/').slice(-2).join('/').split('.')[0];
+          await cloudinary.uploader.destroy(publicId);
+        }
+      } catch (uploadError) {
+        console.error("Error uploading new image:", uploadError);
+      }
+    }
+
+    const updatedMeal = await Meal.findByIdAndUpdate(mealId, updateData, { 
+      new: true, 
+      runValidators: true 
+    });
+    
     res.status(200).json(updatedMeal);
   } catch (error: unknown) {
     const message = getErrorMessage(error);
@@ -243,6 +316,18 @@ export const deleteMeal = async (req: Request, res: Response) => {
       });
     }
 
+    // Delete image from Cloudinary if it exists
+    if (meal.imageUri && meal.imageUri.includes('cloudinary')) {
+      try {
+        const publicId = meal.imageUri.split('/').slice(-2).join('/').split('.')[0];
+        await cloudinary.uploader.destroy(publicId);
+        console.log("✅ Deleted image from Cloudinary:", publicId);
+      } catch (cloudinaryError) {
+        console.error("❌ Error deleting image from Cloudinary:", cloudinaryError);
+        // Continue with meal deletion even if Cloudinary deletion fails
+      }
+    }
+
     const deletedMeal = await Meal.findByIdAndDelete(mealId);
     res.status(200).json({ message: "Meal deleted successfully", deletedMeal });
   } catch (error: unknown) {
@@ -266,8 +351,26 @@ export const deleteAllMeals = async (req: Request, res: Response) => {
 
     if (!userId) return res.status(400).json({ message: "User ID is required" });
 
+    // Get all meals to delete their images from Cloudinary
+    const meals = await Meal.find({ user: userId });
+    
+    // Delete images from Cloudinary
+    for (const meal of meals) {
+      if (meal.imageUri && meal.imageUri.includes('cloudinary')) {
+        try {
+          const publicId = meal.imageUri.split('/').slice(-2).join('/').split('.')[0];
+          await cloudinary.uploader.destroy(publicId);
+        } catch (cloudinaryError) {
+          console.error("Error deleting image from Cloudinary:", cloudinaryError);
+        }
+      }
+    }
+
     const result = await Meal.deleteMany({ user: userId });
-    res.status(200).json({ message: "All meals deleted successfully", deletedCount: result.deletedCount });
+    res.status(200).json({ 
+      message: "All meals deleted successfully", 
+      deletedCount: result.deletedCount 
+    });
   } catch (error: unknown) {
     const message = getErrorMessage(error);
     console.error("Error deleting all meals:", message);

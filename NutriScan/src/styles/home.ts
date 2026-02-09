@@ -1,214 +1,661 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
 
-const GREEN = "#32CD32"; // Lime Green accent color
+const { width } = Dimensions.get("window");
 
 export const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#fff",
-    },
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+  },
+  
+  scrollContent: {
+    paddingBottom: 100,
+  },
 
-    scrollContent: {
-        padding: 16,
-        // Add padding at the bottom so the last item isn't hidden behind the nav bar
-        paddingBottom: 100,
-    },
+  // Header Section
+  header: {
+    backgroundColor: "#fff",
+    paddingTop: 50,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
 
-    // Header section with the logo
-    logoRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 10,
-    },
+  headerTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
 
-    logoImage: {
-        width: 90,
-        height: 90,
-        resizeMode: "contain",
-        marginTop: 10,
-    },
+  logoSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
 
-    // The weekly calendar strip
-    calendarRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 20,
-    },
+  logoImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
 
-    dayItem: {
-        alignItems: "center",
-        width: "13%", // Fits 7 days across the screen
-    },
+  greetingSection: {
+    flex: 1,
+    marginLeft: 12,
+  },
 
-    // The small green/black ring above the date
-    progressRing: {
-        width: 38,
-        height: 38,
-        borderRadius: 19,
-        borderWidth: 3,
-        borderColor: GREEN,
-        justifyContent: "center",
-        alignItems: "center",
-        marginBottom: 6,
-        backgroundColor: "#000",
-    },
+  greetingText: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 2,
+  },
 
-    progressText: {
-        fontSize: 9,
-        fontWeight: "700",
-        color: "#fff",
-    },
+  userName: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1a1a1a",
+  },
 
-    dateText: {
-        fontSize: 13,
-        color: "#000",
-        fontWeight: "600",
-        marginBottom: 2,
-    },
+  // Header Actions (Profile + Notification)
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
 
-    dayText: {
-        fontSize: 10,
-        color: "#666",
-        textTransform: "uppercase",
-    },
+  profileButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#f5f5f5",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
 
-    // Style for the currently selected day
-    activeText: {
-        fontWeight: "900",
-        color: "#000",
-    },
+  profileImage: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
 
-    // The main black card showing calories
-    card: {
-        backgroundColor: "#000",
-        borderRadius: 20,
-        padding: 20,
-        marginBottom: 25,
-        minHeight: 180,
-    },
+  profilePlaceholder: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#f5f5f5",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-    cardHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        marginBottom: 10,
-    },
+  notificationButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#f5f5f5",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+  },
 
-    cardTitle: {
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: "600",
-        maxWidth: "80%",
-    },
+  notificationBadge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#FF3B30",
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
 
-    cardContent: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginTop: 15,
-    },
+  // Stats Row
+  statsRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 16,
+  },
 
-    calorieNumber: {
-        fontSize: 42,
-        color: "#fff",
-        fontWeight: "700",
-        marginBottom: 4,
-    },
+  statBox: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+    borderRadius: 16,
+    padding: 12,
+    alignItems: "center",
+  },
 
-    calorieLabel: {
-        color: "#aaa",
-        fontSize: 14,
-        fontWeight: "500",
-    },
+  statValue: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    marginTop: 4,
+  },
 
-    // Visual ring inside the card
-    kcalRing: {
-        width: 65,
-        height: 65,
-        borderRadius: 32.5,
-        borderWidth: 3,
-        borderColor: GREEN,
-        justifyContent: "center",
-        alignItems: "center",
-    },
+  statLabel: {
+    fontSize: 11,
+    color: "#666",
+    marginTop: 2,
+  },
 
-    kcalText: {
-        color: "#fff",
-        fontWeight: "700",
-        fontSize: 12,
-    },
+  statIcon: {
+    marginBottom: 4,
+  },
 
-    // Recent Activities section
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: "800",
-        color: "#000",
-        marginBottom: 15,
-        textAlign: "center",
-    },
+  // Calendar Section
+  calendarSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
 
-    // Dashed box shown when no meals are recorded
-    emptyBox: {
-        backgroundColor: "#f5f5f5",
-        borderRadius: 12,
-        borderWidth: 1.5,
-        borderStyle: "dashed",
-        borderColor: "#aaa",
-        paddingVertical: 30,
-        paddingHorizontal: 20,
-        alignItems: "center",
-        marginBottom: 20,
-    },
+  calendarTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    marginBottom: 16,
+  },
 
-    emptyTitle: {
-        fontWeight: "700",
-        fontSize: 14,
-        marginBottom: 6,
-        color: "#000",
-    },
+  calendarRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 8,
+  },
 
-    emptySubtitle: {
-        color: "#666",
-        fontSize: 14,
-    },
+  dayItem: {
+    flex: 1,
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
 
-    // Styling for a single activity item (if data exists)
-    activityItem: {
-        backgroundColor: "#F9F9F9",
-        padding: 15,
-        borderRadius: 12,
-        marginBottom: 10,
-        borderLeftWidth: 4,
-        borderLeftColor: GREEN,
-    },
+  dayItemActive: {
+    backgroundColor: "#FF6B35",
+    shadowColor: "#FF6B35",
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
 
-    // Floating green add button
-    addButton: {
-        width: 60,
-        height: 60,
-        backgroundColor: GREEN,
-        borderRadius: 18,
-        justifyContent: "center",
-        alignItems: "center",
-        alignSelf: "center",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 5,
-    },
+  progressRing: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+    borderWidth: 3,
+    borderColor: "#e0e0e0",
+  },
 
-    // Fixed bottom navigation bar
-    bottomNav: {
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 85,
-        backgroundColor: "#333",
-        flexDirection: "row",
-        justifyContent: "space-around",
-        alignItems: "center",
-        paddingBottom: 10,
-    },
+  progressRingActive: {
+    backgroundColor: "#fff",
+    borderColor: "#fff",
+  },
+
+  progressRingFilled: {
+    borderColor: "#FF9800",
+    backgroundColor: "#FFF3E0",
+  },
+
+  progressText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#666",
+  },
+
+  progressTextActive: {
+    color: "#FF6B35",
+  },
+
+  dateText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    marginBottom: 2,
+  },
+
+  dateTextActive: {
+    color: "#fff",
+  },
+
+  dayText: {
+    fontSize: 10,
+    color: "#999",
+    fontWeight: "600",
+  },
+
+  dayTextActive: {
+    color: "#fff",
+  },
+
+  mealCountBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "#FF9800",
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    minWidth: 18,
+    alignItems: "center",
+  },
+
+  mealCountText: {
+    fontSize: 9,
+    fontWeight: "700",
+    color: "#fff",
+  },
+
+  // Main Nutrition Card
+  nutritionCard: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 24,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+
+  nutritionGradient: {
+    padding: 20,
+  },
+
+  nutritionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
+  nutritionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff",
+  },
+
+  infoButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  nutritionMain: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
+  calorieCircle: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 8,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+    marginBottom: 16,
+  },
+
+  calorieNumber: {
+    fontSize: 42,
+    fontWeight: "800",
+    color: "#fff",
+  },
+
+  calorieLabel: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.9)",
+    fontWeight: "600",
+    marginTop: 4,
+  },
+
+  goalRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+
+  goalText: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.8)",
+  },
+
+  goalNumber: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#fff",
+  },
+
+  // Macros Section
+  macrosGrid: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 16,
+  },
+
+  macroItem: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: 16,
+    padding: 12,
+    alignItems: "center",
+  },
+
+  macroValue: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff",
+    marginTop: 8,
+  },
+
+  macroLabel: {
+    fontSize: 11,
+    color: "rgba(255, 255, 255, 0.8)",
+    marginTop: 2,
+  },
+
+  macroProgress: {
+    width: "100%",
+    height: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 2,
+    marginTop: 8,
+    overflow: "hidden",
+  },
+
+  macroProgressFill: {
+    height: "100%",
+    backgroundColor: "#fff",
+    borderRadius: 2,
+  },
+
+  // AI Analysis
+  aiAnalysisCard: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+
+  aiIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#FFF3E0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  aiAnalysisText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#333",
+    lineHeight: 20,
+  },
+
+  // Recent Meals Section
+  recentSection: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1a1a1a",
+  },
+
+  viewAllButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+
+  viewAllText: {
+    fontSize: 14,
+    color: "#FF6B35",
+    fontWeight: "600",
+  },
+
+  // Meal Card
+  mealCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+
+  mealImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    backgroundColor: "#f0f0f0",
+  },
+
+  mealImagePlaceholder: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  mealInfo: {
+    flex: 1,
+  },
+
+  mealName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#1a1a1a",
+    marginBottom: 4,
+  },
+
+  mealMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+
+  mealTypeChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    backgroundColor: "#f0f0f0",
+  },
+
+  mealTypeText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#666",
+  },
+
+  mealTime: {
+    fontSize: 12,
+    color: "#999",
+  },
+
+  mealCalories: {
+    alignItems: "flex-end",
+  },
+
+  mealCalorieValue: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#FF6B35",
+  },
+
+  mealCalorieLabel: {
+    fontSize: 11,
+    color: "#999",
+    marginTop: 2,
+  },
+
+  // Empty State
+  emptyState: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 32,
+    alignItems: "center",
+    marginBottom: 12,
+  },
+
+  emptyIcon: {
+    marginBottom: 16,
+  },
+
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1a1a1a",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+
+  emptySubtitle: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+
+  emptyButton: {
+    backgroundColor: "#FF6B35",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+
+  emptyButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
+  },
+
+  // Floating Add Button
+  addButton: {
+    position: "absolute",
+    bottom: 90,
+    right: 20,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#FF6B35",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#FF6B35",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f8f9fa",
+  },
+
+  loadingText: {
+    marginTop: 16,
+    fontSize: 14,
+    color: "#666",
+  },
+
+  // Weekly Stats Card
+  weeklyStatsCard: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+
+  weeklyStatsTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    marginBottom: 12,
+  },
+
+  weeklyStatsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+
+  weeklyStatItem: {
+    flex: 1,
+    minWidth: "45%",
+    backgroundColor: "#f8f9fa",
+    borderRadius: 12,
+    padding: 12,
+  },
+
+  weeklyStatValue: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#FF6B35",
+    marginBottom: 4,
+  },
+
+  weeklyStatLabel: {
+    fontSize: 12,
+    color: "#666",
+  },
 });
