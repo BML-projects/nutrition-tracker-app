@@ -138,7 +138,7 @@ export default function HistoryScreen() {
 
   const viewMealDetails = (meal: SavedMeal) => {
     router.push({
-      pathname: "./signup/food-details",
+      pathname: "./signup/fooddetails",
       params: {
         imageUri: meal.imageUri,
         foodName: meal.foodName,
