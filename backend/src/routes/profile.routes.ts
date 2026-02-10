@@ -6,6 +6,7 @@ import {
   updateActivityLevel, 
   updateGoal, 
   changePassword,
+  updateTargetWeight, // NEW
   upload 
 } from '../controllers/profile.controller';
 import { protect } from '../middleware/auth.middleware';
@@ -28,5 +29,8 @@ router.post(
 router.patch('/activity-level', protect, updateActivityLevel);
 router.patch('/goal', protect, updateGoal);
 router.patch('/change-password', protect, changePassword);
+
+// NEW: Update target weight and timeline
+router.patch('/target-weight', protect, updateTargetWeight);
 
 export default router;

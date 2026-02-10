@@ -10,6 +10,7 @@ import { errorHandler, notFound } from "./middleware/error.middleware";
 import path from "path/win32";
 import foodRoutes from "./routes/food.routes";
 import mealRoutes from "./routes/mealRoutes";
+import analyticsRoutes from "./routes/analytics";
 
 
 dotenv.config();
@@ -90,6 +91,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/admin", adminRoutes);
 app.use("/api/food", foodRoutes);
 app.use('/api', mealRoutes);  
+app.use('/api', analyticsRoutes);
 
 // ================== ERROR HANDLING ==================
 app.use(notFound);
