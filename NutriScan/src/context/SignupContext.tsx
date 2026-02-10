@@ -12,6 +12,10 @@ export interface SignupData {
   goal?: "lose" | "maintain" | "gain";
   height?: number;
   weight?: number;
+  // NEW: Target weight fields
+  targetWeight?: number;
+  timeline?: "fast" | "moderate" | "slow";
+  estimatedWeeks?: number;
 }
 
 interface SignupContextType {
@@ -33,6 +37,10 @@ export const SignupProvider = ({ children }: { children: ReactNode }) => {
     goal: undefined,
     height: undefined,
     weight: undefined,
+    // NEW: Initialize target weight fields
+    targetWeight: undefined,
+    timeline: undefined,
+    estimatedWeeks: undefined,
   });
 
   const setData = (newData: Partial<SignupData>) => {
@@ -49,6 +57,10 @@ export const SignupProvider = ({ children }: { children: ReactNode }) => {
     goal: undefined,
     height: undefined,
     weight: undefined,
+    // NEW: Reset target weight fields
+    targetWeight: undefined,
+    timeline: undefined,
+    estimatedWeeks: undefined,
   });
 
   return (
