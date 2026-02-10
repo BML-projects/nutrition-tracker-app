@@ -262,3 +262,41 @@ export const updateGoal = async (goal: string) => {
     throw error;
   }
 };
+
+// ================== UPDATE TARGET WEIGHT ==================
+export const updateTargetWeight = async (targetWeightData: {
+  targetWeight: number;
+  timeline: 'fast' | 'moderate' | 'slow';
+}) => {
+  try {
+    console.log("🎯 [updateTargetWeight] Starting...");
+    console.log("🎯 [updateTargetWeight] Data:", targetWeightData);
+
+    const token = await AsyncStorage.getItem("accessToken");
+
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const url = `${API_BASE}/profile/target-weight`;
+    console.log("🎯 [updateTargetWeight] URL:", url);
+
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        targetWeight: targetWeightData.targetWeight,
+        timeline: targetWeightData.timeline,
+      }),
+    });
+
+    console.log("🎯 [updateTargetWeight] Response status:", response.status);
+    return await handleResponse(response, 'updateTargetWeight');
+  } catch (error) {
+    console.error("🎯 [updateTargetWeight] Error:", error);
+    throw error;
+  }
+};

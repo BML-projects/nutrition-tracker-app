@@ -1,5 +1,5 @@
 import { logout } from "@/services/auth-api";
-import { getProfile, updateGoal, updateProfile } from "@/services/profile-api";
+import { getProfile, updateGoal, updateProfile, updateTargetWeight } from "@/services/profile-api";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -16,8 +16,10 @@ import {
     Animated
 } from "react-native";
 import EditProfileModal from "./editprofilemodal";
+// import EditTargetWeightModal from "./editTargetWeightModal";
 import { styles } from "../../src/styles/setting";
 import BottomNav from "./ButtomNav";
+import EditTargetWeightModal from "./editprofilemodal";
 
 /* ================= INTERFACES ================= */
 interface GoalCalories {
@@ -40,6 +42,10 @@ interface UserProfile {
   dailyCalories: number;
   activityLevel?: string;
   profilePhoto?: string;
+  targetWeight?: number;
+  timeline?: 'fast' | 'moderate' | 'slow';
+  estimatedWeeks?: number;
+  estimatedCompletionDate?: string;
 }
 
 interface ProfileResponse {
@@ -48,6 +54,7 @@ interface ProfileResponse {
   goalCalories?: GoalCalories;
 }
 
+/* ================= MAIN COMPONENT ================= */
 export default function SettingsScreen() {
   const router = useRouter();
 
@@ -64,6 +71,7 @@ export default function SettingsScreen() {
 
   // Edit profile modal state
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editTargetWeightModalVisible, setEditTargetWeightModalVisible] = useState(false);
 
   // Animation values
   const [fadeAnim] = useState(new Animated.Value(0));
@@ -95,6 +103,20 @@ export default function SettingsScreen() {
     if (bmi < 25) return { category: 'Normal', color: '#10b981' };
     if (bmi < 30) return { category: 'Overweight', color: '#f59e0b' };
     return { category: 'Obese', color: '#ef4444' };
+  };
+
+  // Handle target weight update
+  const handleTargetWeightUpdate = async (data: { targetWeight: number; timeline: 'fast' | 'moderate' | 'slow' }) => {
+    try {
+      const response = await updateTargetWeight(data);
+      
+      if (response.success) {
+        Alert.alert("✓ Success", "Target weight updated successfully!");
+        await fetchUserProfile();
+      }
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to update target weight");
+    }
   };
 
   // Activity level change handler
@@ -157,23 +179,9 @@ export default function SettingsScreen() {
         await fetchUserProfile();
       }
     } catch (error: any) {
-      throw error;
+      Alert.alert("Error", error.message || "Failed to update profile");
     }
   };
-
-  // Check token on mount
-  useEffect(() => {
-    const checkToken = async () => {
-      try {
-        const token = await AsyncStorage.getItem('accessToken');
-        console.log('🔍 SettingsScreen - Token exists:', !!token);
-      } catch (error) {
-        console.error('🔍 SettingsScreen - Token check error:', error);
-      }
-    };
-    
-    checkToken();
-  }, []);
 
   // Fetch user profile function
   const fetchUserProfile = useCallback(async () => {
@@ -229,6 +237,20 @@ export default function SettingsScreen() {
       setRefreshing(false);
     }
   }, [router, fadeAnim]);
+
+  // Check token on mount
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        console.log('🔍 SettingsScreen - Token exists:', !!token);
+      } catch (error) {
+        console.error('🔍 SettingsScreen - Token check error:', error);
+      }
+    };
+    
+    checkToken();
+  }, []);
 
   // Fetch user profile on component mount
   useEffect(() => {
@@ -349,7 +371,6 @@ export default function SettingsScreen() {
                 </View>
               )}
               
-              {/* Single badge - only one! */}
               <View style={styles.avatarBadge}>
                 <Ionicons name="checkmark-circle" size={24} color="#10b981" />
               </View>
@@ -499,6 +520,102 @@ export default function SettingsScreen() {
               )}
             </View>
           </View>
+
+          {/* ================= TARGET WEIGHT SECTION ================= */}
+          {user?.goal !== 'maintain' && (
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Ionicons name="flag-outline" size={22} color="#D37034" />
+                <Text style={styles.sectionTitle}>Target Weight & Timeline</Text>
+              </View>
+
+              <View style={styles.card}>
+                <TouchableOpacity
+                  style={styles.targetWeightContainer}
+                  onPress={() => setEditTargetWeightModalVisible(true)}
+                >
+                  <View style={styles.targetWeightLeft}>
+                    <View style={styles.targetIconContainer}>
+                      <Ionicons name="trophy" size={24} color="#D37034" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      {user?.targetWeight ? (
+                        <>
+                          <Text style={styles.targetLabel}>Target Weight</Text>
+                          <Text style={styles.targetValue}>{user.targetWeight} kg</Text>
+                          {user.timeline && (
+                            <View style={styles.timelineBadge}>
+                              <Ionicons 
+                                name={
+                                  user.timeline === 'fast' ? 'flash' : 
+                                  user.timeline === 'slow' ? 'hourglass' : 
+                                  'walk'
+                                } 
+                                size={14} 
+                                color="#666" 
+                              />
+                              <Text style={styles.timelineBadgeText}>
+                                {user.timeline === 'fast' ? 'Fast' : 
+                                 user.timeline === 'slow' ? 'Slow & Steady' : 
+                                 'Moderate'} pace
+                              </Text>
+                            </View>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <Text style={styles.targetLabel}>Set Your Target</Text>
+                          <Text style={styles.targetHint}>Define your weight goal</Text>
+                        </>
+                      )}
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={22} color="#999" />
+                </TouchableOpacity>
+
+                {user?.targetWeight && user?.estimatedWeeks && (
+                  <View style={styles.targetPlanCard}>
+                    <View style={styles.targetPlanRow}>
+                      <View style={styles.targetPlanItem}>
+                        <Ionicons name="calendar-outline" size={18} color="#3b82f6" />
+                        <Text style={styles.targetPlanLabel}>Duration</Text>
+                        <Text style={styles.targetPlanValue}>
+                          {user.estimatedWeeks} weeks
+                        </Text>
+                      </View>
+                      
+                      {user.estimatedCompletionDate && (
+                        <>
+                          <View style={styles.targetPlanDivider} />
+                          <View style={styles.targetPlanItem}>
+                            <Ionicons name="flag-outline" size={18} color="#10b981" />
+                            <Text style={styles.targetPlanLabel}>Target Date</Text>
+                            <Text style={styles.targetPlanValue}>
+                              {new Date(user.estimatedCompletionDate).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric' 
+                              })}
+                            </Text>
+                          </View>
+                        </>
+                      )}
+                    </View>
+                    
+                    <View style={styles.weightToGoCard}>
+                      <Ionicons 
+                        name={user.goal === 'lose' ? 'trending-down' : 'trending-up'} 
+                        size={20} 
+                        color={user.goal === 'lose' ? '#3b82f6' : '#f59e0b'} 
+                      />
+                      <Text style={styles.weightToGoText}>
+                        {Math.abs((user.targetWeight || 0) - user.weight).toFixed(1)} kg to go
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
 
           {/* ================= ACTIVITY LEVEL SECTION ================= */}
           <View style={styles.section}>
@@ -655,6 +772,16 @@ export default function SettingsScreen() {
           onClose={() => setEditModalVisible(false)}
           userData={user}
           onSave={handleProfileUpdate}
+        />
+      )}
+
+      {/* ================= EDIT TARGET WEIGHT MODAL ================= */}
+      {user && (
+        <EditTargetWeightModal
+          visible={editTargetWeightModalVisible}
+          onClose={() => setEditTargetWeightModalVisible(false)}
+          userData={user}
+          onSave={handleTargetWeightUpdate}
         />
       )}
 

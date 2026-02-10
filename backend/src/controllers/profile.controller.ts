@@ -220,6 +220,13 @@ export const getProfile = async (req: Request, res: Response) => {
         dailyCalories: user.dailyCalories,
         activityLevel: user.activityLevel || 'moderate',
         profilePhoto: user.profilePhoto, // Cloudinary URL
+        // Target weight fields
+        targetWeight: user.targetWeight,
+        timeline: user.timeline,
+        estimatedWeeks: user.estimatedWeeks,
+        estimatedCompletionDate: user.estimatedCompletionDate 
+          ? user.estimatedCompletionDate.toISOString().split('T')[0] 
+          : undefined,
       },
       goalCalories: allGoalCalories
     };
@@ -356,6 +363,132 @@ export const updateGoal = async (req: Request, res: Response) => {
     res.status(500).json({ 
       success: false,
       error: 'Server error',
+      message: error.message 
+    });
+  }
+};
+
+// ==================== UPDATE TARGET WEIGHT (NEW) ====================
+export const updateTargetWeight = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const { targetWeight, timeline } = req.body;
+
+    console.log('🎯 [Update Target Weight] Starting for user:', userId);
+    console.log('🎯 [Update Target Weight] Data:', { targetWeight, timeline });
+
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
+
+    // Validation
+    if (!targetWeight || targetWeight < 30 || targetWeight > 300) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid target weight. Must be between 30-300 kg' 
+      });
+    }
+
+    if (!timeline || !['fast', 'moderate', 'slow'].includes(timeline)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid timeline. Must be fast, moderate, or slow' 
+      });
+    }
+
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    const currentWeight = user.weight;
+    const goal = user.goal;
+
+    // Validate goal direction
+    if (goal === 'lose' && targetWeight >= currentWeight) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'For weight loss, target must be less than current weight' 
+      });
+    }
+
+    if (goal === 'gain' && targetWeight <= currentWeight) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'For weight gain, target must be more than current weight' 
+      });
+    }
+
+    // Calculate weight plan
+    const weightDifference = Math.abs(targetWeight - currentWeight);
+
+    // Weekly rates based on timeline and goal
+    const weeklyRates: Record<string, { lose: number; gain: number }> = {
+      fast: { lose: 1.0, gain: 0.5 },
+      moderate: { lose: 0.5, gain: 0.35 },
+      slow: { lose: 0.25, gain: 0.25 }
+    };
+
+    const weeklyRate = weeklyRates[timeline][goal as 'lose' | 'gain'];
+    const estimatedWeeks = Math.ceil(weightDifference / weeklyRate);
+    
+    // Calculate completion date
+    const completionDate = new Date();
+    completionDate.setDate(completionDate.getDate() + (estimatedWeeks * 7));
+
+    // Calculate calories
+    const calorieDeficitPerKg = 7700; // calories per kg
+    const dailyAdjustment = Math.round((weeklyRate * calorieDeficitPerKg) / 7);
+    
+    // Get maintenance calories
+    const birthYear = user.dob.getFullYear();
+    const age = new Date().getFullYear() - birthYear;
+    const bmr = calculateBMR(user.height, user.weight, age, user.gender);
+    
+    const activityMultipliers: Record<string, number> = {
+      sedentary: 1.2,
+      light: 1.375,
+      moderate: 1.55,
+      active: 1.725,
+      very_active: 1.9
+    };
+    
+    const activityLevel = user.activityLevel || 'moderate';
+    const maintenanceCalories = Math.round(bmr * activityMultipliers[activityLevel]);
+    
+    const dailyCalories = goal === 'lose' 
+      ? maintenanceCalories - dailyAdjustment
+      : maintenanceCalories + dailyAdjustment;
+
+    // Update user
+    user.targetWeight = targetWeight;
+    user.timeline = timeline;
+    user.estimatedWeeks = estimatedWeeks;
+    user.estimatedCompletionDate = completionDate;
+    user.dailyCalories = dailyCalories;
+
+    await user.save();
+
+    console.log('🎯 [Update Target Weight] Success');
+
+    res.json({
+      success: true,
+      message: 'Target weight updated successfully',
+      targetWeight: user.targetWeight,
+      timeline: user.timeline,
+      estimatedWeeks: user.estimatedWeeks,
+      estimatedCompletionDate: completionDate.toISOString().split('T')[0],
+      weeklyRate,
+      dailyCalories: user.dailyCalories,
+      dailyCalorieAdjustment: dailyAdjustment,
+      explanation: `Your target is to ${goal} ${weightDifference.toFixed(1)} kg in ${estimatedWeeks} weeks at a ${timeline} pace.`
+    });
+  } catch (error: any) {
+    console.error('🎯 [Update Target Weight] Error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Server error', 
       message: error.message 
     });
   }

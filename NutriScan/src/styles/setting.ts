@@ -644,4 +644,104 @@ export const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
+
+
+  // Target Weight Section Styles
+targetWeightContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingVertical: 4,
+},
+targetWeightLeft: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  flex: 1,
+},
+targetIconContainer: {
+  width: 48,
+  height: 48,
+  borderRadius: 24,
+  backgroundColor: '#fef3c7',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginRight: 12,
+},
+targetLabel: {
+  fontSize: 13,
+  color: '#666',
+  marginBottom: 2,
+},
+targetValue: {
+  fontSize: 18,
+  fontWeight: '600',
+  color: '#000',
+},
+targetHint: {
+  fontSize: 14,
+  color: '#999',
+  marginTop: 2,
+},
+timelineBadge: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: '#f0f0f0',
+  paddingHorizontal: 8,
+  paddingVertical: 4,
+  borderRadius: 12,
+  marginTop: 6,
+  alignSelf: 'flex-start',
+},
+timelineBadgeText: {
+  fontSize: 11,
+  color: '#666',
+  marginLeft: 4,
+  fontWeight: '500',
+},
+targetPlanCard: {
+  backgroundColor: '#f8f9fa',
+  borderRadius: 12,
+  padding: 12,
+  marginTop: 16,
+},
+targetPlanRow: {
+  flexDirection: 'row',
+  marginBottom: 12,
+},
+targetPlanItem: {
+  flex: 1,
+  alignItems: 'center',
+},
+targetPlanDivider: {
+  width: 1,
+  height: 50,
+  backgroundColor: '#e0e0e0',
+  marginHorizontal: 8,
+},
+targetPlanLabel: {
+  fontSize: 11,
+  color: '#666',
+  marginTop: 4,
+},
+targetPlanValue: {
+  fontSize: 15,
+  fontWeight: '600',
+  color: '#000',
+  marginTop: 2,
+},
+weightToGoCard: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: '#fff',
+  borderRadius: 8,
+  padding: 10,
+},
+weightToGoText: {
+  fontSize: 13,
+  color: '#333',
+  marginLeft: 6,
+  fontWeight: '500',
+},
+
 });
