@@ -603,7 +603,7 @@ export default function SettingsScreen() {
 
             <TouchableOpacity 
               style={styles.actionCard}
-              onPress={() => Alert.alert('Coming Soon', 'Progress tracking feature coming soon!')}
+              onPress={() => router.push('./analytics') }
             >
               <View style={[styles.actionIconContainer, { backgroundColor: '#dbeafe' }]}>
                 <Ionicons name="stats-chart" size={24} color="#3b82f6" />

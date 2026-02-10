@@ -8,7 +8,7 @@ import { generateAccessToken, generateRefreshToken } from "../utils/token";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 
-/* ================= Zod Signup Schema ================= */
+/* ================= Zod Signup Schema (Enhanced) ================= */
 const signupSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
@@ -24,6 +24,10 @@ const signupSchema = z.object({
   weight: z.number().positive(),
   dob: z.coerce.date(),
   goal: z.enum(["lose", "maintain", "gain"]),
+  // NEW: Target weight fields (optional)
+  targetWeight: z.number().positive().optional(),
+  timeline: z.enum(["fast", "moderate", "slow"]).optional(),
+  estimatedWeeks: z.number().positive().optional(),
 });
 
 const forgotPasswordSchema = z.object({
@@ -47,17 +51,39 @@ const verifyOTPSchema = z.object({
   otp: z.string().length(6, "OTP must be 6 digits"),
 });
 
-
 // Configure your email service
 const transporter = nodemailer.createTransport({
-  service: "gmail", // or your email service
+  service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER, // your email
-    pass: process.env.EMAIL_PASSWORD, // your email password or app password
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
   },
 });
 
+/* ================= HELPER FUNCTIONS ================= */
 
+// Calculate age from date of birth
+const calculateAge = (dob: Date): number => {
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const monthDiff = today.getMonth() - dob.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+    age--;
+  }
+  return age;
+};
+
+// Calculate weekly weight change rate based on goal and timeline
+const calculateWeeklyRate = (goal: string, timeline: string): number => {
+  const weeklyRates: Record<string, Record<string, number>> = {
+    lose: { fast: 1.0, moderate: 0.5, slow: 0.25 },
+    gain: { fast: 0.5, moderate: 0.35, slow: 0.25 },
+  };
+  
+  return weeklyRates[goal]?.[timeline] || 0.5;
+};
+
+/* ================= FORGOT PASSWORD ================= */
 export const forgotPassword = async (req: Request, res: Response) => {
   try {
     console.log("=== FORGOT PASSWORD REQUEST ===");
@@ -73,26 +99,21 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
     const { email } = parsed.data;
 
-    // Find user
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
-      // Don't reveal if email exists or not for security
       return res.status(200).json({
         success: true,
         message: "If the email exists, an OTP has been sent",
       });
     }
 
-    // Generate 6-digit OTP
     const otp = crypto.randomInt(100000, 999999).toString();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
 
-    // Save OTP to user document
     user.resetPasswordOTP = otp;
     user.resetPasswordOTPExpiry = otpExpiry;
     await user.save();
 
-    // Send email with OTP
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
@@ -125,10 +146,10 @@ export const forgotPassword = async (req: Request, res: Response) => {
       message: "Error sending OTP. Please try again later.",
       error: error.message,
     });
-  }}
+  }
+};
 
-
-  /* ================= VERIFY OTP ================= */
+/* ================= VERIFY OTP ================= */
 export const verifyOTP = async (req: Request, res: Response) => {
   try {
     console.log("=== VERIFY OTP REQUEST ===");
@@ -151,7 +172,6 @@ export const verifyOTP = async (req: Request, res: Response) => {
       });
     }
 
-    // Check if OTP exists and is valid
     if (!user.resetPasswordOTP || !user.resetPasswordOTPExpiry) {
       return res.status(400).json({
         success: false,
@@ -159,7 +179,6 @@ export const verifyOTP = async (req: Request, res: Response) => {
       });
     }
 
-    // Check if OTP is expired
     if (new Date() > user.resetPasswordOTPExpiry) {
       return res.status(400).json({
         success: false,
@@ -167,7 +186,6 @@ export const verifyOTP = async (req: Request, res: Response) => {
       });
     }
 
-    // Verify OTP
     if (user.resetPasswordOTP !== otp) {
       return res.status(400).json({
         success: false,
@@ -191,7 +209,7 @@ export const verifyOTP = async (req: Request, res: Response) => {
   }
 };
 
-
+/* ================= RESET PASSWORD ================= */
 export const resetPassword = async (req: Request, res: Response) => {
   try {
     console.log("=== RESET PASSWORD REQUEST ===");
@@ -214,7 +232,6 @@ export const resetPassword = async (req: Request, res: Response) => {
       });
     }
 
-    // Verify OTP again
     if (!user.resetPasswordOTP || user.resetPasswordOTP !== otp) {
       return res.status(400).json({
         success: false,
@@ -229,10 +246,8 @@ export const resetPassword = async (req: Request, res: Response) => {
       });
     }
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update password and clear OTP
     user.password = hashedPassword;
     user.resetPasswordOTP = undefined;
     user.resetPasswordOTPExpiry = undefined;
@@ -254,13 +269,7 @@ export const resetPassword = async (req: Request, res: Response) => {
   }
 };
 
-
-
-
-
-
-
-//check email exists
+/* ================= CHECK EMAIL EXISTS ================= */
 export const checkEmailExists = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
@@ -302,16 +311,11 @@ export const checkEmailExists = async (req: Request, res: Response) => {
   }
 };
 
-
-
-/* ================= SIGNUP ================= */
+/* ================= SIGNUP (ENHANCED WITH TARGET WEIGHT) ================= */
 export const signup = async (req: Request, res: Response) => {
   try {
     console.log('=== SIGNUP REQUEST START ===');
     console.log('Request body:', req.body);
-    console.log('Request headers:', req.headers);
-    console.log('Content-Type header:', req.headers['content-type']);
-    console.log('Content-Length:', req.headers['content-length']);
     
     const parsed = signupSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -322,12 +326,35 @@ export const signup = async (req: Request, res: Response) => {
       });
     }
 
-    // ✅ Add fullName here
-    const { fullName, email, password, gender, height, weight, dob, goal } = parsed.data;
+    const { 
+      fullName, 
+      email, 
+      password, 
+      gender, 
+      height, 
+      weight, 
+      dob, 
+      goal,
+      targetWeight,
+      timeline,
+      estimatedWeeks
+    } = parsed.data;
 
-    console.log('Parsed data:', { fullName, email, gender, height, weight, dob, goal });
+    console.log('Parsed data:', { 
+      fullName, 
+      email, 
+      gender, 
+      height, 
+      weight, 
+      dob, 
+      goal,
+      targetWeight,
+      timeline,
+      estimatedWeeks
+    });
 
-    const existingUser = await User.findOne({ email });
+    // Check for existing user
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
     if (existingUser) {
       console.log('User already exists:', email);
       return res.status(400).json({ 
@@ -336,35 +363,88 @@ export const signup = async (req: Request, res: Response) => {
       });
     }
 
+    // Validate target weight if provided
+    if (targetWeight) {
+      if (goal === 'lose' && targetWeight >= weight) {
+        return res.status(400).json({
+          success: false,
+          message: "Target weight must be less than current weight for weight loss"
+        });
+      }
+      
+      if (goal === 'gain' && targetWeight <= weight) {
+        return res.status(400).json({
+          success: false,
+          message: "Target weight must be greater than current weight for weight gain"
+        });
+      }
+
+      if (targetWeight < 30 || targetWeight > 300) {
+        return res.status(400).json({
+          success: false,
+          message: "Target weight must be between 30 and 300 kg"
+        });
+      }
+    }
+
+    // Validate that target weight is provided for lose/gain goals
+    if ((goal === 'lose' || goal === 'gain') && !targetWeight) {
+      return res.status(400).json({
+        success: false,
+        message: `Target weight is required for ${goal} goal`
+      });
+    }
+
     console.log('Creating new user...');
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ Add fullname here
+    // Calculate health metrics
+    const age = calculateAge(dob);
+    const bmi = calculateBMI(height, weight);
+    const bmr = calculateBMR(height, weight, age, gender);
+    const dailyCalories = calculateDailyCalories(bmr, goal);
+
+    // Calculate target weight plan details
+    let weeklyWeightChangeRate: number | undefined;
+    let estimatedCompletionDate: Date | undefined;
+
+    if (targetWeight && timeline) {
+      weeklyWeightChangeRate = calculateWeeklyRate(goal, timeline);
+      
+      if (estimatedWeeks) {
+        estimatedCompletionDate = new Date();
+        estimatedCompletionDate.setDate(estimatedCompletionDate.getDate() + estimatedWeeks * 7);
+      }
+    }
+
+    // Create user with all fields including initial weight history
     const user = await User.create({
-      fullname: fullName,  // Map fullName to fullname (database field)
-      email,
+      fullname: fullName,
+      email: email.toLowerCase().trim(),
       password: hashedPassword,
       gender,
       height,
       weight,
       dob,
       goal,
+      bmi,
+      bmr,
+      dailyCalories,
+      // Target weight fields
+      targetWeight: targetWeight || undefined,
+      timeline: timeline || undefined,
+      estimatedWeeks: estimatedWeeks || undefined,
+      weeklyWeightChangeRate: weeklyWeightChangeRate || undefined,
+      estimatedCompletionDate: estimatedCompletionDate || undefined,
+      // Add initial weight to history
+      weightHistory: [{
+        weight: weight,
+        date: new Date(),
+        note: 'Initial weight'
+      }]
     });
 
     console.log('User created with ID:', user._id);
-
-    // Calculate BMI, BMR, dailyCalories
-    const bmi = calculateBMI(height, weight);
-    const birthYear = dob.getFullYear();
-    const age = new Date().getFullYear() - birthYear;
-    const bmr = calculateBMR(height, weight, age, gender);
-    const dailyCalories = calculateDailyCalories(bmr, goal);
-
-    // Update user document
-    user.bmi = bmi;
-    user.bmr = bmr;
-    user.dailyCalories = dailyCalories;
-    await user.save();
 
     // Generate tokens
     const accessToken = generateAccessToken(user._id.toString());
@@ -381,7 +461,7 @@ export const signup = async (req: Request, res: Response) => {
 
     console.log('=== SIGNUP REQUEST COMPLETE ===');
     
-    // ✅ Return proper response structure
+    // Return comprehensive response with fitness plan
     res.status(201).json({
       success: true,
       accessToken,
@@ -389,9 +469,30 @@ export const signup = async (req: Request, res: Response) => {
         id: user._id,
         email: user.email,
         fullName: user.fullname,
+        gender: user.gender,
+        height: user.height,
+        weight: user.weight,
+        dob: user.dob,
+        goal: user.goal,
         bmi: user.bmi,
         bmr: user.bmr,
-        dailyCalories: user.dailyCalories
+        dailyCalories: user.dailyCalories,
+        targetWeight: user.targetWeight,
+        timeline: user.timeline,
+        estimatedWeeks: user.estimatedWeeks,
+        estimatedCompletionDate: user.estimatedCompletionDate,
+      },
+      fitnessPlan: {
+        currentWeight: weight,
+        targetWeight: targetWeight || null,
+        goal,
+        bmi: Math.round(bmi * 10) / 10,
+        bmr: Math.round(bmr),
+        dailyCalories,
+        timeline: timeline || null,
+        estimatedWeeks: estimatedWeeks || null,
+        estimatedCompletionDate: estimatedCompletionDate || null,
+        weeklyWeightChangeRate: weeklyWeightChangeRate || null,
       }
     });
   } catch (error: any) {
@@ -404,7 +505,6 @@ export const signup = async (req: Request, res: Response) => {
   }
 };
 
-/* ================= LOGIN ================= */
 /* ================= LOGIN ================= */
 export const login = async (req: Request, res: Response) => {
   try {
@@ -420,7 +520,7 @@ export const login = async (req: Request, res: Response) => {
       });
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
     
     if (!user) {
       return res.status(401).json({ 
@@ -447,11 +547,11 @@ export const login = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
     });
 
-    // Return accessToken + user info
+    // Return accessToken + comprehensive user info
     return res.status(200).json({ 
       success: true,
       accessToken,
@@ -459,9 +559,18 @@ export const login = async (req: Request, res: Response) => {
         id: user._id.toString(),
         email: user.email,
         fullName: user.fullname,
+        gender: user.gender,
+        height: user.height,
+        weight: user.weight,
+        dob: user.dob,
+        goal: user.goal,
         bmi: user.bmi,
         bmr: user.bmr,
-        dailyCalories: user.dailyCalories
+        dailyCalories: user.dailyCalories,
+        targetWeight: user.targetWeight,
+        timeline: user.timeline,
+        estimatedWeeks: user.estimatedWeeks,
+        estimatedCompletionDate: user.estimatedCompletionDate,
       }
     });
 
@@ -475,11 +584,11 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
+/* ================= GET CURRENT USER ================= */
 export const getCurrentUser = async (req: Request, res: Response) => {
   try {
     console.log("=== GET CURRENT USER REQUEST ===");
     
-    // The protect middleware has already set req.userId
     const userId = (req as any).userId;
     
     console.log("User ID from token:", userId);
@@ -491,7 +600,6 @@ export const getCurrentUser = async (req: Request, res: Response) => {
       });
     }
 
-    // Optionally, fetch full user details from database
     const user = await User.findById(userId).select('-password');
     
     if (!user) {
@@ -503,11 +611,10 @@ export const getCurrentUser = async (req: Request, res: Response) => {
 
     console.log("✅ Returning user info for:", userId);
 
-    // Return user info
     res.status(200).json({
       success: true,
       userId: userId,
-      _id: userId,  // Include both for compatibility
+      _id: userId,
       user: {
         id: user._id.toString(),
         email: user.email,
@@ -520,6 +627,11 @@ export const getCurrentUser = async (req: Request, res: Response) => {
         bmi: user.bmi,
         bmr: user.bmr,
         dailyCalories: user.dailyCalories,
+        targetWeight: user.targetWeight,
+        timeline: user.timeline,
+        estimatedWeeks: user.estimatedWeeks,
+        estimatedCompletionDate: user.estimatedCompletionDate,
+        weeklyWeightChangeRate: user.weeklyWeightChangeRate,
       }
     });
   } catch (error: any) {
@@ -531,7 +643,6 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     });
   }
 };
-
 
 /* ================= REFRESH ================= */
 export const refresh = async (req: Request, res: Response) => {
@@ -556,10 +667,3 @@ export const logout = async (_req: Request, res: Response) => {
   res.clearCookie("refreshToken");
   res.sendStatus(204);
 };
-
-
-
-
-
-
-
