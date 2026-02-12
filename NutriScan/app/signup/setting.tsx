@@ -357,36 +357,41 @@ export default function SettingsScreen() {
 
         <Animated.View style={{ opacity: fadeAnim }}>
           {/* ================= PROFILE HERO CARD ================= */}
-          <View style={styles.profileHeroCard}>
-            <View style={styles.avatarContainer}>
-              {user?.profilePhoto ? (
-                <Image
-                  source={{ uri: user.profilePhoto }}
-                  style={styles.avatarImage}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={styles.avatarGradient}>
-                  <Ionicons name="person" size={50} color="#fff" />
-                </View>
-              )}
-              
-              <View style={styles.avatarBadge}>
-                <Ionicons name="checkmark-circle" size={24} color="#10b981" />
-              </View>
-            </View>
+         <View style={styles.profileHeroCard}>
+  <View style={styles.avatarContainer}>
+    {user?.profilePhoto ? (
+      <Image
+        source={{ uri: user.profilePhoto }}
+        style={styles.avatarImage}
+        resizeMode="cover"
+      />
+    ) : (
+      <View style={styles.avatarGradient}>
+        <Ionicons name="person" size={50} color="#fff" />
+      </View>
+    )}
 
-            <Text style={styles.profileName}>{user?.fullName || 'User'}</Text>
-            <Text style={styles.profileEmail}>{user?.email || 'user@example.com'}</Text>
-            
-            <TouchableOpacity 
-              style={styles.editProfileButton}
-              onPress={() => setEditModalVisible(true)}
-            >
-              <Ionicons name="create-outline" size={18} color="#fff" style={{ marginRight: 6 }} />
-              <Text style={styles.editProfileButtonText}>Edit Profile</Text>
-            </TouchableOpacity>
-          </View>
+    <View style={styles.avatarBadge}>
+      <Ionicons name="checkmark-circle" size={24} color="#10b981" />
+    </View>
+  </View>
+
+  <Text style={styles.profileName}>{user?.fullName || "User"}</Text>
+  <Text style={styles.profileEmail}>{user?.email || "user@example.com"}</Text>
+
+  <TouchableOpacity
+    style={styles.editProfileButton}
+    onPress={() => router.push("./editprofilescreen")}
+  >
+    <Ionicons
+      name="create-outline"
+      size={18}
+      color="#fff"
+      style={{ marginRight: 6 }}
+    />
+    <Text style={styles.editProfileButtonText}>Edit Profile</Text>
+  </TouchableOpacity>
+</View>
 
           {/* ================= HEALTH METRICS CARDS ================= */}
           <View style={styles.metricsGrid}>

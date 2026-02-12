@@ -82,48 +82,36 @@ export const getProfile = async () => {
 
 // ================== UPDATE PROFILE ==================
 export const updateProfile = async (profileData: any) => {
-  try {
-    console.log("✏️ [updateProfile] Starting...");
-    const token = await AsyncStorage.getItem("accessToken");
+  const token = await AsyncStorage.getItem("accessToken");
+  if (!token) throw new Error("No authentication token found");
 
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
+  // 1) Update profile details
+  const response = await fetch(`${API_BASE}/profile`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      fullName: profileData.fullName,
+      gender: profileData.gender,
+      height: profileData.height,
+      weight: profileData.weight,
+      dob: profileData.dob,
+    }),
+  });
 
-    const url = `${API_BASE}/profile`;
-    console.log("✏️ [updateProfile] URL:", url);
-    console.log("✏️ [updateProfile] Data:", profileData);
+  const result = await handleResponse(response, "updateProfile");
 
-    // Always use JSON for profile updates (handle photo separately if needed)
-    const response = await fetch(url, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        fullName: profileData.fullName,
-        gender: profileData.gender,
-        height: profileData.height,
-        weight: profileData.weight,
-        dob: profileData.dob,
-      }),
-    });
-
-    console.log("✏️ [updateProfile] Status:", response.status);
-    const result = await handleResponse(response, 'updateProfile');
-
-    // If there's a profile photo, upload it separately
-    if (profileData.profilePhoto) {
-      await uploadProfilePhoto(profileData.profilePhoto);
-    }
-
-    return result;
-  } catch (error) {
-    console.error("✏️ [updateProfile] Error:", error);
-    throw error;
+  // 2) Upload photo if exists
+  if (profileData.profilePhoto) {
+    await uploadProfilePhoto(profileData.profilePhoto);
   }
+
+  // 3) RETURN UPDATED PROFILE
+  return await getProfile();
 };
+
 
 // ================== UPLOAD PROFILE PHOTO ==================
 export const uploadProfilePhoto = async (photo: any) => {
